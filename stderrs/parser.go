@@ -50,27 +50,24 @@ func RegistryParsers(fns ...ParseFunc) {
 // Parse - error parser from the base interface.
 // If the passed error is nil, a processing error will be returned.
 // If the error could not be determined, an enriched Undefined error will be returned.
-func Parse(err error) *Error {
+func Parse(err error) (*Error, bool) {
 	if err == nil {
-		return Undefined.
-			SetMessage("incorrect error handling")
+		return nil, false
 	}
 
 	for _, handler := range l_parsers {
 		if std := handler(err); std != nil {
-			return std
+			return std, true
 		}
 	}
 
 	for _, handler := range g_parsers {
 		if std := handler(err); std != nil {
-			return std
+			return std, true
 		}
 	}
 
-	return Undefined.
-		SetMessage("internal server error").
-		EmbedErrors(err)
+	return nil, false
 }
 
 func parseModel(err error) (std *Error) {
@@ -80,10 +77,10 @@ func parseModel(err error) (std *Error) {
 	case *Error:
 		return v
 	default:
-		var result *Error
+		var result Error
 
-		if errors.As(err, result) {
-			return result
+		if errors.As(err, &result) {
+			return &result
 		}
 	}
 

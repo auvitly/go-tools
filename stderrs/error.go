@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/auvitly/go-tools/stderrs/internal/utils"
 	"google.golang.org/grpc/codes"
 	"net/http"
 	"regexp"
@@ -191,29 +192,71 @@ func (e Error) Unwrap() error {
 
 // Is - implementation of the standard interface.
 func (e Error) Is(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	if std, ok := Parse(err); ok {
+		switch {
+		case e.Code == std.Code && e.Embed != nil && std.Embed == nil:
+			return true
+		case e.Code == std.Code && e.Embed == nil && std.Embed == nil:
+			return true
+		case e.Code == std.Code && e.Embed == nil && std.Embed != nil:
+			return false
+		case e.Code == std.Code && e.Embed != nil && std.Embed != nil:
+			for _, item := range utils.Unwrap(std.Embed) {
+				if !errors.Is(e.Embed, item) {
+					return false
+				}
+			}
+
+			return true
+		case e.Code != std.Code && e.Embed != nil:
+			return errors.Is(e.Embed, err)
+		}
+	}
+
+	if errors.Is(e.Embed, err) {
+		return true
+	}
+
+	for _, item := range utils.Unwrap(err) {
+		if errors.Is(e, item) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// Contains - check contains error. Contains method is an extended version Is,
+// where the matching of the error text is alo checked. It is used as a replacement for Is
+// when analyzing an error recovered from JSON.
+func (e Error) Contains(err error) bool {
 	switch v := err.(type) {
 	case Error:
-		return e.Is(&v)
+		return e.Contains(&v)
 	case *Error:
 		switch {
 		case e.Code == v.Code && e.Embed != nil && v.Embed != nil:
 			switch emb := v.Embed.(type) {
 			case interface{ Unwrap() error }:
-				if !errors.Is(emb.Unwrap(), e.Embed) {
+				if !strings.Contains(emb.Unwrap().Error(), e.Embed.Error()) {
 					return false
 				}
 
 				return true
 			case interface{ Unwrap() []error }:
 				for _, sub := range emb.Unwrap() {
-					if !e.Is(sub) {
+					if !e.Contains(sub) {
 						return false
 					}
 				}
 
 				return true
 			default:
-				return errors.Is(e.Embed, v.Embed)
+				return strings.Contains(e.Embed.Error(), v.Embed.Error())
 			}
 		case e.Code == v.Code && v.Embed == nil:
 			return true
@@ -222,17 +265,6 @@ func (e Error) Is(err error) bool {
 
 	if e.Embed == nil {
 		return false
-	}
-
-	return errors.Is(e.Embed, err)
-}
-
-// Contains - check contains error. Contains method is an extended version Is,
-// where the matching of the error text is alo checked. It is used as a replacement for Is
-// when analyzing an error recovered from JSON.
-func (e Error) Contains(err error) bool {
-	if e.Is(err) {
-		return true
 	}
 
 	return strings.Contains(e.Error(), err.Error())
