@@ -1,10 +1,10 @@
-package errors
+package stderrs
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/auvitly/go-tools/errors/internal/models"
+	"github.com/auvitly/go-tools/stderrs/internal/models"
 	"strings"
 )
 

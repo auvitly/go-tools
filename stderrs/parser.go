@@ -1,4 +1,4 @@
-package errors
+package stderrs
 
 import (
 	"errors"
@@ -70,7 +70,7 @@ func Parse(err error) *Error {
 
 	return Undefined.
 		SetMessage("internal server error").
-		WithErrors(err)
+		EmbedErrors(err)
 }
 
 func parseModel(err error) (std *Error) {
@@ -99,7 +99,7 @@ func parseGRPC(err error) *Error {
 
 		return std.
 			SetMessage(parsed.Message()).
-			WithErrors(errors.New(parsed.Message()))
+			EmbedErrors(errors.New(parsed.Message()))
 	}
 
 	return nil

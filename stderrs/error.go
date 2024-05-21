@@ -1,4 +1,4 @@
-package errors
+package stderrs
 
 import (
 	"encoding/json"
@@ -66,8 +66,8 @@ func (e Error) SetGRPCCode(code codes.Code) *Error {
 	return &e
 }
 
-// WithErrors - add a nested errors.
-func (e Error) WithErrors(errs ...error) *Error {
+// EmbedErrors - add a nested errors.
+func (e Error) EmbedErrors(errs ...error) *Error {
 	switch v := e.Embed.(type) {
 	case interface{ Unwrap() error }:
 		var join = append([]error{v.Unwrap()}, errs...)
@@ -192,13 +192,28 @@ func (e Error) Unwrap() error {
 // Is - implementation of the standard interface.
 func (e Error) Is(err error) bool {
 	switch v := err.(type) {
-	case *Error:
-		return e.Is(*v)
 	case Error:
+		return e.Is(&v)
+	case *Error:
 		switch {
 		case e.Code == v.Code && e.Embed != nil && v.Embed != nil:
-			if errors.Is(e.Embed, v.Embed) {
+			switch emb := v.Embed.(type) {
+			case interface{ Unwrap() error }:
+				if !errors.Is(emb.Unwrap(), e.Embed) {
+					return false
+				}
+
 				return true
+			case interface{ Unwrap() []error }:
+				for _, sub := range emb.Unwrap() {
+					if !e.Is(sub) {
+						return false
+					}
+				}
+
+				return true
+			default:
+				return errors.Is(e.Embed, v.Embed)
 			}
 		case e.Code == v.Code && v.Embed == nil:
 			return true
