@@ -28,7 +28,7 @@ func TestOnError(t *testing.T) {
 func TestOn(t *testing.T) {
 	t.Parallel()
 
-	var err = stderrs.Internal.SetMessage("my message")
+	var err = stderrs.Internal.EmbedErrors(fs.ErrExist).SetMessage("my message")
 
 	func() {
 		defer recovery.On(&err).Do()
@@ -38,8 +38,10 @@ func TestOn(t *testing.T) {
 
 	std, ok := stderrs.From(err)
 	require.True(t, ok)
+	require.True(t, std.Is(fs.ErrExist))
 	require.True(t, std.Is(stderrs.Panic))
 	require.True(t, std.Is(stderrs.Internal))
+	require.True(t, std.Is(stderrs.Internal.EmbedErrors(fs.ErrExist)))
 }
 
 func TestHandler(t *testing.T) {
