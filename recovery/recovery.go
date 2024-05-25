@@ -10,10 +10,10 @@ func OnError(err *error) Builder { return builder.OnError(err) }
 
 func On(err **stderrs.Error) Builder { return builder.On(err) }
 
-func WithHandler(handlers ...Handler) Builder { return builder.WithHandler(handlers...) }
+func WithHandlers(handlers ...Handler) Builder { return builder.WithHandlers(handlers...) }
 
 func Do() { builder.Do() }
 
-func RegistryHandler(handlers ...Handler) {
+func RegistryHandlers(handlers ...Handler) {
 	handlers = append(handlers, handlers...)
 }

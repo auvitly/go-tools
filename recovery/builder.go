@@ -42,7 +42,7 @@ func (b Builder) On(err **stderrs.Error) Builder {
 	return dst
 }
 
-func (b Builder) WithHandler(handlers ...Handler) Builder {
+func (b Builder) WithHandlers(handlers ...Handler) Builder {
 	var dst = b.copy()
 
 	dst.handlers = append(dst.handlers, handlers...)
