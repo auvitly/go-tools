@@ -117,3 +117,9 @@ func TestFrom(t *testing.T) {
     require.True(t, std.Is(stderrs.Internal))
 }
 ```
+
+Если необходим кастомный метод восстановления ошибки, то его можно встроить пользовательский 
+метод в`From` через метод `RegistryFrom`. Сигнатура метода должна отвечать типу:
+```go
+type FromFunc func(err error) *Error
+```
