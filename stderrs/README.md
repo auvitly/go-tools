@@ -1,4 +1,3 @@
-
 <div align="center">
   <img width="100" height="100" src="https://img.icons8.com/clouds/200/error.png" alt="error"/>
   <h3 align="center">Standard Errors</h3>
