@@ -7,7 +7,6 @@ import (
 	"github.com/auvitly/go-tools/stderrs/internal/unwrap"
 	"google.golang.org/grpc/codes"
 	"net/http"
-	"regexp"
 	"strings"
 )
 
@@ -40,8 +39,9 @@ func New(code string) *Error {
 
 // SetCode - set general code. The code influences the error definition.
 // Errors are considered equal if their codes match.
-func (e Error) SetCode(code string) *Error {
-	e.Code = code
+func (e Error) SetCode(code *Error) *Error {
+	e.Code = code.Code
+	e.Codes = code.Codes
 
 	return &e
 }
@@ -240,19 +240,4 @@ func (e Error) Is(err error) bool {
 	}
 
 	return false
-}
-
-// Contains - checking for the presence of a regular expression.
-func (e Error) Contains(text string) bool {
-	return strings.Contains(e.Message, text) || strings.Contains(e.Embed.Error(), text)
-}
-
-// Match - checking for the presence of a regular expression.
-func (e Error) Match(expr string) bool {
-	re, err := regexp.Compile(expr)
-	if err != nil {
-		return false
-	}
-
-	return re.MatchString(e.Embed.Error())
 }
