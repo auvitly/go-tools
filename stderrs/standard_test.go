@@ -5,6 +5,8 @@ import (
 	"github.com/auvitly/go-tools/stderrs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"io/fs"
 	"testing"
@@ -54,10 +56,11 @@ func TestError_JSON(t *testing.T) {
 	assert.True(t, out.Contains(fs.ErrClosed.Error()))
 }
 
-func TestX(t *testing.T) {
-	var err1 = stderrs.Internal.
-		EmbedErrors(fs.ErrClosed, fs.ErrExist).
-		EmbedErrors(stderrs.Unavailable.EmbedErrors(fs.ErrNotExist))
+func TestFrom(t *testing.T) {
+	var err = status.Error(codes.Internal, "message")
 
-	t.Logf("%#v", err1)
+	std, ok := stderrs.From(err)
+	require.True(t, ok)
+
+	require.True(t, std.Is(stderrs.Internal))
 }

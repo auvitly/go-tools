@@ -100,3 +100,20 @@ type Error struct {
 | `Unauthenticated`    | unauthenticated     | Unauthenticated     | StatusUnauthorized        |
 | `Undefined`          | -                   | Internal            | StatusInternalServerError |
 | `Panic`              | panic               | Internal            | StatusInternalServerError |
+
+Для восстановления стандартной ошибки предлагается использовать обощенный метод From:
+```go
+// From - функция восстановления ошибки из стандартного интерфейса.
+func From(err error) (*Error, bool) 
+```
+
+Метод позволяет восстановить ошибку из GRPC ответа и проверить на стандартную модель:
+```go
+func TestFrom(t *testing.T) {
+    var err = status.Error(codes.Internal, "message")
+
+    std, ok := stderrs.From(err)
+    require.True(t, ok)
+    require.True(t, std.Is(stderrs.Internal))
+}
+```

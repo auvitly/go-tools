@@ -6,15 +6,15 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// ParseFunc - function to get error from source.
-type ParseFunc func(err error) *Error
+// FromFunc - function to get error from source.
+type FromFunc func(err error) *Error
 
 var (
-	g_parsers = []ParseFunc{
-		parseModel,
-		parseGRPC,
+	fromHandlers = []FromFunc{
+		fromModel,
+		fromGRPC,
 	}
-	l_parsers []ParseFunc
+	fromUserHandlers []FromFunc
 )
 
 var grpcMapper = map[codes.Code]*Error{
@@ -36,32 +36,32 @@ var grpcMapper = map[codes.Code]*Error{
 	codes.Unauthenticated:    Unauthenticated,
 }
 
-// RegistryParsers - allows you to register a custom error parser for recovery from the standard interface.
-func RegistryParsers(fns ...ParseFunc) {
+// RegistryFrom - allows you to register a custom error parser for recovery from the standard interface.
+func RegistryFrom(fns ...FromFunc) {
 	for _, fn := range fns {
 		if fn == nil {
 			continue
 		}
 
-		l_parsers = append(l_parsers, fn)
+		fromUserHandlers = append(fromUserHandlers, fn)
 	}
 }
 
-// Parse - error parser from the base interface.
+// From - error parser from the base interface.
 // If the passed error is nil, a processing error will be returned.
 // If the error could not be determined, an enriched Undefined error will be returned.
-func Parse(err error) (*Error, bool) {
+func From(err error) (*Error, bool) {
 	if err == nil {
 		return nil, false
 	}
 
-	for _, handler := range l_parsers {
+	for _, handler := range fromHandlers {
 		if std := handler(err); std != nil {
 			return std, true
 		}
 	}
 
-	for _, handler := range g_parsers {
+	for _, handler := range fromUserHandlers {
 		if std := handler(err); std != nil {
 			return std, true
 		}
@@ -70,24 +70,17 @@ func Parse(err error) (*Error, bool) {
 	return nil, false
 }
 
-func parseModel(err error) (std *Error) {
-	switch v := err.(type) {
-	case Error:
-		return &v
-	case *Error:
-		return v
-	default:
-		var result Error
+func fromModel(err error) (std *Error) {
+	var result Error
 
-		if errors.As(err, &result) {
-			return &result
-		}
+	if errors.As(err, &result) {
+		return &result
 	}
 
 	return nil
 }
 
-func parseGRPC(err error) *Error {
+func fromGRPC(err error) *Error {
 	if parsed, ok := status.FromError(err); ok {
 		std, found := grpcMapper[parsed.Code()]
 		if !found {
