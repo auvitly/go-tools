@@ -6,6 +6,11 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// StandardError - interface to get error from source.
+type StandardError interface {
+	StandardFrom(err error) *Error
+}
+
 // FromFunc - function to get error from source.
 type FromFunc func(err error) *Error
 
@@ -55,13 +60,23 @@ func From(err error) (*Error, bool) {
 		return nil, false
 	}
 
-	for _, handler := range fromHandlers {
+	if stderr, ok := err.(StandardError); ok {
+		var std = stderr.StandardFrom(err)
+
+		if std == nil {
+			return nil, false
+		}
+
+		return std, true
+	}
+
+	for _, handler := range fromUserHandlers {
 		if std := handler(err); std != nil {
 			return std, true
 		}
 	}
 
-	for _, handler := range fromUserHandlers {
+	for _, handler := range fromHandlers {
 		if std := handler(err); std != nil {
 			return std, true
 		}
