@@ -33,7 +33,7 @@ func (b Builder) OnError(err *error) Builder {
 	return dst
 }
 
-func (b Builder) OnStandardError(err **stderrs.Error) Builder {
+func (b Builder) On(err **stderrs.Error) Builder {
 	var dst = b.copy()
 
 	dst.target = nil
@@ -98,7 +98,8 @@ func (b Builder) recovery(msg any) {
 		use(handler)
 	}
 
-	if b.target != nil {
+	switch {
+	case b.target != nil:
 		var std = stderrs.Panic.
 			SetMessage(_message).
 			EmbedErrors(errs...).
@@ -109,5 +110,16 @@ func (b Builder) recovery(msg any) {
 		}
 
 		*b.target = std
+	case b.stderr != nil:
+		var std = stderrs.Panic.
+			SetMessage(_message).
+			EmbedErrors(errs...).
+			WithField("panic", msg)
+
+		if *b.stderr != nil {
+			std = std.EmbedErrors(*b.stderr)
+		}
+
+		*b.stderr = std
 	}
 }

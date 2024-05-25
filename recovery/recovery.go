@@ -8,7 +8,7 @@ func SetMessage(message string) Builder { return builder.SetMessage(message) }
 
 func OnError(err *error) Builder { return builder.OnError(err) }
 
-func OnStandardError(err **stderrs.Error) Builder { return builder.OnStandardError(err) }
+func On(err **stderrs.Error) Builder { return builder.On(err) }
 
 func WithHandler(handlers ...Handler) Builder { return builder.WithHandler(handlers...) }
 

@@ -28,10 +28,10 @@ func TestPanicOnError(t *testing.T) {
 func TestPanicOnStdError(t *testing.T) {
 	t.Parallel()
 
-	var err error = stderrs.Internal.SetMessage("my message")
+	var err = stderrs.Internal.SetMessage("my message")
 
 	func() {
-		defer recovery.OnError(&err).Do()
+		defer recovery.On(&err).Do()
 
 		panic("panic: message")
 	}()
