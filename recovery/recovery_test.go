@@ -1,11 +1,13 @@
 package recovery_test
 
 import (
+	"context"
 	"github.com/auvitly/go-tools/recovery"
 	"github.com/auvitly/go-tools/stderrs"
 	"github.com/stretchr/testify/require"
 	"io/fs"
 	"testing"
+	"time"
 )
 
 func TestOnError(t *testing.T) {
@@ -53,7 +55,13 @@ func TestHandler(t *testing.T) {
 	)
 
 	func() {
-		defer recovery.WithHandler(func(msg any) { actual = msg.(string) }).Do()
+		defer recovery.WithHandlers(
+			func(_ context.Context, msg any) error {
+				actual = msg.(string)
+
+				return nil
+			},
+		).Do()
 
 		panic(_panic)
 	}()
@@ -72,7 +80,11 @@ func TestPanicInHandler(t *testing.T) {
 
 	func() {
 		defer recovery.
-			WithHandler(func(_ any) { panic(_panic) }).
+			WithHandlers(func(_ context.Context, msg any) error {
+				panic(_panic)
+
+				return nil
+			}).
 			SetMessage(_message).
 			On(&err).
 			Do()
@@ -86,4 +98,64 @@ func TestPanicInHandler(t *testing.T) {
 	require.Equal(t, _message, err.Message)
 	require.Equal(t, _panic, std.Fields["panic"])
 	require.Equal(t, _message, std.Message)
+}
+
+func TestDoContextExceeded(t *testing.T) {
+	t.Parallel()
+
+	var (
+		ctx, cancel = context.WithTimeout(context.Background(), time.Millisecond)
+		err         *stderrs.Error
+	)
+
+	t.Cleanup(func() {
+		cancel()
+	})
+
+	func() {
+		defer recovery.
+			WithHandlers(func(ctx context.Context, msg any) error {
+				time.Sleep(5 * time.Millisecond)
+
+				return nil
+			}).
+			On(&err).
+			DoContext(ctx)
+
+		panic("")
+	}()
+
+	<-ctx.Done()
+
+	require.NotNil(t, err)
+	require.Nil(t, err.Embed)
+}
+
+func TestDoContext_HandlerError(t *testing.T) {
+	t.Parallel()
+
+	var (
+		ctx, cancel = context.WithTimeout(context.Background(), 5*time.Millisecond)
+		err         *stderrs.Error
+	)
+
+	t.Cleanup(func() {
+		cancel()
+	})
+
+	func() {
+		defer recovery.
+			WithHandlers(func(_ context.Context, msg any) error {
+				return stderrs.Internal.SetMessage("%s", msg)
+			}).
+			On(&err).
+			DoContext(ctx)
+
+		panic("")
+	}()
+
+	<-ctx.Done()
+
+	require.NotNil(t, err)
+	require.True(t, err.Is(stderrs.Internal))
 }

@@ -1,8 +1,12 @@
 package recovery
 
-import "github.com/auvitly/go-tools/stderrs"
+import (
+	"context"
+	"github.com/auvitly/go-tools/stderrs"
+	"sync"
+)
 
-type Handler func(msg any)
+type Handler func(ctx context.Context, msg any) error
 
 type Builder struct {
 	handlers []Handler
@@ -16,6 +20,7 @@ var (
 	_message  = "internal server error: unhandled exception"
 )
 
+// SetMessage - set message for standard error.
 func (b Builder) SetMessage(message string) Builder {
 	var dst = b.copy()
 
@@ -24,6 +29,7 @@ func (b Builder) SetMessage(message string) Builder {
 	return dst
 }
 
+// OnError - perform error enrichment.
 func (b Builder) OnError(err *error) Builder {
 	var dst = b.copy()
 
@@ -33,6 +39,7 @@ func (b Builder) OnError(err *error) Builder {
 	return dst
 }
 
+// On - perform standard error enrichment.
 func (b Builder) On(err **stderrs.Error) Builder {
 	var dst = b.copy()
 
@@ -42,6 +49,7 @@ func (b Builder) On(err **stderrs.Error) Builder {
 	return dst
 }
 
+// WithHandlers - add exception handler.
 func (b Builder) WithHandlers(handlers ...Handler) Builder {
 	var dst = b.copy()
 
@@ -65,39 +73,86 @@ func (b Builder) copy() Builder {
 
 func (b Builder) Do() {
 	if msg := recover(); msg != nil {
-		b.recovery(msg)
+		b.recovery(context.Background(), msg)
 	}
 }
 
-func (b Builder) recovery(msg any) {
+func (b Builder) DoContext(ctx context.Context) {
+	if msg := recover(); msg != nil {
+		b.recovery(ctx, msg)
+	}
+}
+
+func (b Builder) use(
+	ctx context.Context,
+	msg any,
+	mu *sync.Mutex,
+	errs *[]error,
+	handler Handler,
+) {
+	var err error
+
+	defer func() {
+		if sub := recover(); sub != nil {
+			var std = stderrs.Panic.
+				SetMessage(b.message).
+				WithField("panic", sub)
+
+			if err != nil {
+				std = std.EmbedErrors(err)
+			}
+
+			mu.Lock()
+			*errs = append(*errs, std)
+			mu.Unlock()
+
+			return
+		}
+
+		if err != nil {
+			mu.Lock()
+			*errs = append(*errs, err)
+			mu.Unlock()
+		}
+	}()
+
+	err = handler(ctx, msg)
+}
+
+func (b Builder) recovery(ctx context.Context, msg any) {
 	var (
 		errs []error
-		use  = func(handler Handler) {
-			defer func() {
-				if sub := recover(); sub != nil {
-					errs = append(errs, stderrs.Panic.
-						SetMessage(b.message).
-						WithField("panic", sub),
-					)
-				}
-			}()
-
-			handler(msg)
-		}
+		wg   sync.WaitGroup
+		mu   sync.Mutex
+		ch   = make(chan struct{})
 	)
 
 	if len(b.message) == 0 {
 		b.message = _message
 	}
 
-	for _, handler := range _handlers {
-		use(handler)
-	}
+	b.handle(ctx, msg, &errs, &wg, &mu)
 
-	for _, handler := range b.handlers {
-		use(handler)
-	}
+	go func() {
+		wg.Wait()
+		ch <- struct{}{}
+	}()
 
+	for {
+		select {
+		case <-ctx.Done():
+			b.setError(errs, msg)
+
+			return
+		case <-ch:
+			b.setError(errs, msg)
+
+			return
+		}
+	}
+}
+
+func (b Builder) setError(errs []error, msg any) {
 	switch {
 	case b.target != nil:
 		var std = stderrs.Panic.
@@ -121,5 +176,33 @@ func (b Builder) recovery(msg any) {
 		}
 
 		*b.stderr = std
+	}
+}
+
+func (b Builder) handle(
+	ctx context.Context,
+	msg any,
+	errs *[]error,
+	wg *sync.WaitGroup,
+	mu *sync.Mutex,
+) {
+	for _, handler := range _handlers {
+		wg.Add(1)
+
+		go func(handler Handler) {
+			defer wg.Done()
+
+			b.use(ctx, msg, mu, errs, handler)
+		}(handler)
+	}
+
+	for _, handler := range b.handlers {
+		wg.Add(1)
+
+		go func(handler Handler) {
+			defer wg.Done()
+
+			b.use(ctx, msg, mu, errs, handler)
+		}(handler)
 	}
 }

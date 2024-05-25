@@ -36,10 +36,20 @@ func main() {
 <a name="desc"></a>
 ### 2. Описание
 Основным методом для обработки исключений является метод `Do`, который перехватывает ошибку и 
-позволяет безопасно завершиться вызывающей функции.
+позволяет безопасно завершиться вызывающей функции. 
 ```go
 func MyFunc() {
     defer recovery.Do()
+    
+    panic("msg")	
+}
+```
+
+Если необходимо ограничить время выполнения обработчиков контекстом, то используйте метод `DoContext`.
+
+```go
+func MyFunc(ctx context.Context) {
+    defer recovery.DoContext(ctx)
     
     panic("msg")	
 }
@@ -55,12 +65,18 @@ func MyFunc() {
 Сбрасывает результат работы `On`.
 * `SetMessage` - позволяет установить сообщение в [стандартную ошибку](./../../../stderrs/README.md) 
 при обнаружении паники.
-* `WithHandlers` - добавление обработчиков исключения.
+* `WithHandlers` - добавление обработчиков исключения. 
+
+> Обработчики запускаются **асинхронно**! Если контекст был завершен, 
+> то обработчики завершают своё выполнение по установленным разработчиком правилам. 
+> Это крайне важно, так как это может порождать **утечку горутин**. 
 
 Пример настройки обработчика события со стандартной ошибкой:
 ```go
-func log(msg any) {
+func log(_ context.Context, msg any) error {
 	slog.Error("we obtain panic: %v", msg)
+	
+	return nil
 }
 
 func DoSomething() (result any, err *stderrs.Error) {
@@ -82,8 +98,10 @@ func DoSomething() (result any, err *stderrs.Error) {
 
 ```go
 func main() {	
-    recovery.RegistryHandlers(func(msg any) {
-        slog.Info("%s", msg)
+    recovery.RegistryHandlers(func (_ context.Context, msg any) error {
+        slog.Error("we obtain panic: %v", msg)
+        
+        return nil
     })
 	
     ...
