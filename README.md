@@ -8,7 +8,7 @@
 ---
 
 Tools that should help organize routine tasks and improve code quality. Contains:
-* [`stderrs`](stderrs/README.md)- unification of error handling;
+* [`stderrs`](stderrs/README.md)- unification of error handling
 * [`recovery`](recovery/README.md) - exception handling (panic)
 
 --- 
