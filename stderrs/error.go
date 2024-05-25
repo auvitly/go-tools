@@ -39,36 +39,66 @@ func New(code string) *Error {
 
 // SetCode - set general code. The code influences the error definition.
 // Errors are considered equal if their codes match.
-func (e Error) SetCode(code *Error) *Error {
-	e.Code = code.Code
-	e.Codes = code.Codes
+func (e *Error) SetCode(code *Error) *Error {
+	if e == nil {
+		return e
+	}
 
-	return &e
+	var result = *e
+
+	result.Code = code.Code
+	result.Codes = code.Codes
+
+	return &result
 }
 
 // SetMessage - set general message.
-func (e Error) SetMessage(format string, args ...any) *Error {
-	e.Message = fmt.Sprintf(format, args...)
+func (e *Error) SetMessage(format string, args ...any) *Error {
+	if e == nil {
+		return e
+	}
 
-	return &e
+	var result = *e
+
+	result.Message = fmt.Sprintf(format, args...)
+
+	return &result
 }
 
 // SetHTTPCode - set HTTP status code.
-func (e Error) SetHTTPCode(code int) *Error {
-	e.Codes.HTTP = code
+func (e *Error) SetHTTPCode(code int) *Error {
+	if e == nil {
+		return e
+	}
 
-	return &e
+	var result = *e
+
+	result.Codes.HTTP = code
+
+	return &result
 }
 
 // SetGRPCCode - set GRPC status code.
-func (e Error) SetGRPCCode(code codes.Code) *Error {
-	e.Codes.GRPC = code
+func (e *Error) SetGRPCCode(code codes.Code) *Error {
+	if e == nil {
+		return e
+	}
 
-	return &e
+	var result = *e
+
+	result.Codes.GRPC = code
+
+	return &result
 }
 
 // EmbedErrors - add a nested errors.
-func (e Error) EmbedErrors(errs ...error) *Error {
+func (e *Error) EmbedErrors(errs ...error) *Error {
+	if e == nil {
+		return e
+	}
+
+	var result = *e
+
 	var list = make([]error, 0, len(errs))
 
 	for _, err := range errs {
@@ -81,36 +111,50 @@ func (e Error) EmbedErrors(errs ...error) *Error {
 	case interface{ Unwrap() error }:
 		var join = append([]error{v.Unwrap()}, list...)
 
-		e.Embed = errors.Join(join...)
+		result.Embed = errors.Join(join...)
 	case interface{ Unwrap() []error }:
 		var join = append(v.Unwrap(), list...)
 
-		e.Embed = errors.Join(join...)
+		result.Embed = errors.Join(join...)
 	case nil:
-		e.Embed = errors.Join(list...)
+		result.Embed = errors.Join(list...)
 	default:
 		var join = append([]error{e.Embed}, list...)
 
-		e.Embed = errors.Join(join...)
+		result.Embed = errors.Join(join...)
 	}
 
-	return &e
+	return &result
 }
 
 // Wrap - add a nested.
-func (e Error) Wrap(msg ...string) *Error {
-	var wraps = make([]string, len(e.Wraps))
+func (e *Error) Wrap(msg ...string) *Error {
+	if e == nil {
+		return e
+	}
+
+	var (
+		result = *e
+		wraps  = make([]string, len(e.Wraps))
+	)
 
 	copy(wraps, e.Wraps)
 
-	e.Wraps = append(wraps, msg...)
+	result.Wraps = append(wraps, msg...)
 
-	return &e
+	return &result
 }
 
 // WithField - add fields to description.
-func (e Error) WithField(key string, value any) *Error {
-	var data = make(map[string]any)
+func (e *Error) WithField(key string, value any) *Error {
+	if e == nil {
+		return e
+	}
+
+	var (
+		result = *e
+		data   = make(map[string]any)
+	)
 
 	for k, v := range e.Fields {
 		data[k] = v
@@ -118,18 +162,25 @@ func (e Error) WithField(key string, value any) *Error {
 
 	data[key] = value
 
-	e.Fields = data
+	result.Fields = data
 
-	return &e
+	return &result
 }
 
 // WithFieldIf - add fields to description with condition.
-func (e Error) WithFieldIf(condition bool, key string, value any) *Error {
-	if !condition {
-		return &e
+func (e *Error) WithFieldIf(condition bool, key string, value any) *Error {
+	if e == nil {
+		return e
 	}
 
-	var data = make(map[string]any)
+	if !condition {
+		return e
+	}
+
+	var (
+		result = *e
+		data   = make(map[string]any)
+	)
 
 	for k, v := range e.Fields {
 		data[k] = v
@@ -137,14 +188,21 @@ func (e Error) WithFieldIf(condition bool, key string, value any) *Error {
 
 	data[key] = value
 
-	e.Fields = data
+	result.Fields = data
 
-	return &e
+	return &result
 }
 
 // WithFields - add fields to description.
-func (e Error) WithFields(fields map[string]any) *Error {
-	var data = make(map[string]any)
+func (e *Error) WithFields(fields map[string]any) *Error {
+	if e == nil {
+		return e
+	}
+
+	var (
+		result = *e
+		data   = make(map[string]any)
+	)
 
 	for k, v := range e.Fields {
 		data[k] = v
@@ -154,13 +212,17 @@ func (e Error) WithFields(fields map[string]any) *Error {
 		data[k] = v
 	}
 
-	e.Fields = data
+	result.Fields = data
 
-	return &e
+	return &result
 }
 
 // Error - implementation of the standard interface.
-func (e Error) Error() string {
+func (e *Error) Error() string {
+	if e == nil {
+		return ""
+	}
+
 	var parts []string
 
 	if len(e.Code) != 0 {
@@ -194,18 +256,18 @@ func (e Error) Error() string {
 }
 
 // Unwrap - implementation of the standard interface.
-func (e Error) Unwrap() error {
+func (e *Error) Unwrap() error {
+	if e == nil {
+		return nil
+	}
+
 	return e.Embed
 }
 
 // Is - implementation of the standard interface.
-func (e Error) Is(err error) bool {
-	if err == nil {
+func (e *Error) Is(err error) bool {
+	if e == nil || err == nil {
 		return false
-	}
-
-	if std, ok := err.(Error); ok {
-		return e.Is(&std)
 	}
 
 	if std, ok := err.(*Error); ok {

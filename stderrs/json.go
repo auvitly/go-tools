@@ -9,7 +9,7 @@ import (
 )
 
 // MarshalJSON - implementation of the standard interface.
-func (e Error) MarshalJSON() (_ []byte, err error) {
+func (e *Error) MarshalJSON() (_ []byte, err error) {
 	var raw models.Error
 
 	raw.Code = e.Code

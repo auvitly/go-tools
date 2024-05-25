@@ -86,10 +86,10 @@ func From(err error) (*Error, bool) {
 }
 
 func fromModel(err error) (std *Error) {
-	var result Error
+	var result *Error
 
 	if errors.As(err, &result) {
-		return &result
+		return result
 	}
 
 	return nil

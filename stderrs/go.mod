@@ -3,7 +3,6 @@ module github.com/auvitly/go-tools/stderrs
 go 1.21.3
 
 require (
-	github.com/auvitly/go-tools/errors v0.0.0-20240521185314-d8414d228714
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/grpc v1.64.0
 )
