@@ -46,7 +46,7 @@ func ExternalCall() (any, error) {
 
 <a name="desc"></a>
 ### 2. Описание
-Пакет представляет унифицированную модель:
+Пакет представляет унифицированную модель (далее - стандартная ошибка):
 
 ```go
 package stderrs
@@ -78,7 +78,7 @@ type Error struct {
 }
 ```
 
-На основе модели построен стандартный набор ошибок:
+На основе модели построен набор стандартных ошибок:
 
 | Standard Error       | Standard Code       | GRPC Status         | HTTP Status               |
 |----------------------|---------------------|---------------------|---------------------------|
@@ -101,7 +101,7 @@ type Error struct {
 | `Undefined`          | -                   | Internal            | StatusInternalServerError |
 | `Panic`              | panic               | Internal            | StatusInternalServerError |
 
-Для восстановления стандартной ошибки предлагается использовать обощенный метод From:
+Для восстановления стандартной ошибки из интерфейса `error` предлагается использовать метод `From`:
 ```go
 // From - функция восстановления ошибки из стандартного интерфейса.
 func From(err error) (*Error, bool) 
@@ -196,3 +196,4 @@ func TestFromImpl(t *testing.T) {
     require.True(t, stderr.Is(stderrs.Unknown))
 }
 ```
+
