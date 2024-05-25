@@ -78,7 +78,7 @@ type Error struct {
 }
 ```
 
-Пакет представляет стандартный набор ошибок:
+На основе модели построен стандартный набор ошибок:
 
 | Standard Error       | Standard Code       | GRPC Status         | HTTP Status               |
 |----------------------|---------------------|---------------------|---------------------------|
@@ -100,4 +100,3 @@ type Error struct {
 | `Unauthenticated`    | unauthenticated     | Unauthenticated     | StatusUnauthorized        |
 | `Undefined`          | -                   | Internal            | StatusInternalServerError |
 | `Panic`              | panic               | Internal            | StatusInternalServerError |
-
