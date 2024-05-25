@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestPanicOnError(t *testing.T) {
+func TestOnError(t *testing.T) {
 	t.Parallel()
 
 	var err = fs.ErrExist
@@ -25,7 +25,7 @@ func TestPanicOnError(t *testing.T) {
 	require.True(t, std.Is(fs.ErrExist))
 }
 
-func TestPanicOnStdError(t *testing.T) {
+func TestOn(t *testing.T) {
 	t.Parallel()
 
 	var err = stderrs.Internal.SetMessage("my message")
@@ -40,4 +40,48 @@ func TestPanicOnStdError(t *testing.T) {
 	require.True(t, ok)
 	require.True(t, std.Is(stderrs.Panic))
 	require.True(t, std.Is(stderrs.Internal))
+}
+
+func TestHandler(t *testing.T) {
+	t.Parallel()
+
+	var (
+		actual string
+		_panic = "panic"
+	)
+
+	func() {
+		defer recovery.WithHandler(func(msg any) { actual = msg.(string) }).Do()
+
+		panic(_panic)
+	}()
+
+	require.Equal(t, _panic, actual)
+}
+
+func TestPanicInHandler(t *testing.T) {
+	t.Parallel()
+
+	var (
+		err      *stderrs.Error
+		_panic   = "panic"
+		_message = "message"
+	)
+
+	func() {
+		defer recovery.
+			WithHandler(func(_ any) { panic(_panic) }).
+			SetMessage(_message).
+			On(&err).
+			Do()
+
+		panic("")
+	}()
+
+	std, ok := stderrs.From(err.Embed)
+	require.True(t, ok)
+	require.True(t, std.Is(stderrs.Panic))
+	require.Equal(t, _message, err.Message)
+	require.Equal(t, _panic, std.Fields["panic"])
+	require.Equal(t, _message, std.Message)
 }

@@ -76,8 +76,8 @@ func (b Builder) recovery(msg any) {
 			defer func() {
 				if sub := recover(); sub != nil {
 					errs = append(errs, stderrs.Panic.
-						SetMessage(_message).
-						WithField("panic", msg),
+						SetMessage(b.message).
+						WithField("panic", sub),
 					)
 				}
 			}()
@@ -101,7 +101,7 @@ func (b Builder) recovery(msg any) {
 	switch {
 	case b.target != nil:
 		var std = stderrs.Panic.
-			SetMessage(_message).
+			SetMessage(b.message).
 			EmbedErrors(errs...).
 			WithField("panic", msg)
 
@@ -112,7 +112,7 @@ func (b Builder) recovery(msg any) {
 		*b.target = std
 	case b.stderr != nil:
 		var std = stderrs.Panic.
-			SetMessage(_message).
+			SetMessage(b.message).
 			EmbedErrors(errs...).
 			WithField("panic", msg)
 
