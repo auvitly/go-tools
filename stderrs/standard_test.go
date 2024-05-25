@@ -49,8 +49,8 @@ func TestError_JSON(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.True(t, out.Is(stderrs.Internal))
+	assert.True(t, out.Is(stderrs.Unavailable))
 	assert.False(t, out.Is(stderrs.Undefined))
-
 	assert.True(t, out.Contains(fs.ErrClosed.Error()))
 }
 
