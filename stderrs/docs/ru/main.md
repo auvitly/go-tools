@@ -156,18 +156,18 @@ func (e ForRegistry) Error() string {
 
 func TestRegistry(t *testing.T) {
     stderrs.RegistryFrom(func(err error) *stderrs.Error {
-    var my ForRegistry
-    
-    if errors.As(err, &my) {
-        switch my.Code {
-        case 1:
-            return stderrs.Internal.SetMessage(my.Message)
-        default:
-            return stderrs.Unknown.SetMessage(my.Message)
+        var my ForRegistry
+        
+        if errors.As(err, &my) {
+            switch my.Code {
+            case 1:
+                return stderrs.Internal.SetMessage(my.Message)
+            default:
+                return stderrs.Unknown.SetMessage(my.Message)
+            }
         }
-    }
-    
-    return nil
+        
+        return nil
     })
     
     stderr, ok := stderrs.From(ForRegistry{Code: 1, Message: "message"})
