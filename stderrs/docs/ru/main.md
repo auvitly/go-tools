@@ -46,7 +46,8 @@ func ExternalCall() (any, error) {
 
 <a name="desc"></a>
 ### 2. Описание
-Пакет представляет унифицированную модель для работы с ошибками:
+Пакет представляет унифицированную модель:
+
 ```go
 package stderrs
 
@@ -77,4 +78,26 @@ type Error struct {
 }
 ```
 
+Пакет представляет стандартный набор ошибок:
+
+| Standard Error       | Standard Code       | GRPC Status        | HTTP Status               |
+|----------------------|---------------------|--------------------|---------------------------|
+| `Canceled`           | canceled            | Canceled           | StatusClientClosedRequest |
+| `Unknown`            | unknown             | Unknown            | StatusInternalServerError |
+| `InvalidArgument`    | invalid_argument    | InvalidArgument    | StatusBadRequest          |
+| `DeadlineExceeded`   | deadline_exceeded   | DeadlineExceeded   | StatusBadGateway          |
+| `NotFound`           | not_found           | NotFound           | StatusNotFound            |
+| `AlreadyExists`      | already_exists      | AlreadyExists      | StatusConflict            |
+| `PermissionDenied`   | permission_denied   | PermissionDenied   | StatusForbidden           |
+| `ResourceExhausted`  | resource_exhausted  | ResourceExhausted  | StatusTooManyRequests     |
+| `FailedPrecondition` | failed_precondition | FailedPrecondition | StatusBadRequest          |
+| `Aborted`            | aborted             | Aborted            | StatusConflict            |
+| `OutOfRange`         | out_of_range        | OutOfRange         | StatusBadRequest          | 
+| `Unimplemented`      | unimplemented       | Unimplemented      | StatusNotImplemented      | 
+| `Internal`           | internal            | Internal           | StatusInternalServerError | 
+| `Unavailable`        | unavailable         | Unavailable        | StatusServiceUnavailable  | 
+| `DataLoss`           | data_loss           | DataLoss           | StatusInternalServerError |
+| `Unauthenticated`    | unauthenticated     | Unauthenticated    | StatusUnauthorized        |
+| `Undefined`          | -                   | Undefined          | StatusInternalServerError |
+| `Panic`              | panic               | Panic              | StatusInternalServerError |
 
