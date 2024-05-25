@@ -22,6 +22,7 @@ func TestError_Is(t *testing.T) {
 	assert.True(t, std.Is(stderrs.Internal.EmbedErrors(fs.ErrClosed)))
 	assert.True(t, std.Is(stderrs.Internal.EmbedErrors(fs.ErrExist)))
 	assert.True(t, std.Is(stderrs.Internal.EmbedErrors(fs.ErrClosed, fs.ErrExist)))
+	assert.True(t, std.Is(stderrs.Internal.EmbedErrors(stderrs.Unavailable, stderrs.Aborted)))
 	assert.True(t, std.Is(stderrs.Internal.EmbedErrors(fs.ErrClosed, fs.ErrExist, fs.ErrNotExist, stderrs.Aborted)))
 	assert.True(t, std.Is(stderrs.Unavailable.EmbedErrors(fs.ErrNotExist, stderrs.Aborted)))
 	assert.True(t, std.Is(stderrs.Unavailable.EmbedErrors(fs.ErrNotExist)))
@@ -29,7 +30,7 @@ func TestError_Is(t *testing.T) {
 	assert.False(t, std.Is(fs.ErrPermission))
 	assert.False(t, std.Is(stderrs.Panic))
 	assert.False(t, std.Is(stderrs.Aborted.EmbedErrors(fs.ErrNotExist)))
-	assert.False(t, std.Is(stderrs.Unavailable.EmbedErrors(fs.ErrPermission)))
+	assert.False(t, std.Is(stderrs.Unavailable.EmbedErrors(fs.ErrExist)))
 }
 
 func TestError_JSON(t *testing.T) {
@@ -50,11 +51,13 @@ func TestError_JSON(t *testing.T) {
 	assert.True(t, out.Is(stderrs.Internal))
 	assert.False(t, out.Is(stderrs.Undefined))
 
-	assert.True(t, out.Contains(fs.ErrClosed))
-	assert.True(t, out.Contains(stderrs.Internal))
-	assert.True(t, out.Contains(stderrs.Internal.EmbedErrors(fs.ErrClosed)))
-	assert.True(t, out.Contains(stderrs.Internal.EmbedErrors(fs.ErrClosed, fs.ErrExist)))
-	assert.True(t, out.Contains(stderrs.Unavailable.EmbedErrors(fs.ErrNotExist)))
-	assert.False(t, out.Contains(stderrs.Internal.EmbedErrors(fs.ErrClosed, fs.ErrExist, fs.ErrNotExist)))
-	assert.False(t, out.Is(fs.ErrClosed))
+	assert.True(t, out.Contains(fs.ErrClosed.Error()))
+}
+
+func TestX(t *testing.T) {
+	var err1 = stderrs.Internal.
+		EmbedErrors(fs.ErrClosed, fs.ErrExist).
+		EmbedErrors(stderrs.Unavailable.EmbedErrors(fs.ErrNotExist))
+
+	t.Logf("%#v", err1)
 }

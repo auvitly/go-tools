@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/auvitly/go-tools/stderrs/internal/utils"
+	"github.com/auvitly/go-tools/stderrs/internal/unwrap"
 	"google.golang.org/grpc/codes"
 	"net/http"
 	"regexp"
@@ -69,19 +69,27 @@ func (e Error) SetGRPCCode(code codes.Code) *Error {
 
 // EmbedErrors - add a nested errors.
 func (e Error) EmbedErrors(errs ...error) *Error {
+	var list = make([]error, 0, len(errs))
+
+	for _, err := range errs {
+		if err != nil {
+			list = append(list, err)
+		}
+	}
+
 	switch v := e.Embed.(type) {
 	case interface{ Unwrap() error }:
-		var join = append([]error{v.Unwrap()}, errs...)
+		var join = append([]error{v.Unwrap()}, list...)
 
 		e.Embed = errors.Join(join...)
 	case interface{ Unwrap() []error }:
-		var join = append(v.Unwrap(), errs...)
+		var join = append(v.Unwrap(), list...)
 
 		e.Embed = errors.Join(join...)
 	case nil:
-		e.Embed = errors.Join(errs...)
+		e.Embed = errors.Join(list...)
 	default:
-		var join = append([]error{e.Embed}, errs...)
+		var join = append([]error{e.Embed}, list...)
 
 		e.Embed = errors.Join(join...)
 	}
@@ -196,7 +204,11 @@ func (e Error) Is(err error) bool {
 		return false
 	}
 
-	if std, ok := Parse(err); ok {
+	if std, ok := err.(Error); ok {
+		return e.Is(&std)
+	}
+
+	if std, ok := err.(*Error); ok {
 		switch {
 		case e.Code == std.Code && e.Embed != nil && std.Embed == nil:
 			return true
@@ -205,7 +217,7 @@ func (e Error) Is(err error) bool {
 		case e.Code == std.Code && e.Embed == nil && std.Embed != nil:
 			return false
 		case e.Code == std.Code && e.Embed != nil && std.Embed != nil:
-			for _, item := range utils.Unwrap(std.Embed) {
+			for _, item := range unwrap.Do(std.Embed) {
 				if !errors.Is(e.Embed, item) {
 					return false
 				}
@@ -217,57 +229,22 @@ func (e Error) Is(err error) bool {
 		}
 	}
 
-	if errors.Is(e.Embed, err) {
-		return true
-	}
-
-	for _, item := range utils.Unwrap(err) {
+	for _, item := range unwrap.Do(err) {
 		if errors.Is(e, item) {
 			return true
 		}
 	}
 
+	if errors.Is(e.Embed, err) {
+		return true
+	}
+
 	return false
 }
 
-// Contains - check contains error. Contains method is an extended version Is,
-// where the matching of the error text is alo checked. It is used as a replacement for Is
-// when analyzing an error recovered from JSON.
-func (e Error) Contains(err error) bool {
-	switch v := err.(type) {
-	case Error:
-		return e.Contains(&v)
-	case *Error:
-		switch {
-		case e.Code == v.Code && e.Embed != nil && v.Embed != nil:
-			switch emb := v.Embed.(type) {
-			case interface{ Unwrap() error }:
-				if !strings.Contains(emb.Unwrap().Error(), e.Embed.Error()) {
-					return false
-				}
-
-				return true
-			case interface{ Unwrap() []error }:
-				for _, sub := range emb.Unwrap() {
-					if !e.Contains(sub) {
-						return false
-					}
-				}
-
-				return true
-			default:
-				return strings.Contains(e.Embed.Error(), v.Embed.Error())
-			}
-		case e.Code == v.Code && v.Embed == nil:
-			return true
-		}
-	}
-
-	if e.Embed == nil {
-		return false
-	}
-
-	return strings.Contains(e.Error(), err.Error())
+// Contains - checking for the presence of a regular expression.
+func (e Error) Contains(text string) bool {
+	return strings.Contains(e.Message, text) || strings.Contains(e.Embed.Error(), text)
 }
 
 // Match - checking for the presence of a regular expression.

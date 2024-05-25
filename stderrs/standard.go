@@ -24,7 +24,7 @@ var (
 	// Unknown error. An example of where this error may be returned is
 	// if a Status value received from another address space belongs to
 	// an error-space that is not known in this address space. Also
-	// stderrs raised by APIs that do not return enough error information
+	// errors raised by APIs that do not return enough error information
 	// may be converted to this error.
 	Unknown = New("unknown").
 		SetGRPCCode(codes.Unknown).
@@ -62,9 +62,9 @@ var (
 	// PermissionDenied indicates the caller does not have permission to
 	// execute the specified operation. It must not be used for rejections
 	// caused by exhausting some resource (use ResourceExhausted
-	// instead for those stderrs). It must not be
+	// instead for those errors). It must not be
 	// used if the caller cannot be identified (use Unauthenticated
-	// instead for those stderrs).
+	// instead for those errors).
 	PermissionDenied = New("permission_denied").
 				SetGRPCCode(codes.PermissionDenied).
 				SetHTTPCode(http.StatusForbidden)
@@ -133,8 +133,8 @@ var (
 			SetGRPCCode(codes.Unimplemented).
 			SetHTTPCode(http.StatusNotImplemented)
 
-	// Internal stderrs. Means some invariants expected by underlying
-	// system has been broken. If you see one of these stderrs,
+	// Internal errors. Means some invariants expected by underlying
+	// system has been broken. If you see one of these errors,
 	// something is very broken.
 	Internal = New("internal").
 			SetGRPCCode(codes.Internal).

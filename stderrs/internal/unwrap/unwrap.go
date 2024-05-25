@@ -1,6 +1,6 @@
-package utils
+package unwrap
 
-func Unwrap(err error) []error {
+func Do(err error) []error {
 	switch v := err.(type) {
 	case interface{ Unwrap() error }:
 		return []error{v.Unwrap()}
