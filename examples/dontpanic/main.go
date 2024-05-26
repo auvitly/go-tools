@@ -26,7 +26,7 @@ func wrapHandler(data string) func(ctx context.Context, msg any) error {
 	}
 }
 
-func exceedingHandler(ctx context.Context, _ any) error {
+func exceedingTimeoutHandler(ctx context.Context, _ any) error {
 	time.Sleep(2 * time.Second)
 
 	slog.InfoContext(ctx, "I won't get to the output because the context ended early")
@@ -56,7 +56,7 @@ func main() {
 	)
 
 	recovery.RegistryAsyncHandlers(
-		exceedingHandler,
+		exceedingTimeoutHandler,
 		asyncHandler,
 	)
 
