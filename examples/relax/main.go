@@ -101,7 +101,6 @@ func main() {
 		}
 		{
 			"code": "panic",
-			"message": "internal server error: unhandled exception",
 			"fields": {
 				"panic":"invalid memory address or nil pointer dereference",
 				"stack":"goroutine 8 [running]:

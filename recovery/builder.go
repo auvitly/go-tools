@@ -98,7 +98,6 @@ func (b Builder) use(
 	defer func() {
 		if sub := recover(); sub != nil {
 			var std = stderrs.Panic.
-				SetMessage(b.message).
 				WithField("panic", sub).
 				WithField("stack", string(debug.Stack()))
 
