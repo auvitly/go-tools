@@ -1,6 +1,7 @@
 ## Оглавление
 1. [Постановка проблемы](#problem)
 2. [Описание](#desc)
+3. [Пример использования](#example)
 
 ---
 
@@ -35,6 +36,7 @@ func main() {
 
 <a name="desc"></a>
 ### 2. Описание
+
 Основным методом для обработки исключений является метод `Do`, который перехватывает ошибку и 
 позволяет безопасно завершиться вызывающей функции. 
 ```go
@@ -106,7 +108,7 @@ func DoSomething() (result any, err *stderrs.Error) {
 ```go
 func main() {	
     recovery.RegistryHandlers(func (_ context.Context, msg any) error {
-        slog.Error("we obtain dontpanic: %v", msg)
+        slog.Error("we obtain panic: %v", msg)
         
         return nil
     })
@@ -122,3 +124,8 @@ func MyFunc() {
 ```
 Благодаря объявлению в `main` обработчика, то при вызове функции `MyFunc` будет выводить 
 сообщение с паникой в лог. 
+
+<a name="example"></a>
+### 3. Примеры использования
+
+* Перехват паники c пользовательской обработкой события [[ссылка](./../../../examples/dontpanic/main.go)]
