@@ -145,7 +145,7 @@ func TestDoContext_HandlerError(t *testing.T) {
 
 	func() {
 		defer recovery.
-			WithHandlers(func(_ context.Context, msg any) error {
+			WithAsyncHandlers(func(_ context.Context, msg any) error {
 				return stderrs.Internal.SetMessage("%s", msg)
 			}).
 			On(&err).

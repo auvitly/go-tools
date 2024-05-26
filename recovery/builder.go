@@ -9,15 +9,17 @@ import (
 type Handler func(ctx context.Context, msg any) error
 
 type Builder struct {
-	handlers []Handler
-	target   *error
-	stderr   **stderrs.Error
-	message  string
+	syncHandlers  []Handler
+	asyncHandlers []Handler
+	target        *error
+	stderr        **stderrs.Error
+	message       string
 }
 
 var (
-	_handlers []Handler
-	_message  = "internal server error: unhandled exception"
+	_syncHandlers  []Handler
+	_asyncHandlers []Handler
+	_message       = "internal server error: unhandled exception"
 )
 
 // SetMessage - set message for standard error.
@@ -53,21 +55,32 @@ func (b Builder) On(err **stderrs.Error) Builder {
 func (b Builder) WithHandlers(handlers ...Handler) Builder {
 	var dst = b.copy()
 
-	dst.handlers = append(dst.handlers, handlers...)
+	dst.syncHandlers = append(dst.syncHandlers, handlers...)
+
+	return dst
+}
+
+// WithAsyncHandlers - add async exception handler.
+func (b Builder) WithAsyncHandlers(handlers ...Handler) Builder {
+	var dst = b.copy()
+
+	dst.syncHandlers = append(dst.syncHandlers, handlers...)
 
 	return dst
 }
 
 func (b Builder) copy() Builder {
-	var list = make([]Handler, 0, len(b.handlers))
-
-	list = append(list, b.handlers...)
+	var (
+		syncHandlers  = make([]Handler, 0, len(b.syncHandlers))
+		asyncHandlers = make([]Handler, 0, len(b.asyncHandlers))
+	)
 
 	return Builder{
-		handlers: list,
-		target:   b.target,
-		stderr:   b.stderr,
-		message:  b.message,
+		syncHandlers:  append(syncHandlers, b.syncHandlers...),
+		asyncHandlers: append(asyncHandlers, b.asyncHandlers...),
+		target:        b.target,
+		stderr:        b.stderr,
+		message:       b.message,
 	}
 }
 
@@ -186,7 +199,7 @@ func (b Builder) handle(
 	wg *sync.WaitGroup,
 	mu *sync.Mutex,
 ) {
-	for _, handler := range _handlers {
+	for _, handler := range _asyncHandlers {
 		wg.Add(1)
 
 		go func(handler Handler) {
@@ -196,7 +209,7 @@ func (b Builder) handle(
 		}(handler)
 	}
 
-	for _, handler := range b.handlers {
+	for _, handler := range b.asyncHandlers {
 		wg.Add(1)
 
 		go func(handler Handler) {
@@ -205,4 +218,18 @@ func (b Builder) handle(
 			b.use(ctx, msg, mu, errs, handler)
 		}(handler)
 	}
+
+	wg.Add(1)
+
+	go func() {
+		defer wg.Done()
+
+		for _, handler := range _syncHandlers {
+			b.use(ctx, msg, mu, errs, handler)
+		}
+
+		for _, handler := range b.syncHandlers {
+			b.use(ctx, msg, mu, errs, handler)
+		}
+	}()
 }

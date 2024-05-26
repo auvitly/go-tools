@@ -19,10 +19,17 @@ func On(err **stderrs.Error) Builder { return builder.On(err) }
 // WithHandlers - add exception handler.
 func WithHandlers(handlers ...Handler) Builder { return builder.WithHandlers(handlers...) }
 
+// WithAsyncHandlers - add async exception handler.
+func WithAsyncHandlers(handlers ...Handler) Builder { return builder.WithAsyncHandlers(handlers...) }
+
 func Do() { builder.Do() }
 
 func DoContext(ctx context.Context) { builder.DoContext(ctx) }
 
 func RegistryHandlers(handlers ...Handler) {
-	_handlers = append(_handlers, handlers...)
+	_syncHandlers = append(_syncHandlers, handlers...)
+}
+
+func RegistryAsyncHandlers(handlers ...Handler) {
+	_asyncHandlers = append(_asyncHandlers, handlers...)
 }
