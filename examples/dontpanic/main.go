@@ -15,6 +15,10 @@ func logHandler(ctx context.Context, msg any) error {
 	return nil
 }
 
+func errorHandler(ctx context.Context, msg any) error {
+	return stderrs.Internal.SetMessage("It's error!")
+}
+
 func onStart(ctx context.Context) (err *stderrs.Error) {
 	defer recovery.On(&err).DoContext(ctx)
 
@@ -24,7 +28,7 @@ func onStart(ctx context.Context) (err *stderrs.Error) {
 }
 
 func main() {
-	recovery.RegistryHandlers(logHandler)
+	recovery.RegistryHandlers(logHandler, errorHandler)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()

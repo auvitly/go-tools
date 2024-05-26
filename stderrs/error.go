@@ -231,12 +231,12 @@ func (e *Error) Error() string {
 		parts = append(parts, fmt.Sprintf(`"code": "undefined"`))
 	}
 
-	if e.Embed != nil {
-		parts = append(parts, fmt.Sprintf(`"embed": "%s"`, e.Embed.Error()))
-	}
-
 	if len(e.Message) != 0 {
 		parts = append(parts, fmt.Sprintf(`"message": "%s"`, e.Message))
+	}
+
+	if e.Embed != nil {
+		parts = append(parts, fmt.Sprintf(`"embed": [%s]`, e.Embed.Error()))
 	}
 
 	if len(e.Fields) != 0 {
