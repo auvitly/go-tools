@@ -10,23 +10,27 @@ import (
 	"time"
 )
 
-func logHandler(ctx context.Context, msg any) error {
+// log - logs the panic message.
+func log(ctx context.Context, msg any) error {
 	slog.WarnContext(ctx, fmt.Sprintf("%s", msg))
 
 	return nil
 }
 
-func errorHandler(ctx context.Context, msg any) error {
+// errClosed - the handler failed with an error fs.ErrClosedю
+func errClosed(ctx context.Context, msg any) error {
 	return fs.ErrClosed
 }
 
-func wrapHandler(data string) func(ctx context.Context, msg any) error {
-	return func(_ context.Context, _ any) error {
-		return stderrs.Internal.SetMessage("My data error: %s", data)
+// wrap - the method demonstrates the ability to wrap a function to pass arguments to a handler
+func wrap(text string) func(context.Context, any) error {
+	return func(_ context.Context, msg any) error {
+		return stderrs.Internal.SetMessage("%s: %s", text, msg)
 	}
 }
 
-func exceedingTimeoutHandler(ctx context.Context, _ any) error {
+// tooLate - the time required to execute this method exceeds the context timeout.
+func tooLate(ctx context.Context, _ any) error {
 	time.Sleep(2 * time.Second)
 
 	slog.InfoContext(ctx, "I won't get to the output because the context ended early")
@@ -34,13 +38,15 @@ func exceedingTimeoutHandler(ctx context.Context, _ any) error {
 	return nil
 }
 
-func asyncHandler(ctx context.Context, _ any) error {
+// onTime - a method that manages to asynchronously output a message to the log.
+func onTime(ctx context.Context, _ any) error {
 	slog.InfoContext(ctx, "I slipped through")
 
 	return nil
 }
 
-func onStart(ctx context.Context) (err *stderrs.Error) {
+// method - panic occurs and calls the recovery package handler.
+func method(ctx context.Context) (err *stderrs.Error) {
 	defer recovery.On(&err).Do(ctx)
 
 	panic("I'm dropping the app now! Be afraid!")
@@ -50,20 +56,20 @@ func onStart(ctx context.Context) (err *stderrs.Error) {
 
 func main() {
 	recovery.RegistryHandlers(
-		logHandler,
-		errorHandler,
-		wrapHandler("message"),
+		log,
+		errClosed,
+		wrap("message"),
 	)
 
 	recovery.RegistryAsyncHandlers(
-		exceedingTimeoutHandler,
-		asyncHandler,
+		tooLate,
+		onTime,
 	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	if err := onStart(ctx); err != nil {
+	if err := method(ctx); err != nil {
 		slog.ErrorContext(ctx, fmt.Sprintf("Panic did not overtake us! We received an error: %s", err))
 	}
 }

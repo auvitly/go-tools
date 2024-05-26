@@ -78,8 +78,8 @@ func log(_ context.Context, msg any) error {
 	return nil
 }
 
-func DoSomething() (result any, err *stderrs.Error) {
-	defer recovery.SetMessage("Oh no!").WithHandlers(log).On(&err).Do()
+func DoSomething(ctx context.Context) (result any, err *stderrs.Error) {
+	defer recovery.SetMessage("Oh no!").WithHandlers(log).On(&err).Do(ctx)
 	
 	panic("message")
 }
