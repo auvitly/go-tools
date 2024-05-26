@@ -74,8 +74,8 @@ type Handler func(ctx context.Context, msg any) error
 
 <table cellspacing="0" cellpadding="0">
 <tr>
-    <td><img width="50" height="50" src="https://img.icons8.com/bubbles/100/box-important.png" alt="box-important"/></td>
-    <td>Пользовательские обработчики запускаются <b>асинхронно</b>! Если контекст был завершен, то обработчики выполняются на основании правил, установленных разработчиком. Это крайне важно, так как это может порождать <b>утечку горутин</b>. </td>
+    <td width="80"><img width="50" height="50" src="https://img.icons8.com/bubbles/50/box-important.png" alt="box-important"/></td>
+    <td >Пользовательские обработчики запускаются <b>асинхронно</b>! Если контекст был завершен, то обработчики выполняются на основании правил, установленных разработчиком. Это крайне важно, так как это может порождать <b>утечку горутин</b>. </td>
 </tr>
 </table>
 
