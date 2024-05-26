@@ -10,6 +10,16 @@ import (
 	"time"
 )
 
+func TestDo(t *testing.T) {
+	t.Parallel()
+
+	require.NotPanics(t, func() {
+		defer recovery.Do(context.Background())
+
+		panic("panic: message")
+	})
+}
+
 func TestOnError(t *testing.T) {
 	t.Parallel()
 

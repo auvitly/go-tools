@@ -28,7 +28,11 @@ func WithHandlers(handlers ...Handler) Builder { return _builder.WithHandlers(ha
 func WithAsyncHandlers(handlers ...Handler) Builder { return _builder.WithAsyncHandlers(handlers...) }
 
 // Do - perform panic processing with context. Called exclusively via defer.
-func Do(ctx context.Context) { _builder.Do(ctx) }
+func Do(ctx context.Context) {
+	if msg := recover(); msg != nil {
+		_builder.recovery(ctx, msg)
+	}
+}
 
 // RegistryHandlers - add handlers for global execution.
 func RegistryHandlers(handlers ...Handler) {
