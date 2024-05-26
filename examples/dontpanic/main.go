@@ -21,9 +21,23 @@ func errorHandler(ctx context.Context, msg any) error {
 }
 
 func wrapHandler(data string) func(ctx context.Context, msg any) error {
-	return func(ctx context.Context, msg any) error {
+	return func(_ context.Context, _ any) error {
 		return stderrs.Internal.SetMessage("My data error: %s", data)
 	}
+}
+
+func exceedingHandler(ctx context.Context, _ any) error {
+	time.Sleep(2 * time.Second)
+
+	slog.InfoContext(ctx, "I won't get to the output because the context ended early")
+
+	return nil
+}
+
+func asyncHandler(ctx context.Context, _ any) error {
+	slog.InfoContext(ctx, "I managed to get to the conclusion")
+
+	return nil
 }
 
 func onStart(ctx context.Context) (err *stderrs.Error) {
@@ -41,6 +55,11 @@ func main() {
 		wrapHandler("message"),
 	)
 
+	recovery.RegistryAsyncHandlers(
+		exceedingHandler,
+		asyncHandler,
+	)
+
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
@@ -48,3 +67,10 @@ func main() {
 		slog.ErrorContext(ctx, fmt.Sprintf("Panic did not overtake us! We received an error: %s", err))
 	}
 }
+
+/* STDOUT
+2024/05/26 04:43:14 INFO I managed to get to the conclusion
+2024/05/26 04:43:14 WARN I'm dropping the app now! Be afraid!
+2024/05/26 04:43:15 ERROR Panic did not overtake us! We received an error: {"code": "panic", "message": "internal server error: unhandled exception", "fields": {"panic":"I'm dropping the app now! Be afraid!"}, "embed": [file already closed
+{"code": "internal", "message": "My data error: message"}]}
+*/
