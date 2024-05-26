@@ -103,7 +103,22 @@ func main() {
 			"code": "panic",
 			"message": "internal server error: unhandled exception",
 			"fields": {
-				"panic":"invalid memory address or nil pointer dereference"
+				"panic":"invalid memory address or nil pointer dereference",
+				"stack":"goroutine 8 [running]:
+					runtime/debug.Stack()
+						C:/Program Files/Go/src/runtime/debug/stack.go:24 +0x5e
+							github.com/auvitly/go-tools/recovery.Builder.use.func1()
+						F:/Work/projects/git/auvitly/go-tools/recovery/builder.go:103 +0x433
+							panic({0x9141a0?, 0xb9f920?})
+						C:/Program Files/Go/src/runtime/panic.go:914 +0x21f
+							main.itsPanic({0x9cfcb0, 0xc00007a0e0}, {0x8fcc80, 0x9cd8b0})
+						F:/Work/projects/git/auvitly/go-tools/examples/relax/main.go:36 +0x2
+							github.com/auvitly/go-tools/recovery.Builder.use({{0xc08360, 0x0, 0x0},{0xc08360, 0x0, 0x0}, 0x0, 0xc000044058, {0x965fa7, 0x2a}}, ...)
+						F:/Work/projects/git/auvitly/go-tools/recovery/builder.go:123 +0xee
+`							github.com/auvitly/go-tools/recovery.Builder.handle.func3()
+						F:/Work/projects/git/auvitly/go-tools/recovery/builder.go:219 +0x11f
+							created by github.com/auvitly/go-tools/recovery.Builder.handle in goroutine 1
+						F:/Work/projects/git/auvitly/go-tools/recovery/builder.go:215 +0x63d\n"
 			}
 		}
 	]

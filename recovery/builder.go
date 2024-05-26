@@ -3,6 +3,7 @@ package recovery
 import (
 	"context"
 	"github.com/auvitly/go-tools/stderrs"
+	"runtime/debug"
 	"sync"
 )
 
@@ -98,7 +99,8 @@ func (b Builder) use(
 		if sub := recover(); sub != nil {
 			var std = stderrs.Panic.
 				SetMessage(b.message).
-				WithField("panic", sub)
+				WithField("panic", sub).
+				WithField("stack", string(debug.Stack()))
 
 			if err != nil {
 				std = std.EmbedErrors(err)
