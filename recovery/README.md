@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="100" height="100" src="https://img.icons8.com/clouds/200/knight-shield.png" alt="knight-shield"/>
+  <img width="100" height="100" src="https://img.icons8.com/clouds/200/work.png" alt="wrench"/>
   <h3 align="center">Recovery</h3>
   <h4 align="center">github.com/auvitly/go-tools/recovery</h4>
   <p align="center">Don't panic!</p>
