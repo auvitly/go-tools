@@ -78,7 +78,7 @@ type Handler func(ctx context.Context, msg any) error
 
 
 
-Пример настройки обработчика события со стандартной ошибкой:
+Пример настройки пользовательского обработчика события со стандартной ошибкой:
 ```go
 func log(_ context.Context, msg any) error {
 	slog.Error("we obtain panic: %v", msg)
