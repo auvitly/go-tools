@@ -69,8 +69,8 @@ func main() {
 }
 
 /* STDOUT
-2024/05/26 04:43:14 INFO I managed to get to the conclusion
-2024/05/26 04:43:14 WARN I'm dropping the app now! Be afraid!
-2024/05/26 04:43:15 ERROR Panic did not overtake us! We received an error: {"code": "panic", "message": "internal server error: unhandled exception", "fields": {"panic":"I'm dropping the app now! Be afraid!"}, "embed": [file already closed
+INFO I managed to get to the conclusion
+WARN I'm dropping the app now! Be afraid!
+ERROR Panic did not overtake us! We received an error: {"code": "panic", "message": "internal server error: unhandled exception", "fields": {"panic":"I'm dropping the app now! Be afraid!"}, "embed": [file already closed
 {"code": "internal", "message": "My data error: message"}]}
 */
