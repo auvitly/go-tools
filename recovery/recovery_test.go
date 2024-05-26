@@ -16,7 +16,7 @@ func TestOnError(t *testing.T) {
 	var err = fs.ErrExist
 
 	func() {
-		defer recovery.OnError(&err).Do()
+		defer recovery.OnError(&err).Do(context.Background())
 
 		panic("panic: message")
 	}()
@@ -33,7 +33,7 @@ func TestOn(t *testing.T) {
 	var err = stderrs.Internal.EmbedErrors(fs.ErrExist).SetMessage("my message")
 
 	func() {
-		defer recovery.On(&err).Do()
+		defer recovery.On(&err).Do(context.Background())
 
 		panic("panic: message")
 	}()
@@ -61,7 +61,7 @@ func TestHandler(t *testing.T) {
 
 				return nil
 			},
-		).Do()
+		).Do(context.Background())
 
 		panic(_panic)
 	}()
@@ -87,7 +87,7 @@ func TestPanicInHandler(t *testing.T) {
 			}).
 			SetMessage(_message).
 			On(&err).
-			Do()
+			Do(context.Background())
 
 		panic("")
 	}()
@@ -120,7 +120,7 @@ func TestDoContextExceeded(t *testing.T) {
 				return nil
 			}).
 			On(&err).
-			DoContext(ctx)
+			Do(ctx)
 
 		panic("")
 	}()
@@ -149,7 +149,7 @@ func TestDoContext_HandlerError(t *testing.T) {
 				return stderrs.Internal.SetMessage("%s", msg)
 			}).
 			On(&err).
-			DoContext(ctx)
+			Do(ctx)
 
 		panic("")
 	}()

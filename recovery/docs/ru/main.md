@@ -40,18 +40,8 @@ func main() {
 Основным методом для обработки исключений является метод `Do`, который перехватывает ошибку и 
 позволяет безопасно завершиться вызывающей функции. 
 ```go
-func MyFunc() {
-    defer recovery.Do()
-    
-    panic("msg")	
-}
-```
-
-Если необходимо ограничить время выполнения, то используйте метод `DoContext`.
-
-```go
 func MyFunc(ctx context.Context) {
-    defer recovery.DoContext(ctx)
+    defer recovery.Do(ctx)
     
     panic("msg")	
 }

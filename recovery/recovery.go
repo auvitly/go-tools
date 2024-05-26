@@ -27,11 +27,8 @@ func WithHandlers(handlers ...Handler) Builder { return _builder.WithHandlers(ha
 // WithAsyncHandlers - add async exception handler.
 func WithAsyncHandlers(handlers ...Handler) Builder { return _builder.WithAsyncHandlers(handlers...) }
 
-// Do - perform panic processing. Called exclusively via defer.
-func Do() { _builder.Do() }
-
-// DoContext - perform panic processing with context. Called exclusively via defer.
-func DoContext(ctx context.Context) { _builder.DoContext(ctx) }
+// Do - perform panic processing with context. Called exclusively via defer.
+func Do(ctx context.Context) { _builder.Do(ctx) }
 
 // RegistryHandlers - add handlers for global execution.
 func RegistryHandlers(handlers ...Handler) {
