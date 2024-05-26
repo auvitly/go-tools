@@ -1,10 +1,3 @@
-<hr>
-<div align="center">
-    <img align="center" width="30" height="30" src="https://img.icons8.com/clouds/100/back.png" alt="back"/> 
-    <a href="./../README.md">Go Tools</a>
-</div>
-<hr>
-
 <div align="center">
   <img width="100" height="100" src="https://img.icons8.com/clouds/200/knight-shield.png" alt="knight-shield"/>
   <h3 align="center">Recovery</h3>
