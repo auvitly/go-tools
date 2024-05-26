@@ -235,15 +235,15 @@ func (e *Error) Error() string {
 		parts = append(parts, fmt.Sprintf(`"message": "%s"`, e.Message))
 	}
 
-	if e.Embed != nil {
-		parts = append(parts, fmt.Sprintf(`"embed": [%s]`, e.Embed.Error()))
-	}
-
 	if len(e.Fields) != 0 {
 		raw, err := json.Marshal(e.Fields)
 		if err == nil {
-			parts = append(parts, fmt.Sprintf(`"fields": "%s"`, raw))
+			parts = append(parts, fmt.Sprintf(`"fields": %s`, raw))
 		}
+	}
+
+	if e.Embed != nil {
+		parts = append(parts, fmt.Sprintf(`"embed": [%s]`, e.Embed.Error()))
 	}
 
 	var message = strings.Join(parts, ", ")
@@ -252,7 +252,7 @@ func (e *Error) Error() string {
 		message = fmt.Sprintf("%s > %s", e.Wraps[i], message)
 	}
 
-	return message
+	return fmt.Sprintf("{%s}", message)
 }
 
 // Unwrap - implementation of the standard interface.
