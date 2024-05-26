@@ -35,7 +35,7 @@ func exceedingTimeoutHandler(ctx context.Context, _ any) error {
 }
 
 func asyncHandler(ctx context.Context, _ any) error {
-	slog.InfoContext(ctx, "I managed to get to the conclusion")
+	slog.InfoContext(ctx, "I slipped through")
 
 	return nil
 }
