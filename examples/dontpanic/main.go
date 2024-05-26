@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/auvitly/go-tools/recovery"
 	"github.com/auvitly/go-tools/stderrs"
+	"io/fs"
 	"log/slog"
 	"time"
 )
@@ -16,7 +17,13 @@ func logHandler(ctx context.Context, msg any) error {
 }
 
 func errorHandler(ctx context.Context, msg any) error {
-	return stderrs.Internal.SetMessage("It's error!")
+	return fs.ErrClosed
+}
+
+func wrapHandler(data string) func(ctx context.Context, msg any) error {
+	return func(ctx context.Context, msg any) error {
+		return stderrs.Internal.SetMessage("My data error: %s", data)
+	}
 }
 
 func onStart(ctx context.Context) (err *stderrs.Error) {
@@ -28,7 +35,11 @@ func onStart(ctx context.Context) (err *stderrs.Error) {
 }
 
 func main() {
-	recovery.RegistryHandlers(logHandler, errorHandler)
+	recovery.RegistryHandlers(
+		logHandler,
+		errorHandler,
+		wrapHandler("message"),
+	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()

@@ -243,7 +243,9 @@ func (e *Error) Error() string {
 	}
 
 	if e.Embed != nil {
-		parts = append(parts, fmt.Sprintf(`"embed": [%s]`, e.Embed.Error()))
+		msg := strings.Replace(e.Embed.Error(), "\n", ",", -1)
+
+		parts = append(parts, fmt.Sprintf(`"embed": [%s]`, msg))
 	}
 
 	var message = strings.Join(parts, ", ")
