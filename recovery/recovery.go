@@ -24,5 +24,5 @@ func Do() { builder.Do() }
 func DoContext(ctx context.Context) { builder.DoContext(ctx) }
 
 func RegistryHandlers(handlers ...Handler) {
-	handlers = append(handlers, handlers...)
+	_handlers = append(_handlers, handlers...)
 }

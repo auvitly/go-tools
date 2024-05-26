@@ -106,7 +106,7 @@ func DoSomething() (result any, err *stderrs.Error) {
 ```go
 func main() {	
     recovery.RegistryHandlers(func (_ context.Context, msg any) error {
-        slog.Error("we obtain panic: %v", msg)
+        slog.Error("we obtain dontpanic: %v", msg)
         
         return nil
     })
