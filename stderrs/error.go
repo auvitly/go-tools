@@ -246,7 +246,7 @@ func (e *Error) Error() string {
 		}
 	}
 
-	var message = strings.Join(parts, "; ")
+	var message = strings.Join(parts, ", ")
 
 	for i := 0; i < len(e.Wraps); i++ {
 		message = fmt.Sprintf("%s > %s", e.Wraps[i], message)
