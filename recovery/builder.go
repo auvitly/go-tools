@@ -16,12 +16,6 @@ type Builder struct {
 	message       string
 }
 
-var (
-	_syncHandlers  []Handler
-	_asyncHandlers []Handler
-	_message       = "internal server error: unhandled exception"
-)
-
 // SetMessage - set message for standard error.
 func (b Builder) SetMessage(message string) Builder {
 	var dst = b.copy()
@@ -84,12 +78,14 @@ func (b Builder) copy() Builder {
 	}
 }
 
+// Do - perform panic processing. Called exclusively via defer.
 func (b Builder) Do() {
 	if msg := recover(); msg != nil {
 		b.recovery(context.Background(), msg)
 	}
 }
 
+// DoContext - perform panic processing with context. Called exclusively via defer.
 func (b Builder) DoContext(ctx context.Context) {
 	if msg := recover(); msg != nil {
 		b.recovery(ctx, msg)
