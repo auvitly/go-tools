@@ -17,16 +17,25 @@ func log(ctx context.Context, msg any) error {
 	return nil
 }
 
-// errClosed - the handler failed with an error fs.ErrClosedю
+// errClosed - the handler failed with an error fs.ErrClosed.
 func errClosed(ctx context.Context, msg any) error {
 	return fs.ErrClosed
 }
 
-// wrap - the method demonstrates the ability to wrap a function to pass arguments to a handler
+// wrap - the method demonstrates the ability to wrap a function to pass arguments to a handler.
 func wrap(text string) func(context.Context, any) error {
 	return func(_ context.Context, msg any) error {
 		return stderrs.Internal.SetMessage("%s: %s", text, msg)
 	}
+}
+
+// itsPanic - panic exit handler.
+func itsPanic(context.Context, any) error {
+	var i *int
+
+	_ = *i
+
+	return nil
 }
 
 // tooLate - the time required to execute this method exceeds the context timeout.
@@ -59,6 +68,7 @@ func main() {
 		log,
 		errClosed,
 		wrap("message"),
+		itsPanic,
 	)
 
 	recovery.RegistryAsyncHandlers(
@@ -87,7 +97,14 @@ func main() {
 		file already closed
 		{
 			"code": "internal",
-			"message": "My data error: message"
+			"message": "message: I'm dropping the app now! Be afraid!"
+		}
+		{
+			"code": "panic",
+			"message": "internal server error: unhandled exception",
+			"fields": {
+				"panic":"invalid memory address or nil pointer dereference"
+			}
 		}
 	]
 }
