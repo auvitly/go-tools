@@ -242,7 +242,26 @@ func (e *Error) Error() string {
 		}
 	}
 
-	if e.Embed != nil {
+	switch v := e.Embed.(type) {
+	case interface{ Unwrap() []error }:
+		var messages []string
+
+		for _, item := range v.Unwrap() {
+			if _, ok := item.(*Error); ok {
+				messages = append(messages, item.Error())
+			} else {
+				messages = append(messages, fmt.Sprintf(`"%s"`, item.Error()))
+			}
+		}
+
+		parts = append(parts, fmt.Sprintf(`"embed": [%s]`, strings.Join(messages, ", ")))
+	case interface{ Unwrap() error }:
+		parts = append(parts, fmt.Sprintf(`"embed": [%s]`, e.Embed.Error()))
+	default:
+		if v == nil {
+			break
+		}
+
 		parts = append(parts, fmt.Sprintf(`"embed": [%s]`, e.Embed.Error()))
 	}
 

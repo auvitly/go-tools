@@ -96,11 +96,11 @@ func main() {
 		"panic":"I'm dropping the app now! Be afraid!"
 	},
 	"embed":[
-		file already closed
+		"file already closed",
 		{
 			"code": "internal",
 			"message": "message: I'm dropping the app now! Be afraid!"
-		}
+		},
 		{
 			"code": "panic",
 			"fields": {
@@ -119,10 +119,9 @@ func main() {
 					github.com/auvitly/go-tools/recovery.Builder.handle.func3()
 						F:/Work/projects/git/auvitly/go-tools/recovery/builder.go:218 +0x11f
 					created by github.com/auvitly/go-tools/recovery.Builder.handle in goroutine 1
-						F:/Work/projects/git/auvitly/go-tools/recovery/builder.go:214 +0x63d
-				"
+						F:/Work/projects/git/auvitly/go-tools/recovery/builder.go:214 +0x63d"
 			}
-		}
+		},
 		{
 			"code": "unknown",
 			"message": "Successfully assigned the error! Wow!"
