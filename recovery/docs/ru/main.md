@@ -106,8 +106,8 @@ func main() {
     ...
 }
 
-func MyFunc() {
-    defer recovery.Do()
+func MyFunc(ctx context.Context) {
+    defer recovery.Do(ctx)
     
     panic("msg")
 }

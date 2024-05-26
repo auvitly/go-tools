@@ -41,7 +41,7 @@ func asyncHandler(ctx context.Context, _ any) error {
 }
 
 func onStart(ctx context.Context) (err *stderrs.Error) {
-	defer recovery.On(&err).DoContext(ctx)
+	defer recovery.On(&err).Do(ctx)
 
 	panic("I'm dropping the app now! Be afraid!")
 
