@@ -7,8 +7,10 @@ import (
 	"sync"
 )
 
+// Handler - user panic handler.
 type Handler func(ctx context.Context, msg any) error
 
+// Builder - panic handle builder.
 type Builder struct {
 	syncHandlers  []Handler
 	asyncHandlers []Handler
@@ -108,8 +110,6 @@ func (b Builder) use(
 			mu.Lock()
 			*errs = append(*errs, std)
 			mu.Unlock()
-
-			return
 		}
 
 		if err != nil {
