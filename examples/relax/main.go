@@ -87,7 +87,7 @@ func main() {
 /* OUT:
 2024/05/27 23:26:04 INFO I slipped through
 2024/05/27 23:26:04 INFO log message="I'm dropping the app now! Be afraid!"
-2024/05/27 23:26:04 INFO wrap text=message message="I'm dropping the app now! Be afraid!"
+2024/05/27 23:26:04 INFO wrap text="message" message="I'm dropping the app now! Be afraid!"
 2024/05/27 23:26:05 ERROR Panic did not overtake us! We received an error: {
 	"code": "panic",
 	"message": "internal server error: unhandled exception",
