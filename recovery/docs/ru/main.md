@@ -52,9 +52,9 @@ func MyFunc(ctx context.Context) {
 
 Для настройки обработчика паники используется:
 * `On` - метод позволяет выполнить обогащение [стандартной ошибки](./../../../stderrs/README.md) 
-при обработке исключения паникой. Сбрасывает результат работы `OnError`.
+при обработке исключения паникой. Исключает действие метода `OnError`.
 * `OnError` - метод позволяет выполнить обогащение паникой стандартного интерфейса `error`.
-Сбрасывает результат работы `On`.
+Исключает действие метода `On`.
 * `SetMessage` - позволяет установить сообщение в [стандартную ошибку](./../../../stderrs/README.md) 
 при обнаружении паники.
 * `WithHandlers` - добавление пользовательских обработчиков исключения. 
@@ -68,12 +68,10 @@ type Handler func(ctx context.Context, msg any) error
 > Если контекст был завершен, то обработчики выполняются на основании правил, 
 > установленных разработчиком. Это крайне важно, так как это может порождать **утечку горутин**!
 
-
-
 Пример настройки пользовательского обработчика события со стандартной ошибкой:
 ```go
-func log(_ context.Context, msg any) error {
-	slog.Error("we obtain panic: %v", msg)
+func log(ctx context.Context, msg any) error {
+    slog.ErrorContext(ctx, "we obtain panic: %v", msg)
 	
 	return nil
 }
@@ -86,7 +84,7 @@ func DoSomething(ctx context.Context) (result any, err *stderrs.Error) {
 ```
 
 При возникновении исключения будет вызвана функция `log`, затем будет сформирована ошибка, которая
-подменит `err` обогащенной ошибкой с сообщением `Oh no!`.
+переопределит `err` стандартной ошибкой с сообщением `Oh no!`.
 
 > Отметим, что сначала выполняются обработчики, а затем уже формируется ошибка.
 > Это связано с тем, что пакет также учитывает исключения в самих обработчиках. 
@@ -97,8 +95,8 @@ func DoSomething(ctx context.Context) (result any, err *stderrs.Error) {
 
 ```go
 func main() {	
-    recovery.RegistryHandlers(func (_ context.Context, msg any) error {
-        slog.Error("we obtain panic: %v", msg)
+    recovery.RegistryHandlers(func (ctx context.Context, msg any) error {
+        slog.ErrorContext(ctx, "we obtain panic: %v", msg)
         
         return nil
     })
