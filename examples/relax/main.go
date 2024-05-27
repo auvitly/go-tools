@@ -5,53 +5,49 @@ import (
 	"fmt"
 	"github.com/auvitly/go-tools/recovery"
 	"github.com/auvitly/go-tools/stderrs"
-	"io/fs"
 	"log/slog"
 	"time"
 )
 
 // log - logs the panic message.
-func log(ctx context.Context, msg any) error {
-	slog.WarnContext(ctx, fmt.Sprintf("%s", msg))
-
-	return nil
-}
-
-// errClosed - the handler failed with an error fs.ErrClosed.
-func errClosed(ctx context.Context, msg any) error {
-	return fs.ErrClosed
+func log(ctx context.Context, msg any) {
+	slog.InfoContext(ctx, "log", "message", msg)
 }
 
 // wrap - the method demonstrates the ability to wrap a function to pass arguments to a handler.
-func wrap(text string) func(context.Context, any) error {
-	return func(_ context.Context, msg any) error {
-		return stderrs.Internal.SetMessage("%s: %s", text, msg)
+func wrap(text string) func(context.Context, any) {
+	return func(ctx context.Context, msg any) {
+		slog.InfoContext(ctx, "wrap",
+			"text", text,
+			"message", msg,
+		)
 	}
 }
 
 // itsPanic - panic exit handler.
-func itsPanic(context.Context, any) error {
+func itsPanic(context.Context, any) {
 	var i *int
 
 	_ = *i
-
-	return nil
 }
 
 // tooLate - the time required to execute this method exceeds the context timeout.
-func tooLate(ctx context.Context, _ any) error {
+func tooLate(ctx context.Context, _ any) {
 	time.Sleep(2 * time.Second)
 
-	slog.InfoContext(ctx, "I won't get to the output because the context ended early")
+	slog.InfoContext(ctx, "tooLate")
+}
 
-	return nil
+// tooLatePanic - panic exit handler, the time required to execute this method exceeds the context timeout.
+func tooLatePanic(ctx context.Context, _ any) {
+	time.Sleep(2 * time.Second)
+
+	panic("tooLatePanic")
 }
 
 // onTime - a method that manages to asynchronously output a message to the log.
-func onTime(ctx context.Context, _ any) error {
+func onTime(ctx context.Context, _ any) {
 	slog.InfoContext(ctx, "I slipped through")
-
-	return nil
 }
 
 // method - panic occurs and calls the recovery package handler.
@@ -68,7 +64,6 @@ func method(ctx context.Context) (err *stderrs.Error) {
 func main() {
 	recovery.RegistryHandlers(
 		log,
-		errClosed,
 		wrap("message"),
 		itsPanic,
 	)
@@ -76,6 +71,7 @@ func main() {
 	recovery.RegistryAsyncHandlers(
 		tooLate,
 		onTime,
+		tooLatePanic,
 	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -84,42 +80,42 @@ func main() {
 	if err := method(ctx); err != nil {
 		slog.ErrorContext(ctx, fmt.Sprintf("Panic did not overtake us! We received an error: %s", err))
 	}
+
+	time.Sleep(2 * time.Second)
 }
 
 /* OUT:
-> [ INFO ]  I managed to get to the conclusion
-> [ WARN ]  I'm dropping the app now! Be afraid!
-> [ ERROR ] Panic did not overtake us! We received an error: We received an error: {
+2024/05/27 23:26:04 INFO I slipped through
+2024/05/27 23:26:04 INFO log message="I'm dropping the app now! Be afraid!"
+2024/05/27 23:26:04 INFO wrap text=message message="I'm dropping the app now! Be afraid!"
+2024/05/27 23:26:05 ERROR Panic did not overtake us! We received an error: {
 	"code": "panic",
 	"message": "internal server error: unhandled exception",
 	"fields": {
-		"panic":"I'm dropping the app now! Be afraid!"
+		"panic":"I'm dropping the app now! Be afraid!",
+		"uuid":"179e3034-270e-48d3-9459-d83cf89545a8",
 	},
-	"embed":[
-		"file already closed",
-		{
-			"code": "internal",
-			"message": "message: I'm dropping the app now! Be afraid!"
-		},
+	"embed": [
 		{
 			"code": "panic",
 			"fields": {
-				"panic":"invalid memory address or nil pointer dereference",
-				"stack":"goroutine 8 [running]:
+				"panic":"runtime error: invalid memory address or nil pointer dereference",
+				"uuid":"179e3034-270e-48d3-9459-d83cf89545a8",
+				"stack":"goroutine 9 [running]:
 					runtime/debug.Stack()
 						C:/Program Files/Go/src/runtime/debug/stack.go:24 +0x5e
 					github.com/auvitly/go-tools/recovery.Builder.use.func1()
-						F:/Work/projects/git/auvitly/go-tools/recovery/builder.go:102 +0x345
-					panic({0xc031a0?, 0xe8e920?})
+						F:/Work/projects/git/auvitly/go-tools/recovery/builder.go:111 +0x2be
+					panic({0xd953c0?, 0x10229c0?})
 						C:/Program Files/Go/src/runtime/panic.go:914 +0x21f
-					main.itsPanic({0xcbecd0, 0xc00007a0e0}, {0xbebc80, 0xcbc8c0})
-						F:/Work/projects/git/auvitly/go-tools/examples/relax/main.go:36 +0x2
-					github.com/auvitly/go-tools/recovery.Builder.use({{0xef7360, 0x0, 0x0}, {0xef7360, 0x0, 0x0}, 0x0, 0xc000044058, {0xc54fcc, 0x2a}}, ...)
-						F:/Work/projects/git/auvitly/go-tools/recovery/builder.go:122 +0x87
+					main.itsPanic({0xe516f0, 0xc00007a0e0}, {0xd7dde0, 0xe4f2c0})
+						F:/Work/projects/git/auvitly/go-tools/examples/relax/main.go:31 +0x2
+					github.com/auvitly/go-tools/recovery.Builder.use({{0xb, 0x33, 0x8e, 0x7d, 0xda, 0xa7, 0x48, 0xf5, 0xb3, 0x96, ...}, ...}, ...)
+						F:/Work/projects/git/auvitly/go-tools/recovery/builder.go:124 +0xf1
 					github.com/auvitly/go-tools/recovery.Builder.handle.func3()
-						F:/Work/projects/git/auvitly/go-tools/recovery/builder.go:218 +0x11f
+						F:/Work/projects/git/auvitly/go-tools/recovery/builder.go:224 +0x125
 					created by github.com/auvitly/go-tools/recovery.Builder.handle in goroutine 1
-						F:/Work/projects/git/auvitly/go-tools/recovery/builder.go:214 +0x63d"
+						F:/Work/projects/git/auvitly/go-tools/recovery/builder.go:220 +0x64b",
 			}
 		},
 		{
@@ -127,5 +123,28 @@ func main() {
 			"message": "Successfully assigned the error! Wow!"
 		}
 	]
+}
+2024/05/27 23:26:06 ERROR [recovery] Panic detected when executing handler after interceptor context ends:
+{
+	"code": "panic",
+	"fields": {
+		"panic":"tooLatePanic",
+		"uuid":"179e3034-270e-48d3-9459-d83cf89545a8",
+		"stack":"goroutine 8 [running]:
+			runtime/debug.Stack()
+				C:/ProgramFiles/Go/src/runtime/debug/stack.go:24 +0x5e
+			github.com/auvitly/go-tools/recovery.Builder.use.func1()
+				F:/Work/projects/git/auvitly/go-tools/recovery/builder.go:111 +0x2be
+			panic({0x5adde0?, 0x67f2a0?})
+				C:/Program Files/Go/src/runtime/panic.go:914 +0x21f
+			main.tooLatePanic({0x0?, 0x0?}, {0x0?, 0x0?})
+				F:/Work/projects/git/auvitly/go-tools/examples/relax/main.go:45 +0x2b
+			github.com/auvitly/go-tools/recovery.Builder.use({{0x17, 0x9e, 0x30, 0x34, 0x27, 0xe, 0x48, 0xd3, 0x94, 0x59, ...}, ...}, ...)
+				F:/Work/projects/git/auvitly/go-tools/recovery/builder.go:128 +0xf1
+			github.com/auvitly/go-tools/recovery.Builder.handle.func1(0x0?)
+				F:/Work/projects/git/auvitly/go-tools/recovery/builder.go:208 +0xc5
+			created by github.com/auvitly/go-tools/recovery.Builder.handle in goroutine 1
+				F:/Work/projects/git/auvitly/go-tools/recovery/builder.go:205 +0x89"
+	}
 }
 */

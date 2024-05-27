@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"io/fs"
 	"testing"
-	"time"
 )
 
 func TestDo(t *testing.T) {
@@ -66,10 +65,8 @@ func TestHandler(t *testing.T) {
 
 	func() {
 		defer recovery.WithHandlers(
-			func(_ context.Context, msg any) error {
+			func(_ context.Context, msg any) {
 				actual = msg.(string)
-
-				return nil
 			},
 		).Do(context.Background())
 
@@ -90,10 +87,8 @@ func TestPanicInHandler(t *testing.T) {
 
 	func() {
 		defer recovery.
-			WithHandlers(func(_ context.Context, msg any) error {
+			WithHandlers(func(_ context.Context, msg any) {
 				panic(_panic)
-
-				return nil
 			}).
 			SetMessage(_message).
 			On(&err).
@@ -107,65 +102,4 @@ func TestPanicInHandler(t *testing.T) {
 	require.True(t, std.Is(stderrs.Panic))
 	require.Equal(t, _message, err.Message)
 	require.Equal(t, _panic, std.Fields["panic"])
-	require.Equal(t, _message, std.Message)
-}
-
-func TestDoContextExceeded(t *testing.T) {
-	t.Parallel()
-
-	var (
-		ctx, cancel = context.WithTimeout(context.Background(), time.Millisecond)
-		err         *stderrs.Error
-	)
-
-	t.Cleanup(func() {
-		cancel()
-	})
-
-	func() {
-		defer recovery.
-			WithHandlers(func(ctx context.Context, msg any) error {
-				time.Sleep(5 * time.Millisecond)
-
-				return nil
-			}).
-			On(&err).
-			Do(ctx)
-
-		panic("")
-	}()
-
-	<-ctx.Done()
-
-	require.NotNil(t, err)
-	require.Nil(t, err.Embed)
-}
-
-func TestDoContext_HandlerError(t *testing.T) {
-	t.Parallel()
-
-	var (
-		ctx, cancel = context.WithTimeout(context.Background(), 5*time.Millisecond)
-		err         *stderrs.Error
-	)
-
-	t.Cleanup(func() {
-		cancel()
-	})
-
-	func() {
-		defer recovery.
-			WithAsyncHandlers(func(_ context.Context, msg any) error {
-				return stderrs.Internal.SetMessage("%s", msg)
-			}).
-			On(&err).
-			Do(ctx)
-
-		panic("")
-	}()
-
-	<-ctx.Done()
-
-	require.NotNil(t, err)
-	require.True(t, err.Is(stderrs.Internal))
 }

@@ -2,7 +2,9 @@ package recovery
 
 import (
 	"context"
+	"fmt"
 	"github.com/auvitly/go-tools/stderrs"
+	"github.com/google/uuid"
 	"log/slog"
 	"runtime/debug"
 	"sync"
@@ -13,6 +15,7 @@ type Handler func(ctx context.Context, msg any)
 
 // Builder - panic builder.
 type Builder struct {
+	uuid          uuid.UUID
 	syncHandlers  []Handler
 	asyncHandlers []Handler
 	target        *error
@@ -104,16 +107,22 @@ func (b Builder) use(
 		}
 
 		var std = stderrs.Panic.
-			WithField("panic", sub).
-			WithField("stack", string(debug.Stack()))
+			WithField("panic", fmt.Sprintf("%s", sub)).
+			WithField("stack", string(debug.Stack())).
+			WithField("uuid", b.uuid.String())
 
-		if _, ok := <-ctx.Done(); ok {
-			slog.Error("[recovery] Panic detected: %s", std.Error())
+		select {
+		case <-ctx.Done():
+			slog.Error(
+				fmt.Sprintf("[recovery] Panic detected when executing handler after interceptor context ends: %s",
+					std.Error(),
+				),
+			)
+		default:
+			mu.Lock()
+			*errs = append(*errs, std)
+			mu.Unlock()
 		}
-
-		mu.Lock()
-		*errs = append(*errs, std)
-		mu.Unlock()
 	}()
 
 	handler(ctx, msg)
@@ -126,6 +135,8 @@ func (b Builder) recovery(ctx context.Context, msg any) {
 		mu   sync.Mutex
 		ch   = make(chan struct{})
 	)
+
+	b.uuid = uuid.New()
 
 	if len(b.message) == 0 {
 		b.message = _message
@@ -158,7 +169,8 @@ func (b Builder) setError(errs []error, msg any) {
 		var std = stderrs.Panic.
 			SetMessage(b.message).
 			EmbedErrors(errs...).
-			WithField("panic", msg)
+			WithField("panic", msg).
+			WithField("uuid", b.uuid.String())
 
 		if *b.target != nil {
 			std = std.EmbedErrors(*b.target)
@@ -169,7 +181,8 @@ func (b Builder) setError(errs []error, msg any) {
 		var std = stderrs.Panic.
 			SetMessage(b.message).
 			EmbedErrors(errs...).
-			WithField("panic", msg)
+			WithField("panic", msg).
+			WithField("uuid", b.uuid.String())
 
 		if *b.stderr != nil {
 			std = std.EmbedErrors(*b.stderr)
