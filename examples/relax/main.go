@@ -124,7 +124,7 @@ func main() {
 		}
 	]
 }
-2024/05/27 23:26:06 ERROR Panic detected when executing handler after interceptor context ends:
+2024/05/27 23:26:06 ERROR panic detected when executing handler after interceptor context ends:
 {
 	"code": "panic",
 	"fields": {
