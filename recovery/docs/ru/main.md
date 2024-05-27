@@ -86,15 +86,15 @@ type Handler func(ctx context.Context, msg any)
 > 
 > Основная ошибка о панике:
 > ```
-> {
->	    "code": "panic",
->	    "message": "internal server error: unhandled exception",
->	    "fields": {
->           "panic":"I'm dropping the app now! Be afraid!",
->           "uuid":"179e3034-270e-48d3-9459-d83cf89545a8",
->	    },
->	    ...
-> }
+>{
+>   "code": "panic",
+>   "message": "internal server error: unhandled exception",
+>   "fields": {
+>       "panic":"I'm dropping the app now! Be afraid!",
+>       "uuid":"179e3034-270e-48d3-9459-d83cf89545a8",
+>   },
+>   ...
+>}
 > ```
 > 
 > Сообщение о панике в обработчике:
