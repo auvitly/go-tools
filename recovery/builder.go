@@ -10,7 +10,7 @@ import (
 // Handler - user panic handler.
 type Handler func(ctx context.Context, msg any) error
 
-// Builder - panic handle builder.
+// Builder - panic builder.
 type Builder struct {
 	syncHandlers  []Handler
 	asyncHandlers []Handler
