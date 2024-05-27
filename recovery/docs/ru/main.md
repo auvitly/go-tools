@@ -142,7 +142,7 @@ func DoSomething(ctx context.Context) (result any, err *stderrs.Error) {
 ```go
 func main() {	
     recovery.RegistryHandlers(func (ctx context.Context, msg any) error {
-        slog.ErrorContext(ctx, "we obtain panic: %v", msg)
+        slog.ErrorContext(ctx, "we obtain panic", "message", msg)
         
         return nil
     })
@@ -160,7 +160,7 @@ func MyFunc(ctx context.Context) {
 Благодаря объявлению в `main` обработчика, то при вызове функции `MyFunc` будет выводить 
 сообщение с паникой в лог:
 ```
-[ERROR] we obtain panic: msg
+[ERROR] we obtain panic: message="msg"
 ```
 
 <a name="example"></a>
