@@ -114,7 +114,7 @@ func (b Builder) use(
 		select {
 		case <-ctx.Done():
 			slog.Error(
-				fmt.Sprintf("[recovery] Panic detected when executing handler after interceptor context ends: %s",
+				fmt.Sprintf("panic detected when executing handler after interceptor context ends: %s",
 					std.Error(),
 				),
 			)
