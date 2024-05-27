@@ -3,12 +3,13 @@ package recovery
 import (
 	"context"
 	"github.com/auvitly/go-tools/stderrs"
+	"log/slog"
 	"runtime/debug"
 	"sync"
 )
 
 // Handler - user panic handler.
-type Handler func(ctx context.Context, msg any) error
+type Handler func(ctx context.Context, msg any)
 
 // Builder - panic builder.
 type Builder struct {
@@ -95,31 +96,27 @@ func (b Builder) use(
 	errs *[]error,
 	handler Handler,
 ) {
-	var err error
-
 	defer func() {
-		if sub := recover(); sub != nil {
-			var std = stderrs.Panic.
-				WithField("panic", sub).
-				WithField("stack", string(debug.Stack()))
+		var sub = recover()
 
-			if err != nil {
-				std = std.EmbedErrors(err)
-			}
-
-			mu.Lock()
-			*errs = append(*errs, std)
-			mu.Unlock()
+		if sub == nil {
+			return
 		}
 
-		if err != nil {
-			mu.Lock()
-			*errs = append(*errs, err)
-			mu.Unlock()
+		var std = stderrs.Panic.
+			WithField("panic", sub).
+			WithField("stack", string(debug.Stack()))
+
+		if _, ok := <-ctx.Done(); ok {
+			slog.Error("[recovery] Panic detected: %s", std.Error())
 		}
+
+		mu.Lock()
+		*errs = append(*errs, std)
+		mu.Unlock()
 	}()
 
-	err = handler(ctx, msg)
+	handler(ctx, msg)
 }
 
 func (b Builder) recovery(ctx context.Context, msg any) {
