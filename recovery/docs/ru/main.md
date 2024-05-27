@@ -160,7 +160,7 @@ func MyFunc(ctx context.Context) {
 Благодаря объявлению в `main` обработчика, то при вызове функции `MyFunc` будет выводить 
 сообщение с паникой в лог:
 ```
-[ERROR] we obtain panic: message="msg"
+[ERROR] we obtain panic message="msg"
 ```
 
 <a name="example"></a>
