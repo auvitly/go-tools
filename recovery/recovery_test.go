@@ -1,7 +1,6 @@
 package recovery_test
 
 import (
-	"context"
 	"github.com/auvitly/go-tools/recovery"
 	"github.com/auvitly/go-tools/stderrs"
 	"github.com/stretchr/testify/require"
@@ -13,7 +12,7 @@ func TestDo(t *testing.T) {
 	t.Parallel()
 
 	require.NotPanics(t, func() {
-		defer recovery.Do(context.Background())
+		defer recovery.Do()
 
 		panic("panic: message")
 	})
