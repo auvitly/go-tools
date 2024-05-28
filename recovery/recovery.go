@@ -7,25 +7,35 @@ import (
 
 var (
 	_builder       Builder
-	_syncHandlers  []Handler
-	_asyncHandlers []Handler
+	_syncHandlers  []SyncHandler
+	_asyncHandlers []AsyncHandler
 	_message       = "internal server error: unhandled exception"
 )
 
 // SetMessage - set message for standard error.
-func SetMessage(message string) Builder { return _builder.SetMessage(message) }
+func SetMessage(message string) Builder {
+	return _builder.SetMessage(message)
+}
 
 // OnError - perform error enrichment.
-func OnError(err *error) Builder { return _builder.OnError(err) }
+func OnError(err *error) Builder {
+	return _builder.OnError(err)
+}
 
 // On - perform standard error enrichment.
-func On(err **stderrs.Error) Builder { return _builder.On(err) }
+func On(err **stderrs.Error) Builder {
+	return _builder.On(err)
+}
 
-// WithHandlers - add exception handler.
-func WithHandlers(handlers ...Handler) Builder { return _builder.WithHandlers(handlers...) }
+// WithSyncHandlers - add sync exception handler.
+func WithSyncHandlers(handlers ...SyncHandler) Builder {
+	return _builder.WithSyncHandlers(handlers...)
+}
 
 // WithAsyncHandlers - add async exception handler.
-func WithAsyncHandlers(handlers ...Handler) Builder { return _builder.WithAsyncHandlers(handlers...) }
+func WithAsyncHandlers(handlers ...AsyncHandler) Builder {
+	return _builder.WithAsyncHandlers(handlers...)
+}
 
 // Do - perform panic processing with context. Called exclusively via defer.
 func Do(ctx context.Context) {
@@ -34,12 +44,12 @@ func Do(ctx context.Context) {
 	}
 }
 
-// RegistryHandlers - add handlers for global execution.
-func RegistryHandlers(handlers ...Handler) {
+// RegistrySyncHandlers - add handlers for global execution.
+func RegistrySyncHandlers(handlers ...SyncHandler) {
 	_syncHandlers = append(_syncHandlers, handlers...)
 }
 
 // RegistryAsyncHandlers - add handlers for global async execution.
-func RegistryAsyncHandlers(handlers ...Handler) {
+func RegistryAsyncHandlers(handlers ...AsyncHandler) {
 	_asyncHandlers = append(_asyncHandlers, handlers...)
 }

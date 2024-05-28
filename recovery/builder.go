@@ -4,20 +4,20 @@ import (
 	"context"
 	"fmt"
 	"github.com/auvitly/go-tools/stderrs"
-	"github.com/google/uuid"
-	"log/slog"
 	"runtime/debug"
 	"sync"
 )
 
-// Handler - user panic handler.
-type Handler func(ctx context.Context, msg any)
+// SyncHandler - sync user panic handler.
+type SyncHandler func(msg any) (err error)
+
+// AsyncHandler - async user panic handler.
+type AsyncHandler func(msg any)
 
 // Builder - panic builder.
 type Builder struct {
-	uuid          uuid.UUID
-	syncHandlers  []Handler
-	asyncHandlers []Handler
+	syncHandlers  []SyncHandler
+	asyncHandlers []AsyncHandler
 	target        *error
 	stderr        **stderrs.Error
 	message       string
@@ -52,8 +52,8 @@ func (b Builder) On(err **stderrs.Error) Builder {
 	return dst
 }
 
-// WithHandlers - add exception handler.
-func (b Builder) WithHandlers(handlers ...Handler) Builder {
+// WithSyncHandlers - add exception handler.
+func (b Builder) WithSyncHandlers(handlers ...SyncHandler) Builder {
 	var dst = b.copy()
 
 	dst.syncHandlers = append(dst.syncHandlers, handlers...)
@@ -62,18 +62,18 @@ func (b Builder) WithHandlers(handlers ...Handler) Builder {
 }
 
 // WithAsyncHandlers - add async exception handler.
-func (b Builder) WithAsyncHandlers(handlers ...Handler) Builder {
+func (b Builder) WithAsyncHandlers(handlers ...AsyncHandler) Builder {
 	var dst = b.copy()
 
-	dst.syncHandlers = append(dst.syncHandlers, handlers...)
+	dst.asyncHandlers = append(dst.asyncHandlers, handlers...)
 
 	return dst
 }
 
 func (b Builder) copy() Builder {
 	var (
-		syncHandlers  = make([]Handler, 0, len(b.syncHandlers))
-		asyncHandlers = make([]Handler, 0, len(b.asyncHandlers))
+		syncHandlers  = make([]SyncHandler, 0, len(b.syncHandlers))
+		asyncHandlers = make([]AsyncHandler, 0, len(b.asyncHandlers))
 	)
 
 	return Builder{
@@ -86,18 +86,56 @@ func (b Builder) copy() Builder {
 }
 
 // Do - perform panic processing with context. Called exclusively via defer.
-func (b Builder) Do(ctx context.Context) {
+func (b Builder) Do() {
+	if msg := recover(); msg != nil {
+		b.recovery(context.Background(), msg)
+	}
+}
+
+// DoContext - perform panic processing with context. Called exclusively via defer.
+func (b Builder) DoContext(ctx context.Context) {
 	if msg := recover(); msg != nil {
 		b.recovery(ctx, msg)
 	}
 }
 
-func (b Builder) use(
+func (b Builder) useSync(
+	msg any,
+	mu *sync.Mutex,
+	errs *[]error,
+	handler SyncHandler,
+) {
+	var err error
+
+	defer func() {
+		var sub = recover()
+
+		if sub == nil {
+			return
+		}
+
+		var std = stderrs.Panic.
+			WithField("panic", fmt.Sprintf("%s", sub)).
+			WithField("stack", string(debug.Stack()))
+
+		if err != nil {
+			std = std.EmbedErrors(err)
+		}
+
+		mu.Lock()
+		*errs = append(*errs, std)
+		mu.Unlock()
+	}()
+
+	err = handler(msg)
+}
+
+func (b Builder) useAsync(
 	ctx context.Context,
 	msg any,
 	mu *sync.Mutex,
 	errs *[]error,
-	handler Handler,
+	handler AsyncHandler,
 ) {
 	defer func() {
 		var sub = recover()
@@ -108,16 +146,10 @@ func (b Builder) use(
 
 		var std = stderrs.Panic.
 			WithField("panic", fmt.Sprintf("%s", sub)).
-			WithField("stack", string(debug.Stack())).
-			WithField("uuid", b.uuid.String())
-
+			WithField("stack", string(debug.Stack()))
 		select {
 		case <-ctx.Done():
-			slog.Error(
-				fmt.Sprintf("panic detected when executing handler after interceptor context ends: %s",
-					std.Error(),
-				),
-			)
+			return
 		default:
 			mu.Lock()
 			*errs = append(*errs, std)
@@ -125,7 +157,7 @@ func (b Builder) use(
 		}
 	}()
 
-	handler(ctx, msg)
+	handler(msg)
 }
 
 func (b Builder) recovery(ctx context.Context, msg any) {
@@ -135,8 +167,6 @@ func (b Builder) recovery(ctx context.Context, msg any) {
 		mu   sync.Mutex
 		ch   = make(chan struct{})
 	)
-
-	b.uuid = uuid.New()
 
 	if len(b.message) == 0 {
 		b.message = _message
@@ -169,8 +199,7 @@ func (b Builder) setError(errs []error, msg any) {
 		var std = stderrs.Panic.
 			SetMessage(b.message).
 			EmbedErrors(errs...).
-			WithField("panic", msg).
-			WithField("uuid", b.uuid.String())
+			WithField("panic", msg)
 
 		if *b.target != nil {
 			std = std.EmbedErrors(*b.target)
@@ -181,8 +210,7 @@ func (b Builder) setError(errs []error, msg any) {
 		var std = stderrs.Panic.
 			SetMessage(b.message).
 			EmbedErrors(errs...).
-			WithField("panic", msg).
-			WithField("uuid", b.uuid.String())
+			WithField("panic", msg)
 
 		if *b.stderr != nil {
 			std = std.EmbedErrors(*b.stderr)
@@ -202,34 +230,28 @@ func (b Builder) handle(
 	for _, handler := range _asyncHandlers {
 		wg.Add(1)
 
-		go func(handler Handler) {
+		go func(handler AsyncHandler) {
 			defer wg.Done()
 
-			b.use(ctx, msg, mu, errs, handler)
+			b.useAsync(ctx, msg, mu, errs, handler)
 		}(handler)
 	}
 
 	for _, handler := range b.asyncHandlers {
 		wg.Add(1)
 
-		go func(handler Handler) {
+		go func(handler AsyncHandler) {
 			defer wg.Done()
 
-			b.use(ctx, msg, mu, errs, handler)
+			b.useAsync(ctx, msg, mu, errs, handler)
 		}(handler)
 	}
 
-	wg.Add(1)
+	for _, handler := range _syncHandlers {
+		b.useSync(msg, mu, errs, handler)
+	}
 
-	go func() {
-		defer wg.Done()
-
-		for _, handler := range _syncHandlers {
-			b.use(ctx, msg, mu, errs, handler)
-		}
-
-		for _, handler := range b.syncHandlers {
-			b.use(ctx, msg, mu, errs, handler)
-		}
-	}()
+	for _, handler := range b.syncHandlers {
+		b.useSync(msg, mu, errs, handler)
+	}
 }
