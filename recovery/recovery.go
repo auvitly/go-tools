@@ -38,7 +38,14 @@ func WithAsyncHandlers(handlers ...AsyncHandler) Builder {
 }
 
 // Do - perform panic processing with context. Called exclusively via defer.
-func Do(ctx context.Context) {
+func Do() {
+	if msg := recover(); msg != nil {
+		_builder.recovery(context.Background(), msg)
+	}
+}
+
+// DoContext - perform panic processing with context. Called exclusively via defer.
+func DoContext(ctx context.Context) {
 	if msg := recover(); msg != nil {
 		_builder.recovery(ctx, msg)
 	}
