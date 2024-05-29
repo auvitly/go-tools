@@ -333,17 +333,17 @@ func fn(ctx context.Context) (err *stderrs.Error) {
 }
 
 func main() {
-	recovery.RegistryAsyncHandlers(globalAsyncPanicHandler)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	err := fn(ctx)
-	if err != nil {
-		slog.Error(err.Error())
-	}
-
-	time.Sleep(2 * time.Second)
+    recovery.RegistryAsyncHandlers(globalAsyncPanicHandler)
+    
+    ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+    defer cancel()
+    
+    err := fn(ctx)
+    if err != nil {
+        slog.Error(err.Error())
+    }
+    
+    time.Sleep(2 * time.Second)
 }
 ```
 
