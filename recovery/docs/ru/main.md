@@ -313,23 +313,23 @@ func main() {
 
 ```go
 func log(msg any) (err error) {
-	slog.Error("exception", "msg", msg)
-
-	return nil
+    slog.Error("exception", "msg", msg)
+    
+    return nil
 }
 
 func globalAsyncPanicHandler(any) {
-	defer recovery.WithoutHandlers().WithHandlers(log).Do()
-
-	time.Sleep(2 * time.Second)
-
-	panic("globalPanicHandler")
+    defer recovery.WithoutHandlers().WithHandlers(log).Do()
+    
+    time.Sleep(2 * time.Second)
+    
+    panic("globalPanicHandler")
 }
 
 func fn(ctx context.Context) (err *stderrs.Error) {
-	defer recovery.On(&err).DoContext(ctx)
-
-	panic("I'm the exception")
+    defer recovery.On(&err).DoContext(ctx)
+    
+    panic("I'm the exception")
 }
 
 func main() {
