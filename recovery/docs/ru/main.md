@@ -366,6 +366,7 @@ func main() {
 записей можно воспользоваться механизмом обработки исключений:
 
 ```go
+
 type modelDB struct {
 	String string
 	PtrInt *int
@@ -376,8 +377,18 @@ type modelAPI struct {
 	Int    int
 }
 
+func log(values ...any) func(any) {
+	return func(msg any) {
+		slog.Error("we obtain panic",
+			slog.Any("panic", msg),
+			slog.Any("stack", string(debug.Stack())),
+			slog.Any("values", values),
+		)
+	}
+}
+
 func convert(item modelDB) (result *modelAPI) {
-	defer recovery.Do()
+	defer recovery.WithAsyncHandlers(log(item)).Do()
 
 	return &modelAPI{
 		String: item.String,
@@ -412,7 +423,9 @@ func main() {
 
 Результат:
 ```
-2024/05/30 01:06:36 INFO Our results results="[{String:valid Int:0}]"
+2024/05/30 01:28:32 ERROR we obtain panic panic="runtime error: invalid memory address or nil pointer dereference" stack="goroutine 6 [running]:\nruntime/debug.Stack()\n\tC:/Program Files/Go/src/runtime/debug/stack.go:24 +0x5e\nmain.convert.log.func1({0xcf42e0?, 0xf7f800?})\n\tF:/Work/projects/git/auvitly/go-tools/examples/test/main.go:23 +0xbc\ngithub.com/auvitly/go-tools/recovery.Builder.useAsync({{0xfe8320, 0x0, 0x0}, {0xc000044058, 0x1, 0x1}, 0x0, 0x0, {0xd462c5, 0x2a}, ...}, ...)\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:175 +0x8d\ngithub.com/auvitly/go-tools/recovery.Builder.handle.func1(0x0?)\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:253 +0xc5\ncreated by github.com/auvitly/go-tools/recovery.Builder.handle in goroutine 1\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:250 +0xa7\n" values="[{String:not valid PtrInt:<nil>}]"
+2024/05/30 01:28:32 INFO Our results results="[{String:valid Int:0}]"
+
 ```
 
 #### 3.9 Прочие примеры
