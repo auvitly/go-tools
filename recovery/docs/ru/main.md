@@ -260,6 +260,8 @@ func main() {
 }
 ```
 
+Результат:
+
 ```text
 2024/05/29 22:04:13 ERROR fn error: enrichMyError error: I'm the error: I'm the exception
 ```
@@ -294,6 +296,8 @@ func main() {
     }
 }
 ```
+
+Результат:
 
 ```
 2024/05/30 00:19:15 ERROR {"code": "panic", "message": "internal server error: unhandled exception", "fields": {"panic":"I'm the exception"}, "embed": [{"code": "panic", "fields": {"panic":"Hello world!","stack":"goroutine 1 [running]:\nruntime/debug.Stack()\n\tC:/Program Files/Go/src/runtime/debug/stack.go:24 +0x5e\ngithub.com/auvitly/go-tools/recovery.Builder.useSync.func1()\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:125 +0x38a\npanic({0x113bd00?, 0x120c870?})\n\tC:/Program Files/Go/src/runtime/panic.go:914 +0x21f\nmain.globalPanicHandler({0x17c01f00108, 0x10})\n\tF:/Work/projects/git/auvitly/go-tools/examples/test/main.go:10 +0x25\ngithub.com/auvitly/go-tools/recovery.Builder.useSync({{0xc000044060, 0x1, 0x1}, {0x1447320, 0x0, 0x0}, 0x0, 0xc000044058, {0x11a4fad, 0x2a}, ...}, ...)\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:145 +0x77\ngithub.com/auvitly/go-tools/recovery.Builder.handle({{0xc000044060, 0x1, 0x1}, {0x1447320, 0x0, 0x0}, 0x0, 0xc000044058, {0x11a4fad, 0x2a}, ...}, ...)\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:265 +0x39c\ngithub.com/auvitly/go-tools/recovery.Builder.recovery({{0xc000044060, 0x1, 0x1}, {0x1447320, 0x0, 0x0}, 0x0, 0xc000044058, {0x11a4fad, 0x2a}, ...}, ...)\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:189 +0x110\ngithub.com/auvitly/go-tools/recovery.Builder.Do({{0xc000044060, 0x1, 0x1}, {0x1447320, 0x0, 0x0}, 0x0, 0xc000044058, {0x0, 0x0}, ...})\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:102 +0x6c\npanic({0x113bd00?, 0x120c880?})\n\tC:/Program Files/Go/src/runtime/panic.go:920 +0x270\nmain.fn()\n\tF:/Work/projects/git/auvitly/go-tools/examples/test/main.go:18 +0x405\nmain.main()\n\tF:/Work/projects/git/auvitly/go-tools/examples/test/main.go:24 +0x3fb\n"}}]}
@@ -421,6 +425,7 @@ func main() {
 ```
 
 Результат:
+
 ```
 2024/05/30 01:28:32 ERROR we obtain panic panic="runtime error: invalid memory address or nil pointer dereference" stack="goroutine 6 [running]:\nruntime/debug.Stack()\n\tC:/Program Files/Go/src/runtime/debug/stack.go:24 +0x5e\nmain.convert.log.func1({0xcf42e0?, 0xf7f800?})\n\tF:/Work/projects/git/auvitly/go-tools/examples/test/main.go:23 +0xbc\ngithub.com/auvitly/go-tools/recovery.Builder.useAsync({{0xfe8320, 0x0, 0x0}, {0xc000044058, 0x1, 0x1}, 0x0, 0x0, {0xd462c5, 0x2a}, ...}, ...)\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:175 +0x8d\ngithub.com/auvitly/go-tools/recovery.Builder.handle.func1(0x0?)\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:253 +0xc5\ncreated by github.com/auvitly/go-tools/recovery.Builder.handle in goroutine 1\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:250 +0xa7\n" values="[{String:not valid PtrInt:<nil>}]"
 2024/05/30 01:28:32 INFO Our results results="[{String:valid Int:0}]"
