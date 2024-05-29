@@ -50,7 +50,7 @@ func asyncTooLateHandler(ctx context.Context) func(_ any) {
 
 // asyncTooLatePanicHandler - panic exit handler, the time required to execute this method exceeds the context timeout.
 func asyncTooLatePanicHandler(_ any) {
-	defer recovery.WithoutHandlers().WithSyncHandlers(func(msg any) (err error) {
+	defer recovery.WithoutHandlers().WithHandlers(func(msg any) (err error) {
 		slog.Error("asyncTooLatePanicHandler: recovery", "msg", msg)
 
 		return nil
@@ -76,7 +76,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	recovery.RegistrySyncHandlers(
+	recovery.RegistryHandlers(
 		syncHandler(ctx),
 		syncPanicHandler,
 	)

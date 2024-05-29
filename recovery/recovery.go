@@ -30,9 +30,9 @@ func On(err **stderrs.Error) Builder {
 	return _builder.On(err)
 }
 
-// WithSyncHandlers - add sync exception handler.
-func WithSyncHandlers(handlers ...SyncHandler) Builder {
-	return _builder.WithSyncHandlers(handlers...)
+// WithHandlers - add sync exception handler.
+func WithHandlers(handlers ...Handler) Builder {
+	return _builder.WithHandlers(handlers...)
 }
 
 // WithAsyncHandlers - add async exception handler.
@@ -54,9 +54,9 @@ func DoContext(ctx context.Context) {
 	}
 }
 
-// RegistrySyncHandlers - add handlers for global execution.
-func RegistrySyncHandlers(handlers ...SyncHandler) {
-	_builder = _builder.WithSyncHandlers(handlers...)
+// RegistryHandlers - add handlers for global execution.
+func RegistryHandlers(handlers ...Handler) {
+	_builder = _builder.WithHandlers(handlers...)
 }
 
 // RegistryAsyncHandlers - add handlers for global async execution.

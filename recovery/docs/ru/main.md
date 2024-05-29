@@ -37,133 +37,234 @@ func main() {
 <a name="desc"></a>
 ### 2. Описание
 
-Основным методом для обработки исключений является метод `Do`, который перехватывает ошибку и 
-позволяет безопасно завершиться вызывающей функции. 
-```go
-func MyFunc(ctx context.Context) {
-    defer recovery.Do(ctx)
-    
-    panic("msg")	
-}
-```
+При работе с исключенями пакет предоставляет следующие возможности:
+* предотвратить исключение
+* обработать исключение как ошибку
+* выполнить действия на основе исключения
 
-Для управления поведением при возникновении исключения используется механизма конструктора `recovery.Builder`. 
-Пакет представляет целый набор методов для работы, поэтому ручной инициализации не требуется. 
+Для формирования обработчика исключения используется тип `recovery.Builder`, 
+который насыщается параметрами при помощи функций-конструкторов:
+* `On`, `OnError` - при возникновении исключения формирует *целевую ошибку* типа [`stderrs.Error`](./../../../stderrs/README.md) 
+и `stderrs.Panic` из стандартного набора ошибок, затем выполняет встраивание переданной ошибки, 
+если не равна `nil`. Различие между `On` и `OnError` заключается в типе принимаемой ошибки: `On` - `**stderrs.Error`, 
+`OnError` - `*error`. 
+* `SetMessage` - устанавливает поле Message для сформированной [стандартной ошибки](./../../../stderrs/README.md).
+* `WithHandlers` - позволяет установить обработчики исключения, которые должны типу `recovery.Handler`.
+* `WithAsyncHandlers` - позволяет установить асинхронные обработчики исключения, которые должны типу `recovery.AsyncHandler`.
+* `WithoutHandlers` - позволяет сбросить все установленные обработчики. Необходим, когда требуется исключить 
+использование глобальные обработчиков.
+* `Do`, `DoContext` - методы позволяют выполнить перехват исключения. **По умолчанию** учитывает зарегистрированные 
+глобальные обработчики, для отказа от глобальных обработчиков используйте метод `WithoutHandlers`.
 
-Для настройки обработчика паники используется:
-* `On` - метод позволяет выполнить обогащение [стандартной ошибки](./../../../stderrs/README.md) 
-при обработке исключения паникой. Исключает действие метода `OnError`.
-* `OnError` - метод позволяет выполнить обогащение паникой стандартного интерфейса `error`.
-Исключает действие метода `On`.
-* `SetMessage` - позволяет установить сообщение в [стандартную ошибку](./../../../stderrs/README.md) 
-при обнаружении паники.
-* `WithHandlers` - добавление пользовательских обработчиков исключения. 
-Обработчики запускаются синхронно с прочими синхронными обработчиками в отдельной **goroutine**.
-* `WithAsyncHandlers` - добавление пользовательских обработчиков исключения выполняемых асинхронно. 
-Каждый асинхронный обработчик запускается каждый в своей **goroutine**.
-
-Пользовательские обработчики должны удовлетворять сигнатуре:
-```go
-type Handler func(ctx context.Context, msg any)
-```
-
-<details>
-    <summary>Особенности работы с обработчиками</summary>
-
-> Пользовательские обработчики всегда запускаются **асинхронно**.
->
-> На каждую обработку паники всегда порождается 1 **goroutine** для выполнения синхронных обработчиков, 
-> а также N **goroutine** в соотствии с числом асинхронных обработчиков.
-> 
-> Пользовательские обработчики также могут паниковать. Пакет `recovery` реагирует на подобные сценарии 
-> следующим образом:
-> * Если обработчик завершится в период жизни контекста, информация об этом дополнит основную ошибку о событии паники;
-> * Если обработчик не завершиться за период жизни контекста, информация об этом будет залогирована 
-> при помощи стандартного пакетов `slog` уровнем логирования Error. 
-> 
-> Для определения взаимосвязи между паниками основного потока и пользовательских обработчиков добавляется 
-> уникальный `uuid`, который передается в `fields`:
-> 
-> Основная ошибка о панике:
-> ```
->{
->   "code": "panic",
->   "message": "internal server error: unhandled exception",
->   "fields": {
->       "panic":"I'm dropping the app now! Be afraid!",
->       "uuid":"179e3034-270e-48d3-9459-d83cf89545a8",
->   },
->   ...
->}
-> ```
-> 
-> Сообщение о панике в обработчике:
-> 
->```
->{
->   "code": "panic",
->   "fields": {
->       "panic":"tooLatePanic",
->       "uuid":"179e3034-270e-48d3-9459-d83cf89545a8",
->       "stack":"..."
->}
->```
->
-> Отметим, что ошибка обработчика всегда содержит стек вызовов. Основная ошибка стека не содержит.
-</details>
-
-
-
-Пример настройки пользовательского обработчика события со стандартной ошибкой:
-```go
-func log(ctx context.Context, msg any) error {
-    slog.ErrorContext(ctx, "we obtain panic: %v", msg)
-	
-	return nil
-}
-
-func DoSomething(ctx context.Context) (result any, err *stderrs.Error) {
-	defer recovery.SetMessage("Oh no!").WithHandlers(log).On(&err).Do(ctx)
-	
-	panic("message")
-}
-```
-
-При возникновении исключения будет вызвана функция `log`, затем будет сформирована ошибка, которая
-переопределит `err` стандартной ошибкой с сообщением `Oh no!`.
-
-> Отметим, что сначала выполняются обработчики, а затем уже формируется ошибка.
-> Это связано с тем, что пакет также учитывает исключения в самих обработчиках. 
-> И обогащает результирующую ошибку сообщениями паники.
-
-Если требуется установить ряд глобальных обработчиков, которые будет выполняться при использовании `Do`,
-то используются методы `RegistryHandlers` и `RegistryAsyncHandlers`:
-
-```go
-func main() {	
-    recovery.RegistryHandlers(func (ctx context.Context, msg any) error {
-        slog.ErrorContext(ctx, "we obtain panic", "message", msg)
-        
-        return nil
-    })
-	
-    ...
-}
-
-func MyFunc(ctx context.Context) {
-    defer recovery.Do(ctx)
-    
-    panic("msg")
-}
-```
-
-Благодаря объявлению в `main` обработчика, то при вызове функции `MyFunc` будет выводить 
-сообщение с паникой в лог:
-```
-[ERROR] we obtain panic message="msg"
-```
+Регистрация глобальных обработчиков реализуется методами:
+* `RegistryHandlers` - позволяет установить глобальные обработчики исключения, которые должны типу `recovery.Handler`.
+* `RegistryAsyncHandlers` - позволяет установить глобальные асинхронные обработчики исключения, которые должны типу `recovery.AsyncHandler`.
 
 <a name="example"></a>
 ### 3. Примеры использования
+
+#### 3.1 Предотвращение исключения
+
+Для предотвращения исключения достаточно просто добавить `defer recovery.Do()` в начало функции:
+
+```go
+func fn() {
+    defer recovery.Do()
+	
+    panic("I'm the exception")
+}
+
+func main() {
+    fn()
+	
+    slog.Info("Hello!")
+}
+```
+
+Результат:
+
+```text
+2024/05/29 21:14:58 INFO Hello!
+```
+
+#### 3.2 Предотвращение исключения с обработчиками
+
+Для реакции на исключение используется `WithHandlers` или `WithAsyncHandler`. 
+
+Пример с синхронным и асинхронными обработчиками:
+
+```go
+func asyncHandler(any) {
+    slog.Info("I'm an asynchronous processor")
+}
+
+func syncHandler(any) error {
+    slog.Info("I'm a synchronous processor")
+
+    return nil
+}
+
+func fn() {
+    defer recovery.
+        WithHandlers(syncHandler).
+        WithAsyncHandlers(asyncHandler).
+        Do()
+    
+    panic("I'm the exception")
+}
+
+func main() {
+    fn()
+}
+```
+
+Результат:
+
+```text
+2024/05/29 21:23:51 INFO I'm a synchronous processor  
+2024/05/29 21:23:51 INFO I'm an asynchronous processor
+```
+
+#### 3.2 Передача в обработчики специфических параметров
+
+Используя паттерн функций высшего порядка можно передавать в функцию обработчик необходимые данные, например
+контекст:
+
+```go
+func syncHandler(ctx context.Context) func(any) error {
+    return func(any) error {
+        slog.InfoContext(ctx, "I'm a synchronous processor")
+        
+        return nil
+    }
+}
+
+func fn(ctx context.Context) {
+    defer recovery.WithHandlers(syncHandler(ctx)).Do()
+    
+    panic("I'm the exception")
+}
+
+func main() {
+    fn(context.TODO())
+}
+```
+
+Результат:
+
+```text
+2024/05/29 21:23:51 INFO I'm a synchronous processor
+```
+
+> Отметим, что контекст передаваемый в метод `DoContext` позволяет ограничить время ожидаения асинхронных 
+> обработчиков, в отличии от метода `Do`, который ожидает окончания всех асинхронных обработчиков.
+
+#### 3.4 Обработка ошибок обработчиков
+
+Как следуюет из сингатуры `recovery.Handler`: синхронные обработчики возвращают ошибку. 
+Ошибки, которые возвращают обработчики, обогащают целевую ошибку. Обратимся к модели [стандартной ошибки](./../../../stderrs/README.md):
+```go
+// Error - unified model.
+type Error struct {
+	Code    string         `json:"code"`
+	Message string         `json:"message"`
+	Embed   error          `json:"embed"`
+	Wraps   []string       `json:"wraps"`
+	Fields  map[string]any `json:"fields"`
+	Codes   struct {
+		GRPC codes.Code `json:"grpc"`
+		HTTP int        `json:"http"`
+	} `json:"codes"`
+}
+```
+
+Стандартная ошибка обладает полем `Embed`, которое позволяет хранить все встраиваемые ошибки. Таким образом, 
+возвращаемая ошибка `stderrs.Panic` будет содержать встроенные ошибки, если синхронные обработчики их вернут.
+
+```go
+func syncHandler(any) error {
+    return errors.New("syncHandler error: I'm the error")
+}
+
+func fn(ctx context.Context) (err *stderrs.Error) {
+    defer recovery.WithHandlers(syncHandler).On(&err).Do()
+    
+    panic("I'm the exception")
+}
+
+func main() {
+    err := fn(context.TODO())
+    if err != nil {
+        slog.Error(err.Error())
+    }
+}
+```
+
+Результат:
+
+```text
+2024/05/29 21:47:21 ERROR {"code": "panic", "message": "internal server error: unhandled exception", "fields": {"panic":"I'm the exception"}}
+```
+
+#### 3.5 Обработка ошибок обработчиков для пользовательских типов ошибок
+
+Если вам требуется обогатить собственную имлементацию, то можно воспользоваться механзимом обработчиков и 
+механизмом функций высшего порядка:
+
+```go
+type MyError string
+
+func (e MyError) Error() string {
+    return string(e)
+}
+
+func NewMyError(msg string) *MyError {
+    return (*MyError)(&msg)
+}
+
+func enrichMyError(ptr **MyError) func(msg any) error {
+    return func(msg any) (err error) {
+        defer func() {
+            if err == nil {
+                return
+            }
+            
+            if *ptr == nil {
+                *ptr = new(MyError)
+            }
+            
+            **ptr = MyError(
+                fmt.Sprintf(
+                    "%s: %s: %s",
+                    **ptr, err.Error(), msg,
+                ),
+            )
+        }()
+        
+        return errors.New("enrichMyError error: I'm the error")
+    }
+}
+
+func fn() (err *MyError) {
+    defer recovery.WithHandlers(enrichMyError(&err)).Do()
+    
+    err = NewMyError("fn error")
+    
+    panic("I'm the exception")
+}
+
+func main() {
+    err := fn()
+    if err != nil {
+        slog.Error(err.Error())
+    }
+}
+```
+
+```text
+2024/05/29 22:04:13 ERROR fn error: enrichMyError error: I'm the error: I'm the exception
+```
+
+#### 3.6 Прочие примеры
 
 * Демонстрация механизма перехвата паники c пользовательскими обработчиками [[ссылка](../../../examples/relax/main.go)]

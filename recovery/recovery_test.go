@@ -63,7 +63,7 @@ func TestHandler(t *testing.T) {
 	)
 
 	func() {
-		defer recovery.WithSyncHandlers(
+		defer recovery.WithHandlers(
 			func(msg any) error {
 				actual = msg.(string)
 
@@ -88,7 +88,7 @@ func TestPanicInHandler(t *testing.T) {
 
 	func() {
 		defer recovery.
-			WithSyncHandlers(func(msg any) error {
+			WithHandlers(func(msg any) error {
 				panic(_panic)
 
 				return nil

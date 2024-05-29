@@ -8,15 +8,15 @@ import (
 	"sync"
 )
 
-// SyncHandler - sync user panic handler.
-type SyncHandler func(msg any) (err error)
+// Handler - sync user panic handler.
+type Handler func(msg any) (err error)
 
 // AsyncHandler - async user panic handler.
 type AsyncHandler func(msg any)
 
 // Builder - panic builder.
 type Builder struct {
-	syncHandlers  []SyncHandler
+	syncHandlers  []Handler
 	asyncHandlers []AsyncHandler
 	target        *error
 	stderr        **stderrs.Error
@@ -53,8 +53,8 @@ func (b Builder) On(err **stderrs.Error) Builder {
 	return dst
 }
 
-// WithSyncHandlers - add exception handler.
-func (b Builder) WithSyncHandlers(handlers ...SyncHandler) Builder {
+// WithHandlers - add exception handler.
+func (b Builder) WithHandlers(handlers ...Handler) Builder {
 	var dst = b.copy()
 
 	dst.syncHandlers = append(dst.syncHandlers, handlers...)
@@ -83,7 +83,7 @@ func (b Builder) WithoutHandlers() Builder {
 
 func (b Builder) copy() Builder {
 	var (
-		syncHandlers  = make([]SyncHandler, 0, len(b.syncHandlers))
+		syncHandlers  = make([]Handler, 0, len(b.syncHandlers))
 		asyncHandlers = make([]AsyncHandler, 0, len(b.asyncHandlers))
 	)
 
@@ -114,7 +114,7 @@ func (b Builder) useSync(
 	msg any,
 	mu *sync.Mutex,
 	errs *[]error,
-	handler SyncHandler,
+	handler Handler,
 ) {
 	var err error
 
@@ -174,7 +174,6 @@ func (b Builder) useAsync(
 func (b Builder) recovery(ctx context.Context, msg any) {
 	var (
 		errs []error
-		wg   sync.WaitGroup
 		mu   sync.Mutex
 		ch   = make(chan struct{})
 	)
@@ -183,12 +182,13 @@ func (b Builder) recovery(ctx context.Context, msg any) {
 		b.message = _message
 	}
 
-	b.handle(ctx, msg, &errs, &wg, &mu)
+	b.handle(ctx, msg, ch, &errs, &mu)
 
-	go func() {
-		wg.Wait()
-		ch <- struct{}{}
-	}()
+	if len(b.asyncHandlers) == 0 {
+		b.setError(errs, msg)
+
+		return
+	}
 
 	for {
 		select {
@@ -234,10 +234,12 @@ func (b Builder) setError(errs []error, msg any) {
 func (b Builder) handle(
 	ctx context.Context,
 	msg any,
+	ch chan struct{},
 	errs *[]error,
-	wg *sync.WaitGroup,
 	mu *sync.Mutex,
 ) {
+	var wg sync.WaitGroup
+
 	for _, handler := range b.asyncHandlers {
 		wg.Add(1)
 
@@ -246,6 +248,13 @@ func (b Builder) handle(
 
 			b.useAsync(ctx, msg, mu, errs, handler)
 		}(handler)
+	}
+
+	if len(b.asyncHandlers) != 0 {
+		go func() {
+			wg.Wait()
+			ch <- struct{}{}
+		}()
 	}
 
 	for _, handler := range b.syncHandlers {
