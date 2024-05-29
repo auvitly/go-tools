@@ -6,10 +6,8 @@ import (
 )
 
 var (
-	_builder       Builder
-	_syncHandlers  []SyncHandler
-	_asyncHandlers []AsyncHandler
-	_message       = "internal server error: unhandled exception"
+	_builder Builder
+	_message = "internal server error: unhandled exception"
 )
 
 // SetMessage - set message for standard error.
@@ -20,6 +18,11 @@ func SetMessage(message string) Builder {
 // OnError - perform error enrichment.
 func OnError(err *error) Builder {
 	return _builder.OnError(err)
+}
+
+// WithoutHandlers - allows you to reset all handlers for the selected call.
+func WithoutHandlers() Builder {
+	return _builder.WithoutHandlers()
 }
 
 // On - perform standard error enrichment.
@@ -53,10 +56,10 @@ func DoContext(ctx context.Context) {
 
 // RegistrySyncHandlers - add handlers for global execution.
 func RegistrySyncHandlers(handlers ...SyncHandler) {
-	_syncHandlers = append(_syncHandlers, handlers...)
+	_builder = _builder.WithSyncHandlers(handlers...)
 }
 
 // RegistryAsyncHandlers - add handlers for global async execution.
 func RegistryAsyncHandlers(handlers ...AsyncHandler) {
-	_asyncHandlers = append(_asyncHandlers, handlers...)
+	_builder = _builder.WithAsyncHandlers(handlers...)
 }

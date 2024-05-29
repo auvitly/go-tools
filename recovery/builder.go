@@ -21,6 +21,7 @@ type Builder struct {
 	target        *error
 	stderr        **stderrs.Error
 	message       string
+	global        bool
 }
 
 // SetMessage - set message for standard error.
@@ -66,6 +67,16 @@ func (b Builder) WithAsyncHandlers(handlers ...AsyncHandler) Builder {
 	var dst = b.copy()
 
 	dst.asyncHandlers = append(dst.asyncHandlers, handlers...)
+
+	return dst
+}
+
+// WithoutHandlers - allows you to reset all handlers for the selected call.
+func (b Builder) WithoutHandlers() Builder {
+	var dst = b.copy()
+
+	dst.asyncHandlers = nil
+	dst.syncHandlers = nil
 
 	return dst
 }
@@ -227,16 +238,6 @@ func (b Builder) handle(
 	wg *sync.WaitGroup,
 	mu *sync.Mutex,
 ) {
-	for _, handler := range _asyncHandlers {
-		wg.Add(1)
-
-		go func(handler AsyncHandler) {
-			defer wg.Done()
-
-			b.useAsync(ctx, msg, mu, errs, handler)
-		}(handler)
-	}
-
 	for _, handler := range b.asyncHandlers {
 		wg.Add(1)
 
@@ -245,10 +246,6 @@ func (b Builder) handle(
 
 			b.useAsync(ctx, msg, mu, errs, handler)
 		}(handler)
-	}
-
-	for _, handler := range _syncHandlers {
-		b.useSync(msg, mu, errs, handler)
 	}
 
 	for _, handler := range b.syncHandlers {

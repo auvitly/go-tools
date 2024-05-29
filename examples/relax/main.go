@@ -50,6 +50,12 @@ func asyncTooLateHandler(ctx context.Context) func(_ any) {
 
 // asyncTooLatePanicHandler - panic exit handler, the time required to execute this method exceeds the context timeout.
 func asyncTooLatePanicHandler(_ any) {
+	defer recovery.WithoutHandlers().WithSyncHandlers(func(msg any) (err error) {
+		slog.Error("asyncTooLatePanicHandler: recovery", "msg", msg)
+
+		return nil
+	}).Do()
+
 	time.Sleep(2 * time.Second)
 
 	panic("asyncTooLatePanicHandler")
@@ -86,7 +92,7 @@ func main() {
 		slog.ErrorContext(ctx, fmt.Sprintf("Panic did not overtake us! We received an error: %s", err))
 	}
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(10 * time.Second)
 }
 
 /* OUT:
@@ -155,6 +161,4 @@ func main() {
 	]
 }
 2024/05/28 23:04:33 INFO tooLate
-
-
 */
