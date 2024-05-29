@@ -185,14 +185,14 @@ func syncHandler(any) error {
     return errors.New("syncHandler error: I'm the error")
 }
 
-func fn(ctx context.Context) (err *stderrs.Error) {
+func fn() (err *stderrs.Error) {
     defer recovery.WithHandlers(syncHandler).On(&err).Do()
     
     panic("I'm the exception")
 }
 
 func main() {
-    err := fn(context.TODO())
+    err := fn()
     if err != nil {
         slog.Error(err.Error())
     }
@@ -264,6 +264,157 @@ func main() {
 2024/05/29 22:04:13 ERROR fn error: enrichMyError error: I'm the error: I'm the exception
 ```
 
-#### 3.6 Прочие примеры
+#### 3.6 Предотвращение исключений в пользовательских обработчиках
+
+Пользовательские обработки также могут содержать исключения. 
+Кажется идеей будет использовать пакет `recovery` даже там. 
+Это не требуется для синхронных обработчиков, так как будет 
+выполнен автоматический перехват сообщения об исключении и
+предоставлен стек вызов в обгащенную ошибку:
+
+```go
+func globalPanicHandler(any) (err error) {
+	panic("globalPanicHandler")
+
+	return nil
+}
+
+func fn() (err *stderrs.Error) {
+	defer recovery.On(&err).Do()
+
+	panic("I'm the exception")
+}
+
+func main() {
+	recovery.RegistryHandlers(globalPanicHandler)
+
+	err := fn()
+	if err != nil {
+		slog.Error(err.Error())
+	}
+}
+```
+
+```
+2024/05/30 00:19:15 ERROR {"code": "panic", "message": "internal server error: unhandled exception", "fields": {"panic":"I'm the exception"}, "embed": [{"code": "panic", "fields": {"panic":"Hello world!","stack":"goroutine 1 [running]:\nruntime/debug.Stack()\n\tC:/Program Files/Go/src/runtime/debug/stack.go:24 +0x5e\ngithub.com/auvitly/go-tools/recovery.Builder.useSync.func1()\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:125 +0x38a\npanic({0x113bd00?, 0x120c870?})\n\tC:/Program Files/Go/src/runtime/panic.go:914 +0x21f\nmain.globalPanicHandler({0x17c01f00108, 0x10})\n\tF:/Work/projects/git/auvitly/go-tools/examples/test/main.go:10 +0x25\ngithub.com/auvitly/go-tools/recovery.Builder.useSync({{0xc000044060, 0x1, 0x1}, {0x1447320, 0x0, 0x0}, 0x0, 0xc000044058, {0x11a4fad, 0x2a}, ...}, ...)\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:145 +0x77\ngithub.com/auvitly/go-tools/recovery.Builder.handle({{0xc000044060, 0x1, 0x1}, {0x1447320, 0x0, 0x0}, 0x0, 0xc000044058, {0x11a4fad, 0x2a}, ...}, ...)\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:265 +0x39c\ngithub.com/auvitly/go-tools/recovery.Builder.recovery({{0xc000044060, 0x1, 0x1}, {0x1447320, 0x0, 0x0}, 0x0, 0xc000044058, {0x11a4fad, 0x2a}, ...}, ...)\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:189 +0x110\ngithub.com/auvitly/go-tools/recovery.Builder.Do({{0xc000044060, 0x1, 0x1}, {0x1447320, 0x0, 0x0}, 0x0, 0xc000044058, {0x0, 0x0}, ...})\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:102 +0x6c\npanic({0x113bd00?, 0x120c880?})\n\tC:/Program Files/Go/src/runtime/panic.go:920 +0x270\nmain.fn()\n\tF:/Work/projects/git/auvitly/go-tools/examples/test/main.go:18 +0x405\nmain.main()\n\tF:/Work/projects/git/auvitly/go-tools/examples/test/main.go:24 +0x3fb\n"}}]}
+```
+
+#### 3.7 Предотвращение исключений в асинхронных пользовательских обработчиках
+
+Если обработчики запускаются через метод `Do`, то все исключения будут добавлены в **целевую ошибку**.
+
+Асинхронные обработчики могут завершиться исключение как за время действия контекста, переданного в `DoContext`,
+так и после окончания его времени жизни. Асинхронные обработчики могут быть и глобальными, а по скольку
+после времени жизни контекста ошибка не может быть получена, то нужен механизм обработки исключений и там.
+Возникает вопрос: если глобальный обработчик содержит исключение, то рекурсивный вызов обработчиков
+может привести к ошибке `stack overflow`. Для задач, когда необходимо обработать исключения без задействования
+глобальных обработчиков существует метод `WithoutHandlers`. При вызове этого метода, все глобальные обработчики
+будут убраны, после чего можно "пересобрать" обработчик исключения:
+
+```go
+func log(msg any) (err error) {
+	slog.Error("exception", "msg", msg)
+
+	return nil
+}
+
+func globalAsyncPanicHandler(any) {
+	defer recovery.WithoutHandlers().WithHandlers(log).Do()
+
+	time.Sleep(2 * time.Second)
+
+	panic("globalPanicHandler")
+}
+
+func fn(ctx context.Context) (err *stderrs.Error) {
+	defer recovery.On(&err).DoContext(ctx)
+
+	panic("I'm the exception")
+}
+
+func main() {
+	recovery.RegistryAsyncHandlers(globalAsyncPanicHandler)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	err := fn(ctx)
+	if err != nil {
+		slog.Error(err.Error())
+	}
+
+	time.Sleep(2 * time.Second)
+}
+```
+
+Результат:
+```
+2024/05/30 00:33:37 ERROR {"code": "panic", "message": "internal server error: unhandled exception", "fields": {"panic":"I'm the exception"}}
+2024/05/30 00:33:38 ERROR exception msg=globalPanicHandler
+```
+
+> Постарайтесь не допускать исключений в обработчиках исключений!
+
+#### 3.8 Перехват исключений как механизм защиты обработки данных
+
+Задача:
+
+Имеется выборка записей, малая часть которых (~1%) содержит неожиданное наполнение.
+При попытке конвертации модели из выборки в модель API, возникает исключение из-за 
+обращения к пустому указателю. Если выполнить базовый сценарий обработки, то 
+остальные (~99%) записей станут недоступны. Для обеспечения возврата всех валидных 
+записей можно воспользоваться менизмом обработки исключений:
+
+```go
+type modelDB struct {
+	String string
+	PtrInt *int
+}
+
+type modelAPI struct {
+	String string
+	Int    int
+}
+
+func convert(item modelDB) (result *modelAPI) {
+	defer recovery.Do()
+
+	return &modelAPI{
+		String: item.String,
+		Int:    *item.PtrInt,
+	}
+}
+
+func main() {
+	var (
+		records = []modelDB{
+			{
+				String: "valid",
+				PtrInt: new(int),
+			},
+			{
+				String: "not valid",
+				PtrInt: nil,
+			},
+		}
+		results []modelAPI
+	)
+
+	for _, record := range records {
+		if result := convert(record); result != nil {
+			results = append(results, *result)
+		}
+	}
+
+	slog.Info("Our results", "results", results)
+}
+```
+
+Результат:
+```
+2024/05/30 01:06:36 INFO Our results results="[{String:valid Int:0}]"
+```
+
+#### 3.9 Прочие примеры
 
 * Демонстрация механизма перехвата паники c пользовательскими обработчиками [[ссылка](../../../examples/relax/main.go)]
