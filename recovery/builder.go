@@ -119,23 +119,27 @@ func (b Builder) useSync(
 	var err error
 
 	defer func() {
-		var sub = recover()
+		if sub := recover(); sub != nil {
+			var std = stderrs.Panic.
+				WithField("panic", fmt.Sprintf("%s", sub)).
+				WithField("stack", string(debug.Stack()))
 
-		if sub == nil {
+			if err != nil {
+				std = std.EmbedErrors(err)
+			}
+
+			mu.Lock()
+			*errs = append(*errs, std)
+			mu.Unlock()
+
 			return
 		}
 
-		var std = stderrs.Panic.
-			WithField("panic", fmt.Sprintf("%s", sub)).
-			WithField("stack", string(debug.Stack()))
-
 		if err != nil {
-			std = std.EmbedErrors(err)
+			mu.Lock()
+			*errs = append(*errs, err)
+			mu.Unlock()
 		}
-
-		mu.Lock()
-		*errs = append(*errs, std)
-		mu.Unlock()
 	}()
 
 	err = handler(msg)

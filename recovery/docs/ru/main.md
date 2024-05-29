@@ -131,22 +131,21 @@ func main() {
 контекст:
 
 ```go
-func syncHandler(ctx context.Context) func(any) error {
-    return func(any) error {
-        slog.InfoContext(ctx, "I'm a synchronous processor")
-        
-        return nil
-    }
+func syncHandler(any) error {
+    return errors.New("syncHandler error: I'm the error")
 }
 
-func fn(ctx context.Context) {
-    defer recovery.WithHandlers(syncHandler(ctx)).Do()
+func fn() (err *stderrs.Error) {
+    defer recovery.WithHandlers(syncHandler).On(&err).Do()
     
     panic("I'm the exception")
 }
 
 func main() {
-    fn(context.TODO())
+    err := fn()
+    if err != nil {
+        slog.Error(err.Error())
+    }
 }
 ```
 
@@ -203,7 +202,7 @@ func main() {
 Результат:
 
 ```text
-2024/05/29 21:47:21 ERROR {"code": "panic", "message": "internal server error: unhandled exception", "fields": {"panic":"I'm the exception"}}
+2024/05/29 22:11:59 ERROR {"code": "panic", "message": "internal server error: unhandled exception", "fields": {"panic":"I'm the exception"}, "embed": ["syncHandler error: I'm the error"]}
 ```
 
 #### 3.5 Обработка ошибок обработчиков для пользовательских типов ошибок
