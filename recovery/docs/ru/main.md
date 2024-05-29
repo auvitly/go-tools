@@ -165,15 +165,15 @@ func main() {
 ```go
 // Error - unified model.
 type Error struct {
-	Code    string         `json:"code"`
-	Message string         `json:"message"`
-	Embed   error          `json:"embed"`
-	Wraps   []string       `json:"wraps"`
-	Fields  map[string]any `json:"fields"`
-	Codes   struct {
-		GRPC codes.Code `json:"grpc"`
-		HTTP int        `json:"http"`
-	} `json:"codes"`
+    Code    string         `json:"code"`
+    Message string         `json:"message"`
+    Embed   error          `json:"embed"`
+    Wraps   []string       `json:"wraps"`
+    Fields  map[string]any `json:"fields"`
+    Codes   struct {
+        GRPC codes.Code `json:"grpc"`
+        HTTP int        `json:"http"`
+    } `json:"codes"`
 }
 ```
 
@@ -274,24 +274,24 @@ func main() {
 
 ```go
 func globalPanicHandler(any) (err error) {
-	panic("globalPanicHandler")
-
-	return nil
+    panic("globalPanicHandler")
+    
+    return nil
 }
 
 func fn() (err *stderrs.Error) {
-	defer recovery.On(&err).Do()
-
-	panic("I'm the exception")
+    defer recovery.On(&err).Do()
+    
+    panic("I'm the exception")
 }
 
 func main() {
-	recovery.RegistryHandlers(globalPanicHandler)
-
-	err := fn()
-	if err != nil {
-		slog.Error(err.Error())
-	}
+    recovery.RegistryHandlers(globalPanicHandler)
+    
+    err := fn()
+    if err != nil {
+        slog.Error(err.Error())
+    }
 }
 ```
 
