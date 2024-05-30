@@ -6,7 +6,9 @@ import (
 )
 
 var (
-	_builder Builder
+	_builder = Builder{
+		message: _message,
+	}
 	_message = "internal server error: unhandled exception"
 )
 

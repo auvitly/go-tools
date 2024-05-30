@@ -178,15 +178,18 @@ func (b Builder) useAsync(
 func (b Builder) recovery(ctx context.Context, msg any) {
 	var (
 		errs []error
-		mu   sync.Mutex
-		ch   = make(chan struct{})
+		ch   chan struct{}
 	)
 
 	if len(b.message) == 0 {
 		b.message = _message
 	}
 
-	b.handle(ctx, msg, ch, &errs, &mu)
+	if len(b.asyncHandlers) != 0 || len(b.syncHandlers) != 0 {
+		ch = make(chan struct{})
+
+		b.handle(ctx, msg, ch, &errs)
+	}
 
 	if len(b.asyncHandlers) == 0 {
 		b.setError(errs, msg)
@@ -240,9 +243,9 @@ func (b Builder) handle(
 	msg any,
 	ch chan struct{},
 	errs *[]error,
-	mu *sync.Mutex,
 ) {
 	var wg sync.WaitGroup
+	var mu sync.Mutex
 
 	for _, handler := range b.asyncHandlers {
 		wg.Add(1)
@@ -250,7 +253,7 @@ func (b Builder) handle(
 		go func(handler AsyncHandler) {
 			defer wg.Done()
 
-			b.useAsync(ctx, msg, mu, errs, handler)
+			b.useAsync(ctx, msg, &mu, errs, handler)
 		}(handler)
 	}
 
@@ -262,6 +265,6 @@ func (b Builder) handle(
 	}
 
 	for _, handler := range b.syncHandlers {
-		b.useSync(msg, mu, errs, handler)
+		b.useSync(msg, &mu, errs, handler)
 	}
 }

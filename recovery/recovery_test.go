@@ -106,3 +106,31 @@ func TestPanicInHandler(t *testing.T) {
 	require.Equal(t, _message, err.Message)
 	require.Equal(t, _panic, std.Fields["panic"])
 }
+
+func BenchmarkDo(b *testing.B) {
+	var use = func() {
+		defer recovery.Do()
+
+		panic("")
+	}
+
+	for i := 0; i < b.N; i++ {
+		use()
+	}
+}
+
+func BenchmarkDefaultPanicHandler(b *testing.B) {
+	var use = func() {
+		defer func() {
+			if msg := recover(); msg != nil {
+				return
+			}
+		}()
+
+		panic("")
+	}
+
+	for i := 0; i < b.N; i++ {
+		use()
+	}
+}
