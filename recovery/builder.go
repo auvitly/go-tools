@@ -21,7 +21,7 @@ type Builder struct {
 	target        *error
 	stderr        **stderrs.Error
 	message       string
-	global        bool
+	enriched      bool
 }
 
 // SetMessage - set message for standard error.
@@ -93,6 +93,7 @@ func (b Builder) copy() Builder {
 		target:        b.target,
 		stderr:        b.stderr,
 		message:       b.message,
+		enriched:      true,
 	}
 }
 
@@ -176,6 +177,15 @@ func (b Builder) useAsync(
 }
 
 func (b Builder) recovery(ctx context.Context, msg any) {
+	switch {
+	case !b.enriched:
+		return
+	case (b.stderr != nil || b.target != nil) && len(b.asyncHandlers) == 0 && len(b.syncHandlers) == 0:
+		b.setError(nil, msg)
+
+		return
+	}
+
 	var (
 		errs []error
 		ch   chan struct{}
