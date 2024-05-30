@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/auvitly/go-tools/stderrs"
 	"runtime/debug"
+	"slices"
 	"sync"
 )
 
@@ -83,8 +84,8 @@ func (b Builder) WithoutHandlers() Builder {
 
 func (b Builder) copy() Builder {
 	return Builder{
-		syncHandlers:  b.syncHandlers[:],
-		asyncHandlers: b.asyncHandlers[:],
+		syncHandlers:  slices.Clone(b.syncHandlers),
+		asyncHandlers: slices.Clone(b.asyncHandlers),
 		target:        b.target,
 		stderr:        b.stderr,
 		message:       b.message,

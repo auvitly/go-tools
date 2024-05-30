@@ -63,3 +63,15 @@ func TestFrom(t *testing.T) {
 
 	require.True(t, std.Is(stderrs.Internal))
 }
+
+func TestFields(t *testing.T) {
+	var (
+		err1 = stderrs.Internal
+		err2 = err1.WithField("key", "value")
+	)
+
+	require.NotEqual(t, err1.Fields, err2.Fields)
+	require.Len(t, err1.Fields, 0)
+	require.Len(t, err2.Fields, 1)
+	require.NotNil(t, err2.Fields["key"])
+}

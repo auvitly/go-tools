@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/auvitly/go-tools/stderrs/internal/unwrap"
 	"google.golang.org/grpc/codes"
+	"maps"
 	"net/http"
 	"strings"
 )
@@ -151,18 +152,15 @@ func (e *Error) WithField(key string, value any) *Error {
 		return e
 	}
 
-	var (
-		result = *e
-		data   = make(map[string]any)
-	)
+	var result = *e
 
-	for k, v := range e.Fields {
-		data[k] = v
+	result.Fields = maps.Clone(e.Fields)
+
+	if result.Fields == nil {
+		result.Fields = make(map[string]any)
 	}
 
-	data[key] = value
-
-	result.Fields = data
+	result.Fields[key] = value
 
 	return &result
 }
@@ -177,18 +175,15 @@ func (e *Error) WithFieldIf(condition bool, key string, value any) *Error {
 		return e
 	}
 
-	var (
-		result = *e
-		data   = make(map[string]any)
-	)
+	var result = *e
 
-	for k, v := range e.Fields {
-		data[k] = v
+	result.Fields = maps.Clone(e.Fields)
+
+	if result.Fields == nil {
+		result.Fields = make(map[string]any)
 	}
 
-	data[key] = value
-
-	result.Fields = data
+	result.Fields[key] = value
 
 	return &result
 }
@@ -199,20 +194,15 @@ func (e *Error) WithFields(fields map[string]any) *Error {
 		return e
 	}
 
-	var (
-		result = *e
-		data   = make(map[string]any)
-	)
+	var result = *e
 
-	for k, v := range e.Fields {
-		data[k] = v
+	result.Fields = maps.Clone(e.Fields)
+
+	if result.Fields == nil {
+		result.Fields = make(map[string]any)
 	}
 
-	for k, v := range fields {
-		data[k] = v
-	}
-
-	result.Fields = data
+	maps.Copy(result.Fields, fields)
 
 	return &result
 }

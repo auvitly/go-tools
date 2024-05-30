@@ -144,12 +144,18 @@ func BenchmarkDoWithHandler(b *testing.B) {
 
 	var fns []recovery.Handler
 
-	for j := 0; j < 100; j++ {
+	for j := 0; j < 10; j++ {
 		fns = append(fns, fn)
 	}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		recovery.WithHandlers(fns...)
+		var err error
+
+		func() {
+			defer recovery.OnError(&err).WithHandlers(fns...).Do()
+
+			panic("")
+		}()
 	}
 }
