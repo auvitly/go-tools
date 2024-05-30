@@ -1,6 +1,8 @@
 package recovery_test
 
 import (
+	"errors"
+	"fmt"
 	"github.com/auvitly/go-tools/recovery"
 	"github.com/auvitly/go-tools/stderrs"
 	"github.com/stretchr/testify/require"
@@ -132,5 +134,22 @@ func BenchmarkDefaultPanicHandler(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		use()
+	}
+}
+
+func BenchmarkDoWithHandler(b *testing.B) {
+	var fn = func(msg any) error {
+		return errors.New(fmt.Sprintf("%s", msg))
+	}
+
+	var fns []recovery.Handler
+
+	for j := 0; j < 100; j++ {
+		fns = append(fns, fn)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		recovery.WithHandlers(fns...)
 	}
 }

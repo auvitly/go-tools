@@ -82,14 +82,9 @@ func (b Builder) WithoutHandlers() Builder {
 }
 
 func (b Builder) copy() Builder {
-	var (
-		syncHandlers  = make([]Handler, 0, len(b.syncHandlers))
-		asyncHandlers = make([]AsyncHandler, 0, len(b.asyncHandlers))
-	)
-
 	return Builder{
-		syncHandlers:  append(syncHandlers, b.syncHandlers...),
-		asyncHandlers: append(asyncHandlers, b.asyncHandlers...),
+		syncHandlers:  b.syncHandlers[:],
+		asyncHandlers: b.asyncHandlers[:],
 		target:        b.target,
 		stderr:        b.stderr,
 		message:       b.message,
@@ -113,7 +108,6 @@ func (b Builder) DoContext(ctx context.Context) {
 
 func (b Builder) useSync(
 	msg any,
-	mu *sync.Mutex,
 	errs *[]error,
 	handler Handler,
 ) {
@@ -129,17 +123,13 @@ func (b Builder) useSync(
 				std = std.EmbedErrors(err)
 			}
 
-			mu.Lock()
 			*errs = append(*errs, std)
-			mu.Unlock()
 
 			return
 		}
 
 		if err != nil {
-			mu.Lock()
 			*errs = append(*errs, err)
-			mu.Unlock()
 		}
 	}()
 
@@ -196,9 +186,7 @@ func (b Builder) recovery(ctx context.Context, msg any) {
 	}
 
 	if len(b.asyncHandlers) != 0 || len(b.syncHandlers) != 0 {
-		ch = make(chan struct{})
-
-		b.handle(ctx, msg, ch, &errs)
+		b.handle(ctx, msg, &ch, &errs)
 	}
 
 	if len(b.asyncHandlers) == 0 {
@@ -251,30 +239,36 @@ func (b Builder) setError(errs []error, msg any) {
 func (b Builder) handle(
 	ctx context.Context,
 	msg any,
-	ch chan struct{},
+	ch *chan struct{},
 	errs *[]error,
 ) {
-	var wg sync.WaitGroup
 	var mu sync.Mutex
 
-	for _, handler := range b.asyncHandlers {
-		wg.Add(1)
-
-		go func(handler AsyncHandler) {
-			defer wg.Done()
-
-			b.useAsync(ctx, msg, &mu, errs, handler)
-		}(handler)
-	}
-
 	if len(b.asyncHandlers) != 0 {
+		var wg sync.WaitGroup
+
+		*ch = make(chan struct{})
+
+		for _, handler := range b.asyncHandlers {
+			wg.Add(1)
+
+			go func(handler AsyncHandler) {
+				defer wg.Done()
+
+				b.useAsync(ctx, msg, &mu, errs, handler)
+			}(handler)
+		}
+
 		go func() {
 			wg.Wait()
-			ch <- struct{}{}
+			*ch <- struct{}{}
 		}()
 	}
 
+	mu.Lock()
+	defer mu.Unlock()
+
 	for _, handler := range b.syncHandlers {
-		b.useSync(msg, &mu, errs, handler)
+		b.useSync(msg, errs, handler)
 	}
 }
