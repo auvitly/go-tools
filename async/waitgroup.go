@@ -39,8 +39,15 @@ func (w *WaitGroup) WaitContext(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		default:
-			if wg.state.Load() == 0 {
-				return
+			if wg.state.Load() != 0 {
+				continue
+			}
+
+			d := w.done.Load()
+			if d == nil {
+				w.done.Store(_ch)
+			} else {
+				close(d.(chan struct{}))
 			}
 		}
 	}
