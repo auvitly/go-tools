@@ -109,3 +109,28 @@ func TestWaitGroup_WaitContext_Done(t *testing.T) {
 
 	require.Equal(t, d, 0)
 }
+
+func TestWaitGroup_WaitCh(t *testing.T) {
+	var (
+		d      int
+		result = 1000
+		use    = func() {}
+		wg     async.WaitGroup
+	)
+
+	for i := 0; i < result; i++ {
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+
+			time.Sleep(time.Second)
+
+			use()
+		}()
+	}
+
+	<-wg.WaitCh()
+
+	require.NotEqual(t, d, result)
+}

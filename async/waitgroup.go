@@ -7,9 +7,20 @@ import (
 	"unsafe"
 )
 
+var (
+	_ch = make(chan struct{})
+)
+
+func init() {
+	close(_ch)
+}
+
 // WaitGroup adapter over sync.WaitGroup that allows you to complete the wait by context.
 type WaitGroup struct {
+	mu   sync.Mutex
+	done atomic.Value
 	sync.WaitGroup
+	goroutine bool
 }
 
 // _WaitGroup - internal implementation.
@@ -33,4 +44,47 @@ func (w *WaitGroup) WaitContext(ctx context.Context) {
 			}
 		}
 	}
+}
+
+func (w *WaitGroup) WaitCh() <-chan struct{} {
+	if !w.goroutine {
+		w.waitGoroutine()
+	}
+
+	d := w.done.Load()
+	if d != nil {
+		return d.(chan struct{})
+	}
+
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	d = w.done.Load()
+	if d == nil {
+		d = make(chan struct{})
+		w.done.Store(d)
+	}
+
+	return d.(chan struct{})
+}
+
+func (w *WaitGroup) waitGoroutine() {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	go func() {
+		w.Wait()
+
+		w.mu.Lock()
+		defer w.mu.Unlock()
+
+		d := w.done.Load()
+		if d == nil {
+			w.done.Store(_ch)
+		} else {
+			close(d.(chan struct{}))
+		}
+	}()
+
+	w.goroutine = true
 }
