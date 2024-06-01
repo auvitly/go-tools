@@ -17,7 +17,7 @@ type WaitGroup struct {
 	mu   sync.Mutex
 	done atomic.Value
 	sync.WaitGroup
-	goroutine bool
+	fn sync.Once
 }
 
 // WaitContext blocks until the WaitGroup counter is zero or context done.
@@ -34,9 +34,7 @@ func (w *WaitGroup) WaitContext(ctx context.Context) {
 
 // WaitDone returns a channel that is closed when the wait is complete.
 func (w *WaitGroup) WaitDone() <-chan struct{} {
-	if !w.goroutine {
-		w.waitGoroutine()
-	}
+	w.fn.Do(w.waitGoroutine)
 
 	d := w.done.Load()
 	if d != nil {
@@ -72,6 +70,4 @@ func (w *WaitGroup) waitGoroutine() {
 			close(d.(chan struct{}))
 		}
 	}()
-
-	w.goroutine = true
 }
