@@ -3,6 +3,7 @@ package async_test
 import (
 	"context"
 	"github.com/auvitly/go-tools/async"
+	"github.com/auvitly/go-tools/stderrs"
 	"github.com/stretchr/testify/require"
 	"sync"
 	"testing"
@@ -105,6 +106,7 @@ func TestWaitGroup_WaitContext_Done(t *testing.T) {
 
 	var err = wg.WaitContext(ctx)
 	require.ErrorIs(t, err, context.DeadlineExceeded)
+	require.ErrorIs(t, err, stderrs.DeadlineExceeded)
 	require.Equal(t, d, 0)
 }
 
