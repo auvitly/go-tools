@@ -109,7 +109,7 @@ func TestAsyncWaitGroup_WaitContextDone(t *testing.T) {
 	require.Equal(t, d, 0)
 }
 
-func TestWaitGroup_WaitContextEdge(t *testing.T) {
+func TestAsyncWaitGroup_WaitContextEdge(t *testing.T) {
 	var (
 		d      int
 		result = 10
