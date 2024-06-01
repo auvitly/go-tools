@@ -1,7 +1,14 @@
+<h4> 
+    <a href="./../../../README.md" align="center"> github.com/auvitly/go-tools </a> 
+    > 
+    <a href="./../../README.md" align="center"> async </a>
+    >
+    ru
+</h4>
+ 
+<a name="tools"></a>
 ### Инструментарий
 
 Пакет `async` предоставляет следующий набор инструментов:
 
-* `WaitGroup` - адаптер над `sync.WaitGroup`. Имеет дополнительные методы:
-  * `WaitContext` - блокируется до тех пор, пока счетчик WaitGroup не станет нулевым или пока не будет завершен контекст;
-  * `WaitCh` - возвращает канал, который будет закрыт когда счетчик WaitGroup не станет нулевым.
+* `WaitGroup` - адаптер над [`sync.WaitGroup`](https://pkg.go.dev/sync#WaitGroup) с дополнительными методами. 
