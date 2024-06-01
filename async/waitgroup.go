@@ -16,8 +16,8 @@ func init() {
 type WaitGroup struct {
 	mu   sync.Mutex
 	done atomic.Value
+	fn   sync.Once
 	sync.WaitGroup
-	fn sync.Once
 }
 
 // WaitContext blocks until the WaitGroup counter is zero or context done.
