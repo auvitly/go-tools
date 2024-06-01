@@ -103,7 +103,8 @@ func TestWaitGroup_WaitContext_Done(t *testing.T) {
 		}()
 	}
 
-	require.Error(t, wg.WaitContext(ctx))
+	var err = wg.WaitContext(ctx)
+	require.ErrorIs(t, err, context.DeadlineExceeded)
 	require.Equal(t, d, 0)
 }
 
