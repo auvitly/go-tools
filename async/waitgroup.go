@@ -2,6 +2,7 @@ package async
 
 import (
 	"context"
+	"github.com/auvitly/go-tools/stderrs"
 	"sync"
 	"sync/atomic"
 )
@@ -19,7 +20,7 @@ func (w *WaitGroup) WaitContext(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
-			return ctx.Err()
+			return stderrs.DeadlineExceeded.EmbedErrors(ctx.Err())
 		case <-w.WaitDone():
 			return nil
 		}
