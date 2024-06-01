@@ -13,5 +13,4 @@ Package `stderrs` provides a unified model for working with errors.
 
 ## Documentation
 
-* [English - EN](docs/en/main.md)
 * [Русский - RU](docs/ru/main.md)

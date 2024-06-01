@@ -10,6 +10,7 @@
 Tools that should help organize routine tasks and improve code quality. Contains:
 * [`stderrs`](stderrs/README.md)- error unification
 * [`recovery`](recovery/README.md) - exception handling
+* [`async`](async/README.md) - expansion of standard synchronization solutions
 
 --- 
 
