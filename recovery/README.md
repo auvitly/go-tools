@@ -14,3 +14,4 @@ Package `recovery` provides methods for handling panic.
 ## Documentation
 
 * [Русский - RU](docs/ru/main.md)
+* [English - EN](docs/en/main.md)
