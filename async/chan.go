@@ -1,9 +1,7 @@
 package async
 
-var _ch = makeClosedChan[struct{}]
-
-func makeClosedChan[T any]() chan T {
-	var ch = make(chan T)
+var _ch = func() chan struct{} {
+	var ch = make(chan struct{})
 
 	close(ch)
 
