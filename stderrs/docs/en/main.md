@@ -48,7 +48,7 @@ The following problems can be identified:
   error about service unavailability, developer comprehensive description of where it occurred
   problems, and the service is an action to roll back an unsuccessful transaction.
 > Exception handling is handled by the `recovery` package from the `go-tools` set.
-> You can view the `recovery` package at [link](./../../../recovery/README.md).
+> You can view `recovery` package at [link](./../../../recovery/README.md).
 
 <a name="desc"></a>
 ### 2. Description
