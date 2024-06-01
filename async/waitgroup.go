@@ -4,7 +4,6 @@ import (
 	"context"
 	"sync"
 	"sync/atomic"
-	"unsafe"
 )
 
 var _ch = make(chan struct{})
@@ -21,32 +20,14 @@ type WaitGroup struct {
 	goroutine bool
 }
 
-// _WaitGroup - internal implementation.
-type _WaitGroup struct {
-	_     struct{}
-	state atomic.Uint64
-	_     uint32
-}
-
 // WaitContext blocks until the WaitGroup counter is zero or context done.
 func (w *WaitGroup) WaitContext(ctx context.Context) {
-	wg := (*_WaitGroup)(unsafe.Pointer(w))
-
 	for {
 		select {
 		case <-ctx.Done():
 			return
-		default:
-			if wg.state.Load() != 0 {
-				continue
-			}
-
-			d := w.done.Load()
-			if d == nil {
-				w.done.Store(_ch)
-			} else {
-				close(d.(chan struct{}))
-			}
+		case <-w.WaitDone():
+			return
 		}
 	}
 }
