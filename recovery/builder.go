@@ -3,6 +3,7 @@ package recovery
 import (
 	"context"
 	"fmt"
+	"github.com/auvitly/go-tools/async"
 	"github.com/auvitly/go-tools/stderrs"
 	"runtime/debug"
 	"slices"
@@ -179,7 +180,7 @@ func (b Builder) recovery(ctx context.Context, msg any) {
 
 	var (
 		errs []error
-		ch   chan struct{}
+		ch   <-chan struct{}
 	)
 
 	if len(b.message) == 0 {
@@ -240,15 +241,13 @@ func (b Builder) setError(errs []error, msg any) {
 func (b Builder) handle(
 	ctx context.Context,
 	msg any,
-	ch *chan struct{},
+	ch *<-chan struct{},
 	errs *[]error,
 ) {
 	var mu sync.Mutex
 
 	if len(b.asyncHandlers) != 0 {
-		var wg sync.WaitGroup
-
-		*ch = make(chan struct{})
+		var wg async.WaitGroup
 
 		for _, handler := range b.asyncHandlers {
 			wg.Add(1)
@@ -260,10 +259,7 @@ func (b Builder) handle(
 			}(handler)
 		}
 
-		go func() {
-			wg.Wait()
-			*ch <- struct{}{}
-		}()
+		*ch = wg.WaitCh()
 	}
 
 	mu.Lock()
