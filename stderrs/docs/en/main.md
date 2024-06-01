@@ -6,7 +6,7 @@
     en
 </h4>
 
-## Оглавление
+## Chapters
 1. [Formulation of the problem](#problem)
 2. [Description](#desc)
 
