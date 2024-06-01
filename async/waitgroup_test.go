@@ -35,8 +35,7 @@ func TestWaitGroup_WaitContext(t *testing.T) {
 		}()
 	}
 
-	wg.WaitContext(ctx)
-
+	require.NoError(t, wg.WaitContext(ctx))
 	require.Equal(t, d, result)
 }
 
@@ -70,8 +69,7 @@ func TestWaitGroup_WaitContext_Edge(t *testing.T) {
 		}()
 	}
 
-	wg.WaitContext(ctx)
-
+	require.Error(t, wg.WaitContext(ctx))
 	require.NotEqual(t, d, result)
 }
 
@@ -105,8 +103,7 @@ func TestWaitGroup_WaitContext_Done(t *testing.T) {
 		}()
 	}
 
-	wg.WaitContext(ctx)
-
+	require.Error(t, wg.WaitContext(ctx))
 	require.Equal(t, d, 0)
 }
 

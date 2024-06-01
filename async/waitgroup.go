@@ -21,13 +21,13 @@ type WaitGroup struct {
 }
 
 // WaitContext blocks until the WaitGroup counter is zero or context done.
-func (w *WaitGroup) WaitContext(ctx context.Context) {
+func (w *WaitGroup) WaitContext(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
-			return
+			return ctx.Err()
 		case <-w.WaitDone():
-			return
+			return nil
 		}
 	}
 }
