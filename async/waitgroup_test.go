@@ -130,7 +130,7 @@ func TestWaitGroup_WaitCh(t *testing.T) {
 		}()
 	}
 
-	<-wg.WaitCh()
+	<-wg.WaitDone()
 
 	require.NotEqual(t, d, result)
 }
