@@ -54,9 +54,6 @@ func (w *WaitGroup) WaitDone() <-chan struct{} {
 }
 
 func (w *WaitGroup) waitGoroutine() {
-	w.mu.Lock()
-	defer w.mu.Unlock()
-
 	go func() {
 		w.Wait()
 
