@@ -46,8 +46,8 @@ func (w *WaitGroup) WaitContext(ctx context.Context) {
 	}
 }
 
-// WaitCh returns a channel that is closed when the wait is complete.
-func (w *WaitGroup) WaitCh() <-chan struct{} {
+// WaitDone returns a channel that is closed when the wait is complete.
+func (w *WaitGroup) WaitDone() <-chan struct{} {
 	if !w.goroutine {
 		w.waitGoroutine()
 	}
