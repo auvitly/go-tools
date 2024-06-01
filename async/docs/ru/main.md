@@ -11,4 +11,4 @@
 
 Пакет `async` предоставляет следующий набор инструментов:
 
-* `WaitGroup` - адаптер над [`sync.WaitGroup`](https://pkg.go.dev/sync#WaitGroup) с дополнительными методами. 
+* [`WaitGroup`](waitgroup.md) - адаптер над [`sync.WaitGroup`](https://pkg.go.dev/sync#WaitGroup) с дополнительными методами. 
