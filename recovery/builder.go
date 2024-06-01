@@ -111,6 +111,7 @@ func (b Builder) DoContext(ctx context.Context) {
 func (b Builder) useSync(
 	msg any,
 	errs *[]error,
+	mu *sync.Mutex,
 	handler Handler,
 ) {
 	var err error
@@ -125,12 +126,18 @@ func (b Builder) useSync(
 				std = std.EmbedErrors(err)
 			}
 
+			mu.Lock()
+			defer mu.Unlock()
+
 			*errs = append(*errs, std)
 
 			return
 		}
 
 		if err != nil {
+			mu.Lock()
+			defer mu.Unlock()
+
 			*errs = append(*errs, err)
 		}
 	}()
@@ -262,10 +269,7 @@ func (b Builder) handle(
 		*ch = wg.WaitDone()
 	}
 
-	mu.Lock()
-	defer mu.Unlock()
-
 	for _, handler := range b.syncHandlers {
-		b.useSync(msg, errs, handler)
+		b.useSync(msg, errs, &mu, handler)
 	}
 }
