@@ -259,7 +259,7 @@ func (b Builder) handle(
 			}(handler)
 		}
 
-		*ch = wg.WaitCh()
+		*ch = wg.WaitDone()
 	}
 
 	mu.Lock()
