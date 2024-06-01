@@ -10,7 +10,7 @@ import (
 	"sync"
 )
 
-// Handler - sync user panic handler.
+// Handler - user panic handler.
 type Handler func(msg any) (err error)
 
 // AsyncHandler - async user panic handler.
