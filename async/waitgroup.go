@@ -21,11 +21,14 @@ func (w *WaitGroup) WaitContext(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
-			if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+			switch {
+			case errors.Is(ctx.Err(), context.DeadlineExceeded):
 				return stderrs.DeadlineExceeded.EmbedErrors(ctx.Err())
+			case errors.Is(ctx.Err(), context.Canceled):
+				return stderrs.Canceled.EmbedErrors(ctx.Err())
+			default:
+				return stderrs.Internal.EmbedErrors(ctx.Err())
 			}
-
-			return stderrs.Canceled.EmbedErrors(ctx.Err())
 		case <-w.WaitDone():
 			return nil
 		}
