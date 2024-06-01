@@ -6,12 +6,6 @@ import (
 	"sync/atomic"
 )
 
-var _ch = make(chan struct{})
-
-func init() {
-	close(_ch)
-}
-
 // WaitGroup adapter over sync.WaitGroup that allows you to complete the wait by context.
 type WaitGroup struct {
 	mu   sync.Mutex
