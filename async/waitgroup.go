@@ -10,7 +10,7 @@ import (
 type WaitGroup struct {
 	mu   sync.Mutex
 	done atomic.Value
-	fn   sync.Once
+	once sync.Once
 	sync.WaitGroup
 }
 
@@ -28,7 +28,7 @@ func (w *WaitGroup) WaitContext(ctx context.Context) error {
 
 // WaitDone returns a channel that is closed when the wait is complete.
 func (w *WaitGroup) WaitDone() <-chan struct{} {
-	w.fn.Do(w.waitGoroutine)
+	w.once.Do(w.waitGoroutines)
 
 	d := w.done.Load()
 	if d != nil {
@@ -47,7 +47,7 @@ func (w *WaitGroup) WaitDone() <-chan struct{} {
 	return d.(chan struct{})
 }
 
-func (w *WaitGroup) waitGoroutine() {
+func (w *WaitGroup) waitGoroutines() {
 	go func() {
 		w.Wait()
 
