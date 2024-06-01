@@ -7,7 +7,7 @@ import (
 	"unsafe"
 )
 
-// WaitGroup a simpler implementation of sync.WaitGroup that allows you to complete the wait by context.
+// WaitGroup adapter over sync.WaitGroup that allows you to complete the wait by context.
 type WaitGroup struct {
 	sync.WaitGroup
 }
