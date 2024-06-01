@@ -7,9 +7,7 @@ import (
 	"unsafe"
 )
 
-var (
-	_ch = make(chan struct{})
-)
+var _ch = make(chan struct{})
 
 func init() {
 	close(_ch)
