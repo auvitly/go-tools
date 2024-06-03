@@ -1,6 +1,6 @@
 module github.com/auvitly/go-tools/stderrs
 
-go 1.21.3
+go 1.21
 
 require (
 	github.com/stretchr/testify v1.9.0
