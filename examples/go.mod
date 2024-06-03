@@ -1,3 +1,3 @@
 module github.com/auvitly/go-tools/examples
 
-go 1.21.3
+go 1.21
