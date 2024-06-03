@@ -1,13 +1,10 @@
 package recovery
 
 import (
-	"context"
 	"fmt"
-	"github.com/auvitly/go-tools/async"
 	"github.com/auvitly/go-tools/stderrs"
 	"runtime/debug"
 	"slices"
-	"sync"
 )
 
 // Handler - user panic handler.
@@ -97,21 +94,13 @@ func (b Builder) copy() Builder {
 // Do - perform panic processing with context. Called exclusively via defer.
 func (b Builder) Do() {
 	if msg := recover(); msg != nil {
-		b.recovery(context.Background(), msg)
-	}
-}
-
-// DoContext - perform panic processing with context. Called exclusively via defer.
-func (b Builder) DoContext(ctx context.Context) {
-	if msg := recover(); msg != nil {
-		b.recovery(ctx, msg)
+		b.recovery(msg)
 	}
 }
 
 func (b Builder) useSync(
 	msg any,
 	errs *[]error,
-	mu *sync.Mutex,
 	handler Handler,
 ) {
 	var err error
@@ -126,18 +115,12 @@ func (b Builder) useSync(
 				std = std.EmbedErrors(err)
 			}
 
-			mu.Lock()
-			defer mu.Unlock()
-
 			*errs = append(*errs, std)
 
 			return
 		}
 
 		if err != nil {
-			mu.Lock()
-			defer mu.Unlock()
-
 			*errs = append(*errs, err)
 		}
 	}()
@@ -145,37 +128,7 @@ func (b Builder) useSync(
 	err = handler(msg)
 }
 
-func (b Builder) useAsync(
-	ctx context.Context,
-	msg any,
-	mu *sync.Mutex,
-	errs *[]error,
-	handler AsyncHandler,
-) {
-	defer func() {
-		var sub = recover()
-
-		if sub == nil {
-			return
-		}
-
-		var std = stderrs.Panic.
-			WithField("panic", fmt.Sprintf("%s", sub)).
-			WithField("stack", string(debug.Stack()))
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			mu.Lock()
-			*errs = append(*errs, std)
-			mu.Unlock()
-		}
-	}()
-
-	handler(msg)
-}
-
-func (b Builder) recovery(ctx context.Context, msg any) {
+func (b Builder) recovery(msg any) {
 	switch {
 	case !b.enriched:
 		return
@@ -185,37 +138,27 @@ func (b Builder) recovery(ctx context.Context, msg any) {
 		return
 	}
 
-	var (
-		errs []error
-		ch   <-chan struct{}
-	)
+	var errs []error
 
 	if len(b.message) == 0 {
 		b.message = _message
 	}
 
-	if len(b.asyncHandlers) != 0 || len(b.syncHandlers) != 0 {
-		b.handle(ctx, msg, &ch, &errs)
-	}
-
-	if len(b.asyncHandlers) == 0 {
-		b.setError(errs, msg)
-
-		return
-	}
-
-	for {
-		select {
-		case <-ctx.Done():
-			b.setError(errs, msg)
-
-			return
-		case <-ch:
-			b.setError(errs, msg)
-
-			return
+	if len(b.asyncHandlers) != 0 {
+		for _, handler := range b.asyncHandlers {
+			go handler(msg)
 		}
 	}
+
+	if len(b.syncHandlers) != 0 {
+		for _, handler := range b.syncHandlers {
+			b.useSync(msg, &errs, handler)
+		}
+	}
+
+	b.setError(errs, msg)
+
+	return
 }
 
 func (b Builder) setError(errs []error, msg any) {
@@ -246,30 +189,8 @@ func (b Builder) setError(errs []error, msg any) {
 }
 
 func (b Builder) handle(
-	ctx context.Context,
 	msg any,
-	ch *<-chan struct{},
 	errs *[]error,
 ) {
-	var mu sync.Mutex
 
-	if len(b.asyncHandlers) != 0 {
-		var wg async.WaitGroup
-
-		for _, handler := range b.asyncHandlers {
-			wg.Add(1)
-
-			go func(handler AsyncHandler) {
-				defer wg.Done()
-
-				b.useAsync(ctx, msg, &mu, errs, handler)
-			}(handler)
-		}
-
-		*ch = wg.WaitDone()
-	}
-
-	for _, handler := range b.syncHandlers {
-		b.useSync(msg, errs, &mu, handler)
-	}
 }
