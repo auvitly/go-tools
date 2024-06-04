@@ -26,7 +26,7 @@ func TestOnError(t *testing.T) {
 	var err = fs.ErrExist
 
 	func() {
-		defer recovery.OnError(&err).Do()
+		defer recovery.WithField("key", "value").OnError(&err).Do()
 
 		panic("panic: message")
 	}()
@@ -35,6 +35,7 @@ func TestOnError(t *testing.T) {
 	require.True(t, ok)
 	require.True(t, std.Is(stderrs.Panic))
 	require.True(t, std.Is(fs.ErrExist))
+	require.Equal(t, std.Fields["key"], "value")
 }
 
 func TestOn(t *testing.T) {
