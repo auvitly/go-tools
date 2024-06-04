@@ -58,7 +58,7 @@ func main() {
 `OnError` - `*error`. 
 * `SetMessage` - устанавливает поле Message для сформированной [стандартной ошибки](./../../../stderrs/README.md).
 * `WithField`, `WithFieldIf`, `WithFields`, `WithFieldsIf` - методы добавления полей для целевой 
-[стандартной ошибки](./../../../stderrs/README.md). Суффикс `If` позволяет установить условие добавления ключа.
+[стандартной ошибки](./../../../stderrs/README.md). Суффикс `If` позволяет установить условие добавления.
 * `WithHandlers`, `WithHandlersIf` - позволяет установить обработчики исключения, которые должны типу `recovery.Handler`.
 * `WithAsyncHandlers`, `WithAsyncHandlersIf` - позволяет установить асинхронные обработчики исключения, которые должны типу `recovery.AsyncHandler`.
 * `WithoutHandlers` - позволяет сбросить все установленные обработчики. Необходим, когда требуется исключить 
