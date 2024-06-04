@@ -5,19 +5,26 @@ import (
 	"net/http"
 )
 
+const (
+	msgInternal = "internal server error"
+)
+
 var (
 	// Undefined - unspecified error.
 	Undefined = New("").
+			SetMessage(msgInternal).
 			SetGRPCCode(codes.Internal).
 			SetHTTPCode(http.StatusInternalServerError)
 
 	// Panic - unhandled exception.
 	Panic = New("panic").
+		SetMessage(msgInternal).
 		SetGRPCCode(codes.Internal).
 		SetHTTPCode(http.StatusInternalServerError)
 
 	// Canceled - indicates the operation was canceled (typically by the caller).
 	Canceled = New("canceled").
+			SetMessage("operation was canceled").
 			SetGRPCCode(codes.Canceled).
 			SetHTTPCode(499)
 
@@ -27,7 +34,7 @@ var (
 	// errors raised by APIs that do not return enough error information
 	// may be converted to this error.
 	Unknown = New("unknown").
-		SetMessage("internal server error").
+		SetMessage(msgInternal).
 		SetGRPCCode(codes.Unknown).
 		SetHTTPCode(http.StatusInternalServerError)
 
@@ -36,6 +43,7 @@ var (
 	// that are problematic regardless of the state of the system
 	// (e.g., a malformed file name).
 	InvalidArgument = New("invalid_argument").
+			SetMessage("bad request").
 			SetGRPCCode(codes.InvalidArgument).
 			SetHTTPCode(http.StatusBadRequest)
 
@@ -45,18 +53,21 @@ var (
 	// example, a successful response from a server could have been delayed
 	// long enough for the deadline to expire.
 	DeadlineExceeded = New("deadline_exceeded").
+				SetMessage("operation expired before completion").
 				SetGRPCCode(codes.DeadlineExceeded).
 				SetHTTPCode(http.StatusBadGateway)
 
 	// NotFound means some requested entity (e.g., file or directory) was
 	// not found.
 	NotFound = New("not_found").
+			SetMessage("requested entity was not found").
 			SetGRPCCode(codes.NotFound).
 			SetHTTPCode(http.StatusNotFound)
 
 	// AlreadyExists means an attempt to create an entity failed because one
 	// already exists.
 	AlreadyExists = New("already_exists").
+			SetMessage("entity already exists").
 			SetGRPCCode(codes.AlreadyExists).
 			SetHTTPCode(http.StatusConflict)
 
@@ -67,12 +78,14 @@ var (
 	// used if the caller cannot be identified (use Unauthenticated
 	// instead for those errors).
 	PermissionDenied = New("permission_denied").
+				SetMessage("caller does not have permission to execute the specified operation").
 				SetGRPCCode(codes.PermissionDenied).
 				SetHTTPCode(http.StatusForbidden)
 
 	// ResourceExhausted indicates some resource has been exhausted, perhaps
 	// a per-user quota, or perhaps the entire file system is out of space.
 	ResourceExhausted = New("resource_exhausted").
+				SetMessage("resource has been exhausted").
 				SetGRPCCode(codes.ResourceExhausted).
 				SetHTTPCode(http.StatusTooManyRequests)
 
@@ -96,6 +109,7 @@ var (
 	//      server does not match the condition. E.g., conflicting
 	//      read-modify-write on the same resource.
 	FailedPrecondition = New("failed_precondition").
+				SetMessage("system is not in a state required for the operation's execution").
 				SetGRPCCode(codes.FailedPrecondition).
 				SetHTTPCode(http.StatusBadRequest)
 
@@ -106,6 +120,7 @@ var (
 	// See litmus test above for deciding between FailedPrecondition,
 	// Aborted, and Unavailable.
 	Aborted = New("aborted").
+		SetMessage("aborted").
 		SetGRPCCode(codes.Aborted).
 		SetHTTPCode(http.StatusConflict)
 
@@ -125,12 +140,14 @@ var (
 	// a space can easily look for an OutOfRange error to detect when
 	// they are done.
 	OutOfRange = New("out_of_range").
+			SetMessage("attempted past the valid range").
 			SetGRPCCode(codes.OutOfRange).
 			SetHTTPCode(http.StatusBadRequest)
 
 	// Unimplemented indicates operation is not implemented or not
 	// supported/enabled in this service.
 	Unimplemented = New("unimplemented").
+			SetMessage("not implemented or not supported/enabled in this service").
 			SetGRPCCode(codes.Unimplemented).
 			SetHTTPCode(http.StatusNotImplemented)
 
@@ -138,7 +155,7 @@ var (
 	// system has been broken. If you see one of these errors,
 	// something is very broken.
 	Internal = New("internal").
-			SetMessage("internal server error").
+			SetMessage(msgInternal).
 			SetGRPCCode(codes.Internal).
 			SetHTTPCode(http.StatusInternalServerError)
 
@@ -150,17 +167,20 @@ var (
 	// See litmus test above for deciding between FailedPrecondition,
 	// Aborted, and Unavailable.
 	Unavailable = New("unavailable").
+			SetMessage("service unavailable").
 			SetGRPCCode(codes.Unavailable).
 			SetHTTPCode(http.StatusServiceUnavailable)
 
 	// DataLoss indicates unrecoverable data loss or corruption.
 	DataLoss = New("data_loss").
+			SetMessage("unrecoverable data loss or corruption").
 			SetGRPCCode(codes.DataLoss).
 			SetHTTPCode(http.StatusInternalServerError)
 
 	// Unauthenticated indicates the request does not have valid
 	// authentication credentials for the operation.
 	Unauthenticated = New("unauthenticated").
+			SetMessage("request does not have valid authentication credentials").
 			SetGRPCCode(codes.Unauthenticated).
 			SetHTTPCode(http.StatusUnauthorized)
 )
