@@ -27,6 +27,7 @@ var (
 	// errors raised by APIs that do not return enough error information
 	// may be converted to this error.
 	Unknown = New("unknown").
+		SetMessage("internal server error").
 		SetGRPCCode(codes.Unknown).
 		SetHTTPCode(http.StatusInternalServerError)
 
@@ -137,6 +138,7 @@ var (
 	// system has been broken. If you see one of these errors,
 	// something is very broken.
 	Internal = New("internal").
+			SetMessage("internal server error").
 			SetGRPCCode(codes.Internal).
 			SetHTTPCode(http.StatusInternalServerError)
 
