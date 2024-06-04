@@ -148,6 +148,13 @@ func (b Builder) WithoutHandlers() Builder {
 	return dst
 }
 
+// Do - perform panic processing with context. Called exclusively via defer.
+func (b Builder) Do() {
+	if msg := recover(); msg != nil {
+		b.recovery(msg)
+	}
+}
+
 func (b Builder) copy() Builder {
 	return Builder{
 		syncHandlers:  slices.Clone(b.syncHandlers),
@@ -157,13 +164,6 @@ func (b Builder) copy() Builder {
 		stderr:        b.stderr,
 		message:       b.message,
 		enriched:      true,
-	}
-}
-
-// Do - perform panic processing with context. Called exclusively via defer.
-func (b Builder) Do() {
-	if msg := recover(); msg != nil {
-		b.recovery(msg)
 	}
 }
 
@@ -257,11 +257,4 @@ func (b Builder) setError(errs []error, msg any) {
 
 		*b.stderr = std
 	}
-}
-
-func (b Builder) handle(
-	msg any,
-	errs *[]error,
-) {
-
 }
