@@ -3,7 +3,7 @@
   <h3 align="center">Standard Errors</h3>
   <h4> <a href="./../README.md" align="center"> github.com/auvitly/go-tools </a> > <b>stderrs</b></h4> 
   <p align="center">Deal with errors easier!</p>
-  <img src="https://img.shields.io/badge/version-0.0.1_alpha-red?style=for-the-badge" alt="version">
+  <img src="https://img.shields.io/badge/version-1.0.0--b-yellow?style=for-the-badge" alt="version">
 </div>
 
 ---

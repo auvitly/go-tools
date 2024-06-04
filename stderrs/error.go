@@ -16,7 +16,6 @@ type Error struct {
 	Code    string         `json:"code"`
 	Message string         `json:"message"`
 	Embed   error          `json:"embed"`
-	Wraps   []string       `json:"wraps"`
 	Fields  map[string]any `json:"fields"`
 	Codes   struct {
 		GRPC codes.Code `json:"grpc"`
@@ -124,24 +123,6 @@ func (e *Error) EmbedErrors(errs ...error) *Error {
 
 		result.Embed = errors.Join(join...)
 	}
-
-	return &result
-}
-
-// Wrap - add a nested.
-func (e *Error) Wrap(msg ...string) *Error {
-	if e == nil {
-		return e
-	}
-
-	var (
-		result = *e
-		wraps  = make([]string, len(e.Wraps))
-	)
-
-	copy(wraps, e.Wraps)
-
-	result.Wraps = append(wraps, msg...)
 
 	return &result
 }
@@ -256,10 +237,6 @@ func (e *Error) Error() string {
 	}
 
 	var message = strings.Join(parts, ", ")
-
-	for i := 0; i < len(e.Wraps); i++ {
-		message = fmt.Sprintf("%s > %s", e.Wraps[i], message)
-	}
 
 	return fmt.Sprintf("{%s}", message)
 }

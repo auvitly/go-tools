@@ -19,7 +19,6 @@ func (e *Error) MarshalJSON() (_ []byte, err error) {
 	}
 
 	raw.Message = e.Message
-	raw.Wraps = e.Wraps
 	raw.Fields = e.Fields
 	raw.Codes = e.Codes
 	raw.Embed, err = marshalJSONEmbedError(e.Embed)
@@ -82,7 +81,6 @@ func (e *Error) UnmarshalJSON(data []byte) (err error) {
 	*e = Error{
 		Code:    raw.Code,
 		Message: raw.Message,
-		Wraps:   raw.Wraps,
 		Fields:  raw.Fields,
 		Codes:   raw.Codes,
 	}

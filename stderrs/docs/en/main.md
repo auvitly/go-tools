@@ -67,9 +67,6 @@ type Error struct {
 	// Embed - built-in errors of the standard type.
 	// Note: allows you to add a standard error interface to the error.
 	Embed   error          `json:"embed"`
-	// Wrap - the ability to wrap an error at the moment the Error function is called.
-	// Note: used to pass the call object and the method in which it was received.
-	Wraps   []string       `json:"wraps"`
 	// Fields - allows you to pass specific parameters that determine the initial error.
 	// For example, when accessing remote resources, you can pass a request model.
 	// Fields is processed by the json package, so the values for the keys must
@@ -99,7 +96,6 @@ Standard error has the following set of methods:
 * `SetHTTPCode` - set the HTTP status code;
 * `SetGRPCCode` - set the GRPC status code;
 * `EmbedErrors` - embed an error;
-* `Wrap` - wrap an error in a message. Provided by the following format `message > %w`;
 * `WithField` - add a value by key;
 * `WithFields` - add values;
 * `WithFieldIf` - add a value by key if the condition is met.
