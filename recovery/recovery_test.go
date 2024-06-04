@@ -41,10 +41,13 @@ func TestOnError(t *testing.T) {
 func TestOn(t *testing.T) {
 	t.Parallel()
 
-	var err = stderrs.Internal.EmbedErrors(fs.ErrExist).SetMessage("my message")
+	var err = stderrs.Internal.
+		WithField("key", "value").
+		EmbedErrors(fs.ErrExist).
+		SetMessage("my message")
 
 	func() {
-		defer recovery.On(&err).Do()
+		defer recovery.WithField("key", "replaced").On(&err).Do()
 
 		panic("panic: message")
 	}()
@@ -55,6 +58,7 @@ func TestOn(t *testing.T) {
 	require.True(t, std.Is(stderrs.Panic))
 	require.True(t, std.Is(stderrs.Internal))
 	require.True(t, std.Is(stderrs.Internal.EmbedErrors(fs.ErrExist)))
+	require.Equal(t, std.Fields["key"], "replaced")
 }
 
 func TestHandler(t *testing.T) {
