@@ -178,7 +178,6 @@ type Error struct {
     Code    string         `json:"code"`
     Message string         `json:"message"`
     Embed   error          `json:"embed"`
-    Wraps   []string       `json:"wraps"`
     Fields  map[string]any `json:"fields"`
     Codes   struct {
         GRPC codes.Code `json:"grpc"`
