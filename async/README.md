@@ -8,6 +8,8 @@
 
 ---
 
+<img src="https://img.shields.io/badge/version-0.0.1_alpha-orange" alt="version">
+
 Package `async` provides tools that extend the core functionality of `sync` package.
 
 ---

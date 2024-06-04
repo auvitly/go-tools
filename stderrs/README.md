@@ -8,6 +8,8 @@
 
 ---
 
+<img src="https://img.shields.io/badge/version-0.0.1_alpha-orange" alt="version">
+
 Package `stderrs` provides a unified model for working with errors.
 
 --- 
