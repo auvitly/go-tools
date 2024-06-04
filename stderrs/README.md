@@ -3,12 +3,10 @@
   <h3 align="center">Standard Errors</h3>
   <h4> <a href="./../README.md" align="center"> github.com/auvitly/go-tools </a> > <b>stderrs</b></h4> 
   <p align="center">Deal with errors easier!</p>
-  <img src="https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white" alt="go">
+  <img src="https://img.shields.io/badge/version-0.0.1_alpha-orange" alt="version">
 </div>
 
 ---
-
-<img src="https://img.shields.io/badge/version-0.0.1_alpha-orange" alt="version">
 
 Package `stderrs` provides a unified model for working with errors.
 

@@ -3,12 +3,10 @@
   <h3 align="center">Recovery</h3>
   <h4> <a href="./../README.md" align="center"> github.com/auvitly/go-tools </a> > <b>recovery</b></h4> 
   <p align="center">Panic it's okay!</p>
-  <img src="https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white" alt="go">
+  <img src="https://img.shields.io/badge/version-0.0.1_alpha-orange" alt="version">
 </div>
 
 ---
-
-<img src="https://img.shields.io/badge/version-0.0.1_alpha-orange" alt="version">
 
 Package `recovery` provides methods for handling panic.
 
