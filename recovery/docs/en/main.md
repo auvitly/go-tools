@@ -60,8 +60,9 @@ if not equal`nil`. The difference between `On` and `OnError` is the type of erro
 * `WithField`, `WithFieldIf`, `WithFields`, `WithFieldsIf` - methods for adding fields for the target
   [standard error](./../../../stderrs/README.md). The `If` suffix allows you to set the condition for adding.
 * `WithHandlers`, `WithHandlersIf` - allows you to set exception handlers that must be of the `recovery.Handler` type.
-* `WithAsyncHandlers`, `WithAsyncHandlersIf` - allows you to set asynchronous exception handlers that must be of type `recovery.AsyncHandler`.* `WithoutHandlers` - reset all installed handlers. Required when you want to exclude 
-use of global handlers.
+* `WithAsyncHandlers`, `WithAsyncHandlersIf` - allows you to set asynchronous exception handlers that must be of type 
+`recovery.AsyncHandler`.* `WithoutHandlers` - reset all installed handlers. Required when you want to exclude use of 
+global handlers.
 * `Do`, `DoContext` - мThe methods allow you to catch an exception. **Default** takes into account registered 
 global handlers; to disable global handlers, use the `WithoutHandlers` method.
 
