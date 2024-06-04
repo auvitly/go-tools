@@ -22,7 +22,7 @@ to the following construction:
 ```go
 func main() {
     defer func(){
-        if msg := recover; msg != nil {
+        if msg := recover(); msg != nil {
             // Do something.
         }   	
     }()
