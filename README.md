@@ -3,6 +3,7 @@
   <h3 align="center">Go Tools</h3>
   <h4 align="center">github.com/auvitly/go-tools</h4>
   <p align="center">Your best friend in development!</p>
+  <img src="https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white" alt="go">
 </div>
 
 ---
