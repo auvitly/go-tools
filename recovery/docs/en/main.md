@@ -63,7 +63,7 @@ if not equal`nil`. The difference between `On` and `OnError` is the type of erro
 * `WithAsyncHandlers`, `WithAsyncHandlersIf` - allows you to set asynchronous exception handlers that must be of type 
 `recovery.AsyncHandler`.* `WithoutHandlers` - reset all installed handlers. Required when you want to exclude use of 
 global handlers.
-* `Do`, `DoContext` - мThe methods allow you to catch an exception. **Default** takes into account registered 
+* `Do` - catch an exception. **Default** takes into account registered 
 global handlers; to disable global handlers, use the `WithoutHandlers` method.
 
 Registration of global handlers is implemented using the following methods:
