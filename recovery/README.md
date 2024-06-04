@@ -3,7 +3,7 @@
   <h3 align="center">Recovery</h3>
   <h4> <a href="./../README.md" align="center"> github.com/auvitly/go-tools </a> > <b>recovery</b></h4> 
   <p align="center">Panic it's okay!</p>
-  <img src="https://img.shields.io/badge/version-0.0.1_alpha-orange" alt="version">
+  <img src="https://img.shields.io/badge/version-0.0.1_alpha-orange?style=for-the-badge" alt="version">
 </div>
 
 ---
