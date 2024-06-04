@@ -24,7 +24,7 @@ var (
 
 	// Canceled - indicates the operation was canceled (typically by the caller).
 	Canceled = New("canceled").
-			SetMessage("operation was canceled").
+			SetMessage("canceled").
 			SetGRPCCode(codes.Canceled).
 			SetHTTPCode(499)
 
@@ -53,21 +53,21 @@ var (
 	// example, a successful response from a server could have been delayed
 	// long enough for the deadline to expire.
 	DeadlineExceeded = New("deadline_exceeded").
-				SetMessage("operation expired before completion").
+				SetMessage("deadline exceeded").
 				SetGRPCCode(codes.DeadlineExceeded).
 				SetHTTPCode(http.StatusBadGateway)
 
 	// NotFound means some requested entity (e.g., file or directory) was
 	// not found.
 	NotFound = New("not_found").
-			SetMessage("requested entity was not found").
+			SetMessage("not found").
 			SetGRPCCode(codes.NotFound).
 			SetHTTPCode(http.StatusNotFound)
 
 	// AlreadyExists means an attempt to create an entity failed because one
 	// already exists.
 	AlreadyExists = New("already_exists").
-			SetMessage("entity already exists").
+			SetMessage("already exists").
 			SetGRPCCode(codes.AlreadyExists).
 			SetHTTPCode(http.StatusConflict)
 
@@ -78,7 +78,7 @@ var (
 	// used if the caller cannot be identified (use Unauthenticated
 	// instead for those errors).
 	PermissionDenied = New("permission_denied").
-				SetMessage("caller does not have permission to execute the specified operation").
+				SetMessage("permission denied").
 				SetGRPCCode(codes.PermissionDenied).
 				SetHTTPCode(http.StatusForbidden)
 
@@ -147,7 +147,7 @@ var (
 	// Unimplemented indicates operation is not implemented or not
 	// supported/enabled in this service.
 	Unimplemented = New("unimplemented").
-			SetMessage("not implemented or not supported/enabled in this service").
+			SetMessage("not implemented or not supported/enabled").
 			SetGRPCCode(codes.Unimplemented).
 			SetHTTPCode(http.StatusNotImplemented)
 
