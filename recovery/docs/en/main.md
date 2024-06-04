@@ -57,9 +57,10 @@ and `stderrs.Panic` from the standard error set, then injects the passed error,
 if not equal`nil`. The difference between `On` and `OnError` is the type of error accepted: `On` - `**stderrs.Error`, 
 `OnError` - `*error`. 
 * `SetMessage` - sets the Message field for the generated [standard error](./../../../stderrs/README.md).
-* `WithHandlers` - install exception handlers that must be typed`recovery.Handler`.
-* `WithAsyncHandlers` - install asynchronous exception handlers that must type `recovery.AsyncHandler`.
-* `WithoutHandlers` - reset all installed handlers. Required when you want to exclude 
+* `WithField`, `WithFieldIf`, `WithFields`, `WithFieldsIf` - methods for adding fields for the target
+  [standard error](./../../../stderrs/README.md). The `If` suffix allows you to set the condition for adding a key.
+* `WithHandlers`, `WithHandlersIf` - allows you to set exception handlers that must be of the `recovery.Handler` type.
+* `WithAsyncHandlers`, `WithAsyncHandlersIf` - allows you to set asynchronous exception handlers that must be of type `recovery.AsyncHandler`.* `WithoutHandlers` - reset all installed handlers. Required when you want to exclude 
 use of global handlers.
 * `Do`, `DoContext` - мThe methods allow you to catch an exception. **Default** takes into account registered 
 global handlers; to disable global handlers, use the `WithoutHandlers` method.
