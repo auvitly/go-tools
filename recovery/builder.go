@@ -3,6 +3,7 @@ package recovery
 import (
 	"fmt"
 	"github.com/auvitly/go-tools/stderrs"
+	"maps"
 	"runtime/debug"
 	"slices"
 )
@@ -19,6 +20,7 @@ type Builder struct {
 	asyncHandlers []AsyncHandler
 	target        *error
 	stderr        **stderrs.Error
+	fields        map[string]any
 	message       string
 	enriched      bool
 }
@@ -52,6 +54,54 @@ func (b Builder) On(err **stderrs.Error) Builder {
 	return dst
 }
 
+// WithField - add a field to the target error.
+func (b Builder) WithField(key string, value any) Builder {
+	var dst = b.copy()
+
+	if dst.fields == nil {
+		dst.fields = make(map[string]any)
+	}
+
+	dst.fields[key] = value
+
+	return dst
+}
+
+// WithFieldIf - Add a field to the target error if the condition is met.
+func (b Builder) WithFieldIf(condition bool, key string, value any) Builder {
+	if !condition {
+		return b
+	}
+
+	return b.WithField(key, value)
+}
+
+// WithFields - add a fields to the target error.
+func (b Builder) WithFields(fields map[string]any) Builder {
+	if fields == nil {
+		return b
+	}
+
+	var dst = b.copy()
+
+	if dst.fields == nil {
+		dst.fields = make(map[string]any)
+	}
+
+	maps.Copy(dst.fields, fields)
+
+	return dst
+}
+
+// WithFieldsIf - Add a fields to the target error if the condition is met.
+func (b Builder) WithFieldsIf(condition bool, fields map[string]any) Builder {
+	if !condition || fields == nil {
+		return b
+	}
+
+	return b.WithFields(fields)
+}
+
 // WithHandlers - add exception handler.
 func (b Builder) WithHandlers(handlers ...Handler) Builder {
 	var dst = b.copy()
@@ -61,6 +111,15 @@ func (b Builder) WithHandlers(handlers ...Handler) Builder {
 	return dst
 }
 
+// WithHandlersIf - add exception handler if the condition is met.
+func (b Builder) WithHandlersIf(condition bool, handlers ...Handler) Builder {
+	if !condition {
+		return b
+	}
+
+	return b.WithHandlers(handlers...)
+}
+
 // WithAsyncHandlers - add async exception handler.
 func (b Builder) WithAsyncHandlers(handlers ...AsyncHandler) Builder {
 	var dst = b.copy()
@@ -68,6 +127,15 @@ func (b Builder) WithAsyncHandlers(handlers ...AsyncHandler) Builder {
 	dst.asyncHandlers = append(dst.asyncHandlers, handlers...)
 
 	return dst
+}
+
+// WithAsyncHandlersIf - add async exception handler if the condition is met.
+func (b Builder) WithAsyncHandlersIf(condition bool, handlers ...AsyncHandler) Builder {
+	if !condition {
+		return b
+	}
+
+	return b.WithAsyncHandlers(handlers...)
 }
 
 // WithoutHandlers - allows you to reset all handlers for the selected call.
@@ -84,6 +152,7 @@ func (b Builder) copy() Builder {
 	return Builder{
 		syncHandlers:  slices.Clone(b.syncHandlers),
 		asyncHandlers: slices.Clone(b.asyncHandlers),
+		fields:        maps.Clone(b.fields),
 		target:        b.target,
 		stderr:        b.stderr,
 		message:       b.message,
@@ -166,6 +235,7 @@ func (b Builder) setError(errs []error, msg any) {
 	case b.target != nil:
 		var std = stderrs.Panic.
 			SetMessage(b.message).
+			WithFields(b.fields).
 			EmbedErrors(errs...).
 			WithField("panic", msg)
 
@@ -177,6 +247,7 @@ func (b Builder) setError(errs []error, msg any) {
 	case b.stderr != nil:
 		var std = stderrs.Panic.
 			SetMessage(b.message).
+			WithFields(b.fields).
 			EmbedErrors(errs...).
 			WithField("panic", msg)
 
