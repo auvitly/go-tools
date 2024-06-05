@@ -166,7 +166,7 @@ Out:
 > Note that the context passed to the `DoContext` method allows you to limit the waiting time for asynchronous 
 > handlers, unlike the `Do` method, which waits for all asynchronous handlers to finish.
 
-#### 3.4 Обработка ошибок обработчиков
+#### 3.4 Handling handler errors
 
 As follows from the `recovery.Handler` signature: synchronous handlers return an error. 
 The errors that handlers return enrich the target error. Let us turn to the model [standard error](./../../../stderrs/README.md):
@@ -438,6 +438,6 @@ Out:
 
 ```
 
-#### 3.9 Прочие примеры
+#### 3.9 Other examples
 
 * Demonstration of the panic interception mechanism with custom handlers [[link](../../../examples/relax/main.go)]
