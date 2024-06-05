@@ -163,9 +163,6 @@ Out:
 2024/05/29 21:23:51 INFO I'm a synchronous processor
 ```
 
-> Note that the context passed to the `DoContext` method allows you to limit the waiting time for asynchronous 
-> handlers, unlike the `Do` method, which waits for all asynchronous handlers to finish.
-
 #### 3.4 Handling handler errors
 
 As follows from the `recovery.Handler` signature: synchronous handlers return an error. 
@@ -304,7 +301,7 @@ func main() {
 }
 ```
 
-Результат:
+Out:
 
 ```
 2024/05/30 00:19:15 ERROR {"code": "panic", "message": "internal server error: unhandled exception", "fields": {"panic":"I'm the exception"}, "embed": [{"code": "panic", "fields": {"panic":"Hello world!","stack":"goroutine 1 [running]:\nruntime/debug.Stack()\n\tC:/Program Files/Go/src/runtime/debug/stack.go:24 +0x5e\ngithub.com/auvitly/go-tools/recovery.Builder.useSync.func1()\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:125 +0x38a\npanic({0x113bd00?, 0x120c870?})\n\tC:/Program Files/Go/src/runtime/panic.go:914 +0x21f\nmain.globalPanicHandler({0x17c01f00108, 0x10})\n\tF:/Work/projects/git/auvitly/go-tools/examples/test/main.go:10 +0x25\ngithub.com/auvitly/go-tools/recovery.Builder.useSync({{0xc000044060, 0x1, 0x1}, {0x1447320, 0x0, 0x0}, 0x0, 0xc000044058, {0x11a4fad, 0x2a}, ...}, ...)\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:145 +0x77\ngithub.com/auvitly/go-tools/recovery.Builder.handle({{0xc000044060, 0x1, 0x1}, {0x1447320, 0x0, 0x0}, 0x0, 0xc000044058, {0x11a4fad, 0x2a}, ...}, ...)\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:265 +0x39c\ngithub.com/auvitly/go-tools/recovery.Builder.recovery({{0xc000044060, 0x1, 0x1}, {0x1447320, 0x0, 0x0}, 0x0, 0xc000044058, {0x11a4fad, 0x2a}, ...}, ...)\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:189 +0x110\ngithub.com/auvitly/go-tools/recovery.Builder.Do({{0xc000044060, 0x1, 0x1}, {0x1447320, 0x0, 0x0}, 0x0, 0xc000044058, {0x0, 0x0}, ...})\n\tF:/Work/projects/git/auvitly/go-tools/recovery/builder.go:102 +0x6c\npanic({0x113bd00?, 0x120c880?})\n\tC:/Program Files/Go/src/runtime/panic.go:920 +0x270\nmain.fn()\n\tF:/Work/projects/git/auvitly/go-tools/examples/test/main.go:18 +0x405\nmain.main()\n\tF:/Work/projects/git/auvitly/go-tools/examples/test/main.go:24 +0x3fb\n"}}]}
