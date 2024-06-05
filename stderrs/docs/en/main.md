@@ -101,28 +101,26 @@ Standard error has the following set of methods:
 * `WithFieldIf` - add a value by key if the condition is met.
 
 A set of standard errors is constructed based on the model:
-
-| Standard Error       | Standard Code       | GRPC Status         | HTTP Status               |
-|----------------------|---------------------|---------------------|---------------------------|
-| `Canceled`           | canceled            | Canceled            | StatusClientClosedRequest |
-| `Unknown`            | unknown             | Unknown             | StatusInternalServerError |
-| `InvalidArgument`    | invalid_argument    | InvalidArgument     | StatusBadRequest          |
-| `DeadlineExceeded`   | deadline_exceeded   | DeadlineExceeded    | StatusBadGateway          |
-| `NotFound`           | not_found           | NotFound            | StatusNotFound            |
-| `AlreadyExists`      | already_exists      | AlreadyExists       | StatusConflict            |
-| `PermissionDenied`   | permission_denied   | PermissionDenied    | StatusForbidden           |
-| `ResourceExhausted`  | resource_exhausted  | ResourceExhausted   | StatusTooManyRequests     |
-| `FailedPrecondition` | failed_precondition | FailedPrecondition  | StatusBadRequest          |
-| `Aborted`            | aborted             | Aborted             | StatusConflict            |
-| `OutOfRange`         | out_of_range        | OutOfRange          | StatusBadRequest          | 
-| `Unimplemented`      | unimplemented       | Unimplemented       | StatusNotImplemented      | 
-| `Internal`           | internal            | Internal            | StatusInternalServerError | 
-| `Unavailable`        | unavailable         | Unavailable         | StatusServiceUnavailable  | 
-| `DataLoss`           | data_loss           | DataLoss            | StatusInternalServerError |
-| `Unauthenticated`    | unauthenticated     | Unauthenticated     | StatusUnauthorized        |
-| `Undefined`          | -                   | Internal            | StatusInternalServerError |
-| `Panic`              | panic               | Internal            | StatusInternalServerError |
-
+| Standard Error       | Standard Code       | GRPC Status         | HTTP Status               | Default Message                                                 |
+|----------------------|---------------------|---------------------|---------------------------|-----------------------------------------------------------------|
+| `Canceled`           | canceled            | Canceled            | StatusClientClosedRequest | canceled                                                        |   
+| `Unknown`            | unknown             | Unknown             | StatusInternalServerError | internal server error                                           |
+| `InvalidArgument`    | invalid_argument    | InvalidArgument     | StatusBadRequest          | bad request                                                     |
+| `DeadlineExceeded`   | deadline_exceeded   | DeadlineExceeded    | StatusBadGateway          | deadline exceeded                                               |
+| `NotFound`           | not_found           | NotFound            | StatusNotFound            | not found                                                       |
+| `AlreadyExists`      | already_exists      | AlreadyExists       | StatusConflict            | already exists                                                  |
+| `PermissionDenied`   | permission_denied   | PermissionDenied    | StatusForbidden           | permission denied                                               |
+| `ResourceExhausted`  | resource_exhausted  | ResourceExhausted   | StatusTooManyRequests     | resource has been exhausted                                     |
+| `FailedPrecondition` | failed_precondition | FailedPrecondition  | StatusBadRequest          | system is not in a state required for the operation's execution |
+| `Aborted`            | aborted             | Aborted             | StatusConflict            | aborted                                                         |
+| `OutOfRange`         | out_of_range        | OutOfRange          | StatusBadRequest          | attempted past the valid range                                  |
+| `Unimplemented`      | unimplemented       | Unimplemented       | StatusNotImplemented      | not implemented or not supported/enabled                        |
+| `Internal`           | internal            | Internal            | StatusInternalServerError | internal server error                                           |
+| `Unavailable`        | unavailable         | Unavailable         | StatusServiceUnavailable  | service unavailable                                             |
+| `DataLoss`           | data_loss           | DataLoss            | StatusInternalServerError | unrecoverable data loss or corruption                           |
+| `Unauthenticated`    | unauthenticated     | Unauthenticated     | StatusUnauthorized        | request does not have valid authentication credentials          |
+| `Undefined`          | -                   | Internal            | StatusInternalServerError | internal server error                                           |
+| `Panic`              | panic               | Internal            | StatusInternalServerError | internal server error                                           |
 To restore the standard error from the `error` interface, it is proposed to use the `From` method:
 ```go
 // From - error recovery function from the standard interface.
