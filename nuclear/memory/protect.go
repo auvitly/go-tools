@@ -9,6 +9,4 @@ const (
 	ProtectModeReadWrite
 )
 
-var (
-	ErrUnsupportedProtectMode = errors.New("unsupported protect mode")
-)
+var ErrUnsupportedProtectMode = errors.New("unsupported protect mode")

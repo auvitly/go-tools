@@ -54,6 +54,6 @@ func Patch(header, footer, eof uintptr, newHeader, newFooter []byte) {
 	atomic.StoreUint32(headerUint32, 0xFEEB)
 	defer atomic.StoreUint32(headerUint32, binary.LittleEndian.Uint32(newHeader))
 
-	Copy(header+4, uintptr(unsafe.Pointer(&newHeader[0])), len(newHeader)-4)
+	Copy(header+4, uintptr(unsafe.Pointer(&newHeader[4])), len(newHeader)-4)
 	Copy(footer, uintptr(unsafe.Pointer(&newFooter[0])), len(newFooter))
 }

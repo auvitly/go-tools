@@ -3,18 +3,21 @@
 
 package memory
 
-import "syscall"
+import (
+	"fmt"
+	"syscall"
+)
 
 var (
 	pageSize = syscall.Getpagesize()
-	modes    = map[ProtectMode]uint32{
+	modes    = map[ProtectMode]int{
 		ProtectModeRead:      syscall.PROT_READ | syscall.PROT_EXEC,
 		ProtectModeReadWrite: syscall.PROT_READ | syscall.PROT_EXEC | syscall.PROT_WRITE,
 	}
 )
 
 func pageFrom(ptr uintptr) uintptr {
-	return ptr & ^(uintptr(pageSize - 1))
+	return ptr & ^uintptr(pageSize-1)
 }
 
 func SetProtect(ptr uintptr, size int, mode ProtectMode) {
@@ -23,10 +26,10 @@ func SetProtect(ptr uintptr, size int, mode ProtectMode) {
 		panic(ErrUnsupportedProtectMode)
 	}
 
-	var page = ptr & ^(uintptr(pageSize - 1))
+	var page = ptr & ^uintptr(pageSize-1)
 
 	for i := page; i < ptr+uintptr(size); i += uintptr(pageSize) {
-		if err := syscall.Mprotect(AddressToBytes(i, pageSize)); err != nil {
+		if err := syscall.Mprotect(As(i, pageSize), protect); err != nil {
 			panic(fmt.Sprintf("syscall.Mprotect: %v", err))
 		}
 	}
