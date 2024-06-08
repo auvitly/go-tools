@@ -167,8 +167,8 @@ func Replace[T any](tg, rp T, oldTo ...*T) *memory.PatchFrame[T] {
 		proxyFn    = *(*T)(unsafe.Pointer(&fn))
 	)
 
-	for i := range oldTo {
-		*oldTo[i] = proxyFn
+	for _, item := range oldTo {
+		*item = proxyFn
 	}
 
 	memory.Patch(sec.Header, sec.Footer, sec.EOF, newHeader, newFooter)

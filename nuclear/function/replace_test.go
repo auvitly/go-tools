@@ -2,24 +2,25 @@ package function_test
 
 import (
 	"github.com/auvitly/go-tools/nuclear/function"
+	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
 )
-
-func Sum(a, b int) int {
-	return a + b
-}
 
 func TestReplace(t *testing.T) {
 	t.Parallel()
 
 	var (
-		old  func(a, b int) int
-		impl = func(a, b int) int {
-			return 1
+		oldTimeFunc func() time.Time
+		newTimeFunc = func() time.Time {
+			return time.Date(2000, 0, 0, 0, 0, 0, 0, time.Local)
 		}
 	)
 
-	function.Replace(Sum, impl, &old)
+	oldTimeFunc = function.Replace(time.Now, newTimeFunc).OldImpl()
 
-	t.Log(Sum(0, 0))
+	a := oldTimeFunc()
+	b := time.Now()
+
+	assert.NotEqual(t, a, b)
 }
