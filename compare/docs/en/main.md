@@ -17,8 +17,9 @@
 
 To compare multiple objects that are not `comparable`, packages from the standard set are used:
 for slices `slices`, for maps - `maps`. However, for comparing structures there is only the `reflect` package,
-which has a function `reflect.DeepEqual`. Often the problem is solved in different ways, which reduces
-uniformity of code within the project.
+which has a function `reflect.DeepEqual`. The existence of the `reflect` package is usually ignored, so developers
+they write their own optimized functions for checks, which leads to a decrease in the homogeneity of the code within 
+the project.
 
 <a name="desc"></a>
 ### 2. Description
