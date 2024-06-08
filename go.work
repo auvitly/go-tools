@@ -1,8 +1,10 @@
 go 1.21
 
 use (
+	./nuclear
 	./recovery
 	./stderrs
-	async
-	examples
+	./async
+	./compare
+	./examples
 )

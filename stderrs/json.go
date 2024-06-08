@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// MarshalJSON - implementation of the standard interface.
+// MarshalJSON - impls of the standard interface.
 func (e *Error) MarshalJSON() (_ []byte, err error) {
 	var raw models.Error
 
