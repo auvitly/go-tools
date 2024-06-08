@@ -3,6 +3,7 @@ package function_test
 import (
 	"github.com/auvitly/go-tools/nuclear/function"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
 )
@@ -10,17 +11,20 @@ import (
 func TestReplace(t *testing.T) {
 	t.Parallel()
 
+	var ts = time.Now()
+
 	var (
 		oldTimeFunc func() time.Time
 		newTimeFunc = func() time.Time {
-			return time.Date(2000, time.January, 1, 0, 0, 0, 0, time.Local)
+			return ts
 		}
 	)
 
-	oldTimeFunc = function.Replace(time.Now, newTimeFunc).OldImpl()
+	patch := function.Replace(time.Now, newTimeFunc, &oldTimeFunc)
+	require.NotNil(t, patch)
 
-	a := oldTimeFunc()
-	b := time.Now()
+	assert.Equal(t, ts, time.Now())
 
-	assert.NotEqual(t, a, b)
+	patch.Unpatch()
+	assert.NotEqual(t, ts, time.Now())
 }
