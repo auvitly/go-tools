@@ -32,8 +32,7 @@ const (
 
 var (
 	modes = map[ProtectMode]uint32{
-		// ProtectModeRead: _PAGE_EXECUTE_READ,
-		ProtectModeRead:      _PAGE_READWRITE,
+		ProtectModeRead:      _PAGE_EXECUTE_READ,
 		ProtectModeReadWrite: _PAGE_EXECUTE_READWRITE,
 	}
 )

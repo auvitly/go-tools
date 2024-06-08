@@ -13,7 +13,7 @@ func TestReplace(t *testing.T) {
 	var (
 		oldTimeFunc func() time.Time
 		newTimeFunc = func() time.Time {
-			return time.Date(2000, 0, 0, 0, 0, 0, 0, time.Local)
+			return time.Date(2000, time.January, 1, 0, 0, 0, 0, time.Local)
 		}
 	)
 
