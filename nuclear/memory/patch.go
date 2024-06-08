@@ -37,6 +37,14 @@ func (p *PatchFrame[T]) Unpatch() {
 	p.once.Do(p.unpatch)
 }
 
+func (p *PatchFrame[T]) OldImpl() T {
+	return p.old
+}
+
+func (p *PatchFrame[T]) NewImpl() T {
+	return p.new
+}
+
 func Patch(header, footer, eof uintptr, newHeader, newFooter []byte) {
 	var headerUint32 = *(**uint32)(unsafe.Pointer(&header))
 

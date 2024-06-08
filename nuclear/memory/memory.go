@@ -1,12 +1,12 @@
 package memory
 
 import (
-	"reflect"
+	"github.com/auvitly/go-tools/nuclear/impls"
 	"unsafe"
 )
 
 func As(ptr uintptr, size int) []byte {
-	return *(*[]byte)(unsafe.Pointer(&reflect.SliceHeader{
+	return *(*[]byte)(unsafe.Pointer(&impls.Slice{
 		Data: ptr,
 		Len:  size,
 		Cap:  size,
@@ -14,7 +14,12 @@ func As(ptr uintptr, size int) []byte {
 }
 
 func Scan(ptr uintptr, size int) []byte {
-	return append(make([]byte, 0, size), As(ptr, size)...)
+	var (
+		buf  = make([]byte, 0, size)
+		data = As(ptr, size)
+	)
+
+	return append(buf, data...)
 }
 
 func Copy(dst uintptr, src uintptr, size int) {

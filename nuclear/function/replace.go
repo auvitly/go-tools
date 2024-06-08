@@ -80,7 +80,7 @@ func inspectFunction(ptr uintptr) (res sections, err error) {
 
 	res.CallInstruction, res.CallAddress = *inst, addr
 
-	inst, addr, err = findInstruction(uintptr(inst.Len), 128, x86asm.JMP, x86asm.MOV, x86asm.CMP, x86asm.NOP, x86asm.INT)
+	inst, addr, err = findInstruction(addr+uintptr(inst.Len), 128, x86asm.JMP, x86asm.MOV, x86asm.CMP, x86asm.NOP, x86asm.INT)
 	if err != nil {
 		return res, err
 	}
@@ -97,7 +97,7 @@ func inspectFunction(ptr uintptr) (res sections, err error) {
 	return res, nil
 }
 
-func ReplaceFunc[T any](tg, rp T, oldTo ...*T) *memory.PatchFrame[T] {
+func Replace[T any](tg, rp T, oldTo ...*T) *memory.PatchFrame[T] {
 	sec, err := inspectFunction(**(**uintptr)(unsafe.Pointer(&tg)))
 	if err != nil {
 		panic(err)
@@ -109,8 +109,8 @@ func ReplaceFunc[T any](tg, rp T, oldTo ...*T) *memory.PatchFrame[T] {
 	)
 
 	var (
-		beforeJBE  = memory.As(sec.Header, int(sec.JBEAddress+sec.Header))
-		beforeCall = memory.As(sec.Footer, int(sec.CallAddress+sec.Footer))
+		beforeJBE  = memory.As(sec.Header, int(sec.JBEAddress-sec.Header))
+		beforeCall = memory.As(sec.Footer, int(sec.CallAddress-sec.Footer))
 		afterCall  = memory.As(
 			sec.CallAddress+uintptr(sec.CallInstruction.Len),
 			int(sec.JMPAddress-sec.CallAddress-uintptr(sec.CallInstruction.Len)),
