@@ -5,7 +5,6 @@ import (
 	"github.com/auvitly/go-tools/nuclear/impls"
 	"reflect"
 	"runtime"
-	"strings"
 	"unsafe"
 )
 
@@ -27,26 +26,10 @@ func New(fn any) Info {
 	return 0
 }
 
-func (i Info) RuntimeName() string {
+func (i Info) Name() string {
 	if i == 0 {
 		return ""
 	}
 
 	return runtime.FuncForPC(uintptr(i)).Name()
-}
-
-func (i Info) Name() (pkg, name string) {
-	name = i.RuntimeName()
-
-	if li := strings.LastIndexByte(name, '/'); li > -1 {
-		pkg = name[:li+1]
-		name = name[li+1:]
-	}
-
-	if li := strings.LastIndexByte(name, '.'); li > -1 {
-		pkg = name[:li]
-		name = name[li+1:]
-	}
-
-	return pkg, name
 }
