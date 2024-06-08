@@ -23,8 +23,8 @@ TEXT ·vmProtect(SB), $56-40
         PUSHQ R8
         PUSHQ R9
         MOVL  targetTask+0(FP), DI
-        MOVL  address+8(FP), SI
-        MOVL  size+16(FP), DX
+        MOVQ  address+8(FP), SI
+        MOVQ  size+16(FP), DX
         MOVL  set_maximum+24(FP), R10
         MOVL  new_protection+28(FP), R8
         XORQ  R9, R9
