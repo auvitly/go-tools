@@ -24,7 +24,7 @@ type sections struct {
 func findInstruction(ptr uintptr, size int, desired x86asm.Op, allowed ...x86asm.Op) (
 	instr *x86asm.Inst, addr uintptr, _ error) {
 	var (
-		code = memory.Scan(ptr, size)
+		code = memory.As(ptr, size)
 		pos  = 0
 	)
 
@@ -37,7 +37,7 @@ loop:
 
 		instruction, err := x86asm.Decode(code[pos:], strconv.IntSize)
 		if err != nil {
-			return nil, 0, err
+			return nil, 0, fmt.Errorf("x86asm.Decode: %w", err)
 		}
 
 		if instruction.Op == desired {
@@ -52,14 +52,14 @@ loop:
 			}
 		}
 
-		return nil, 0, fmt.Errorf("")
+		return nil, 0, fmt.Errorf("unexpected instruction found: %v desired: %v", instruction, desired)
 	}
 }
 
 func inspectFunction(ptr uintptr) (res sections, err error) {
 	inst, addr, err := findInstruction(ptr, 16, x86asm.JBE, x86asm.LEA, x86asm.CMP, x86asm.NOP, x86asm.INT)
 	if err != nil {
-		return res, err
+		return res, fmt.Errorf("findInstruction[0]: %w", err)
 	}
 
 	res.JBEInstruction = *inst
@@ -75,14 +75,14 @@ func inspectFunction(ptr uintptr) (res sections, err error) {
 
 	inst, addr, err = findInstruction(res.Footer, 128, x86asm.CALL, x86asm.MOV, x86asm.CMP, x86asm.NOP, x86asm.INT)
 	if err != nil {
-		return res, err
+		return res, fmt.Errorf("findInstruction[1]: %w", err)
 	}
 
 	res.CallInstruction, res.CallAddress = *inst, addr
 
 	inst, addr, err = findInstruction(addr+uintptr(inst.Len), 128, x86asm.JMP, x86asm.MOV, x86asm.CMP, x86asm.NOP, x86asm.INT)
 	if err != nil {
-		return res, err
+		return res, fmt.Errorf("findInstruction[2]: %w", err)
 	}
 
 	rel, ok = inst.Args[0].(x86asm.Rel)
@@ -100,7 +100,7 @@ func inspectFunction(ptr uintptr) (res sections, err error) {
 func Replace[T any](tg, rp T, oldTo ...*T) *memory.PatchFrame[T] {
 	sec, err := inspectFunction(**(**uintptr)(unsafe.Pointer(&tg)))
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("inspectFunction: %v", err))
 	}
 
 	var (
@@ -153,11 +153,11 @@ func Replace[T any](tg, rp T, oldTo ...*T) *memory.PatchFrame[T] {
 	)
 
 	originTramp = append(originTramp, beforeJBE...)              //
-	originTramp = append(originTramp, 0x76, byte(len(jmpBytes))) // JBE SHORT
+	originTramp = append(originTramp, 0x76, byte(len(jmpBytes))) // JBE rel8
 	originTramp = append(originTramp, jmpBytes...)               // JMP FAR TO ORIGIN BODY
 	originTramp = append(originTramp, beforeCall...)             //
 	originTramp = append(originTramp, callBytes...)              //
-	originTramp = append(originTramp, 0xEB, byte(-size))         //  JMP SHORT
+	originTramp = append(originTramp, 0xEB, byte(-size))         // JMP rel8
 
 	memory.SetProtect(uintptr(unsafe.Pointer(&originTramp[0])), size, memory.ProtectModeReadWrite)
 

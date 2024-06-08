@@ -35,6 +35,6 @@ func SetProtect(ptr uintptr, size int, mode ProtectMode) {
 	}
 
 	if ret := vmProtect(taskSelfTrap(), ptr, size, 0, protect); ret != 0 {
-		panic(fmt.Errorf("%w: %d", ErrMachVMProtect, ret))
+		panic(fmt.Sprintf("vmProtect: ret = %v", ret))
 	}
 }

@@ -4,6 +4,7 @@
 package memory
 
 import (
+	"fmt"
 	"syscall"
 	"unsafe"
 )
@@ -31,7 +32,7 @@ const (
 
 var (
 	modes = map[ProtectMode]uint32{
-		// ProtectModeRead:      _PAGE_EXECUTE_READ,
+		// ProtectModeRead: _PAGE_EXECUTE_READ,
 		ProtectModeRead:      _PAGE_READWRITE,
 		ProtectModeReadWrite: _PAGE_EXECUTE_READWRITE,
 	}
@@ -54,6 +55,6 @@ func SetProtect(ptr uintptr, size int, mode ProtectMode) {
 		uintptr(unsafe.Pointer(&oldProtect)),
 	)
 	if ret == 0 {
-		panic(syscall.GetLastError())
+		panic(fmt.Sprintf("protector.Call: %v", syscall.GetLastError()))
 	}
 }

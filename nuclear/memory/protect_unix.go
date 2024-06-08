@@ -27,7 +27,7 @@ func SetProtect(ptr uintptr, size int, mode ProtectMode) {
 
 	for i := page; i < ptr+uintptr(size); i += uintptr(pageSize) {
 		if err := syscall.Mprotect(AddressToBytes(i, pageSize)); err != nil {
-			panic(err)
+			panic(fmt.Sprintf("syscall.Mprotect: %v", err))
 		}
 	}
 }

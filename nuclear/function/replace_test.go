@@ -3,20 +3,23 @@ package function_test
 import (
 	"github.com/auvitly/go-tools/nuclear/function"
 	"testing"
-	"time"
 )
+
+func Sum(a, b int) int {
+	return a + b
+}
 
 func TestReplace(t *testing.T) {
 	t.Parallel()
 
 	var (
-		old  func() time.Time
-		impl = func() time.Time {
-			return time.Unix(0, 0)
+		old  func(a, b int) int
+		impl = func(a, b int) int {
+			return 1
 		}
 	)
 
-	function.Replace(time.Now, impl, &old)
+	function.Replace(Sum, impl, &old)
 
-	t.Log(time.Now())
+	t.Log(Sum(0, 0))
 }
