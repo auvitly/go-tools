@@ -14,8 +14,8 @@ func As(ptr uintptr, size int) []byte {
 	}))
 }
 
-// Scan - copy of a memory fragment as a slice of bytes.
-func Scan(ptr uintptr, size int) []byte {
+// Clone - copy of a memory fragment as a slice of bytes.
+func Clone(ptr uintptr, size int) []byte {
 	var (
 		buf  = make([]byte, 0, size)
 		data = As(ptr, size)

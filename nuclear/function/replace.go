@@ -146,8 +146,8 @@ func Replace[T any](tg, rp T, oldTo ...*T) *Patch[T] {
 	var newFooter = append(moveDX(newFunc), 0xFF, 0x22) // JMP to new impls
 
 	var (
-		oldHeader = memory.Scan(sec.Header, len(newHeader))
-		oldFooter = memory.Scan(sec.Footer, len(newFooter))
+		oldHeader = memory.Clone(sec.Header, len(newHeader))
+		oldFooter = memory.Clone(sec.Footer, len(newFooter))
 	)
 
 	var (
