@@ -5,6 +5,7 @@ import (
 	"unsafe"
 )
 
+// As - performs a representation of a memory fragment as a slice of bytes
 func As(ptr uintptr, size int) []byte {
 	return *(*[]byte)(unsafe.Pointer(&impls.Slice{
 		Data: ptr,
@@ -13,6 +14,7 @@ func As(ptr uintptr, size int) []byte {
 	}))
 }
 
+// Scan - copy of a memory fragment as a slice of bytes.
 func Scan(ptr uintptr, size int) []byte {
 	var (
 		buf  = make([]byte, 0, size)
@@ -22,10 +24,12 @@ func Scan(ptr uintptr, size int) []byte {
 	return append(buf, data...)
 }
 
+// Copy - copies data from src to dst by number of bytes.
 func Copy(dst uintptr, src uintptr, size int) {
 	copy(As(dst, size), As(src, size))
 }
 
+// Write - overwrites memory by ptr with the following data bytes.
 func Write(ptr uintptr, data []byte) {
 	SetProtect(ptr, len(data), ProtectModeReadWrite)
 	defer func() { SetProtect(ptr, len(data), ProtectModeRead) }()

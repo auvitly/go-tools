@@ -18,12 +18,14 @@ func TestReplace(t *testing.T) {
 		}
 	)
 
-	patch := function.Replace(time.Now, newTimeFunc, &oldTimeFunc)
-	require.NotNil(t, patch)
+	for i := 0; i < 100; i++ {
+		patch := function.Replace(time.Now, newTimeFunc, &oldTimeFunc)
+		require.NotNil(t, patch)
 
-	assert.Equal(t, time.Now(), ts, "equal")
+		assert.Equal(t, time.Now(), ts, "equal")
 
-	patch.Unpatch()
-	time.Sleep(time.Second)
-	assert.NotEqual(t, time.Now(), ts, "not equal")
+		patch.Unpatch()
+		time.Sleep(time.Second)
+		assert.NotEqual(t, time.Now(), ts, "not equal")
+	}
 }

@@ -100,7 +100,7 @@ func inspectFunction(ptr uintptr) (res sections, err error) {
 	return res, nil
 }
 
-func Replace[T any](tg, rp T, oldTo ...*T) *memory.PatchFrame[T] {
+func Replace[T any](tg, rp T, oldTo ...*T) *Patch[T] {
 	mu.Lock()
 	defer mu.Unlock()
 
@@ -177,16 +177,15 @@ func Replace[T any](tg, rp T, oldTo ...*T) *memory.PatchFrame[T] {
 		*item = proxyFn
 	}
 
-	memory.Patch(sec.Header, sec.Footer, sec.EOF, newHeader, newFooter)
+	doPatch(sec.Header, sec.Footer, sec.EOF, newHeader, newFooter)
 
-	var res = memory.NewPatch(proxyFn, rp)
+	var res = NewPatch(proxyFn, rp).
+		WithUnpatch(func() {
+			mu.Lock()
+			defer mu.Unlock()
 
-	res.WithUnpatch(func() {
-		mu.Lock()
-		defer mu.Unlock()
-
-		memory.Patch(sec.Header, sec.Footer, sec.EOF, oldHeader, oldFooter)
-	})
+			doPatch(sec.Header, sec.Footer, sec.EOF, oldHeader, oldFooter)
+		})
 
 	return res
 }
