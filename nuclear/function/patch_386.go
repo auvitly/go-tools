@@ -1,8 +1,9 @@
 package function
 
+// moveDX: MOV EDX, to
 func moveDX(to uintptr) []byte {
 	return []byte{
-		0xBA,
+		0xBA, // ?
 		byte(to),
 		byte(to >> 8),
 		byte(to >> 16),
@@ -10,6 +11,7 @@ func moveDX(to uintptr) []byte {
 	}
 }
 
+// jumpFar: JMP to
 func jumpFar(to uintptr) []byte {
 	return []byte{
 		0xE9,
