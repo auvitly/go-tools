@@ -11,14 +11,14 @@ import (
 func TestReplace(t *testing.T) {
 	var ts = time.Now()
 
-	var newTimeFunc = func() time.Time {
+	var fn = func() time.Time {
 		return ts
 	}
 
 	time.Sleep(time.Second)
 
 	for i := 0; i < 100; i++ {
-		patch := function.Replace(time.Now, newTimeFunc)
+		patch := function.Replace(time.Now, fn)
 		require.NotNil(t, patch)
 
 		assert.Equal(t, time.Now(), ts, "equal")
