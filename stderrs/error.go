@@ -188,7 +188,7 @@ func (e *Error) WithFields(fields map[string]any) *Error {
 	return &result
 }
 
-// Error - impls of the standard interface.
+// Error - implementation of the standard interface.
 func (e *Error) Error() string {
 	if e == nil {
 		return ""
@@ -241,7 +241,7 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("{%s}", message)
 }
 
-// Unwrap - impls of the standard interface.
+// Unwrap - types of the standard interface.
 func (e *Error) Unwrap() error {
 	if e == nil {
 		return nil
@@ -250,7 +250,7 @@ func (e *Error) Unwrap() error {
 	return e.Embed
 }
 
-// Is - impls of the standard interface.
+// Is - types of the standard interface.
 func (e *Error) Is(err error) bool {
 	if e == nil || err == nil {
 		return false

@@ -1,13 +1,13 @@
 package memory
 
 import (
-	"github.com/auvitly/go-tools/nuclear/impls"
+	"github.com/auvitly/go-tools/nuclear/types"
 	"unsafe"
 )
 
 // As - performs a representation of a memory fragment as a slice of bytes
 func As(ptr uintptr, size int) []byte {
-	return *(*[]byte)(unsafe.Pointer(&impls.Slice{
+	return *(*[]byte)(unsafe.Pointer(&types.Slice{
 		Data: ptr,
 		Len:  size,
 		Cap:  size,

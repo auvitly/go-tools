@@ -2,7 +2,7 @@ package function
 
 import (
 	"fmt"
-	"github.com/auvitly/go-tools/nuclear/impls"
+	"github.com/auvitly/go-tools/nuclear/types"
 	"reflect"
 	"runtime"
 	"unsafe"
@@ -19,7 +19,7 @@ func New(fn any) Info {
 		return 0
 	}
 
-	if ptr := (*impls.Interface)(unsafe.Pointer(&fn)).Data; ptr != nil {
+	if ptr := (*types.Interface)(unsafe.Pointer(&fn)).Data; ptr != nil {
 		return Info(*ptr)
 	}
 

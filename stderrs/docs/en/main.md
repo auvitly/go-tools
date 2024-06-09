@@ -70,7 +70,7 @@ type Error struct {
 	// Fields - allows you to pass specific parameters that determine the initial error.
 	// For example, when accessing remote resources, you can pass a request model.
 	// Fields is processed by the json package, so the values for the keys must
-	// be regular impls, or structures, or respond to the json.Marshaler interface.
+	// be regular implementation, or structures, or respond to the json.Marshaler interface.
 	// Otherwise Fields will be skipped.
 	Fields  map[string]any `json:"fields"`
 	// Codes - status codes for various transport levels.

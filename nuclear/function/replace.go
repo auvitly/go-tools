@@ -143,7 +143,7 @@ func Replace[T any](tg, rp T, oldTo ...*T) *Patch[T] {
 		panic(fmt.Sprintf("unsupported JBE instruction %v", sec.JBEInstruction))
 	}
 
-	var newFooter = append(moveDX(newFunc), 0xFF, 0x22) // JMP to new impls
+	var newFooter = append(moveDX(newFunc), 0xFF, 0x22) // JMP to new implementation
 
 	var (
 		oldHeader = memory.Clone(sec.Header, len(newHeader))
