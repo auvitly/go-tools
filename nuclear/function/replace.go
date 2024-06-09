@@ -6,6 +6,7 @@ import (
 	"github.com/auvitly/go-tools/nuclear/memory"
 	"golang.org/x/arch/x86/x86asm"
 	"strconv"
+	"sync"
 	"unsafe"
 )
 
@@ -20,6 +21,8 @@ type sections struct {
 	CallInstruction x86asm.Inst
 	JMPAddress      uintptr
 }
+
+var mu sync.Mutex
 
 func findInstruction(ptr uintptr, size int, desired x86asm.Op, allowed ...x86asm.Op) (
 	instr *x86asm.Inst, addr uintptr, _ error) {
@@ -98,6 +101,9 @@ func inspectFunction(ptr uintptr) (res sections, err error) {
 }
 
 func Replace[T any](tg, rp T, oldTo ...*T) *memory.PatchFrame[T] {
+	mu.Lock()
+	defer mu.Unlock()
+
 	sec, err := inspectFunction(**(**uintptr)(unsafe.Pointer(&tg)))
 	if err != nil {
 		panic(fmt.Sprintf("inspectFunction: %v", err))
@@ -176,6 +182,9 @@ func Replace[T any](tg, rp T, oldTo ...*T) *memory.PatchFrame[T] {
 	var res = memory.NewPatch(proxyFn, rp)
 
 	res.WithUnpatch(func() {
+		mu.Lock()
+		defer mu.Unlock()
+
 		memory.Patch(sec.Header, sec.Footer, sec.EOF, oldHeader, oldFooter)
 	})
 

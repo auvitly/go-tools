@@ -9,8 +9,6 @@ import (
 )
 
 func TestReplace(t *testing.T) {
-	t.Parallel()
-
 	var ts = time.Now()
 
 	var (
@@ -23,8 +21,9 @@ func TestReplace(t *testing.T) {
 	patch := function.Replace(time.Now, newTimeFunc, &oldTimeFunc)
 	require.NotNil(t, patch)
 
-	assert.Equal(t, ts, time.Now())
+	assert.Equal(t, time.Now(), ts, "equal")
 
 	patch.Unpatch()
-	assert.NotEqual(t, ts, time.Now())
+	time.Sleep(time.Second)
+	assert.NotEqual(t, time.Now(), ts, "not equal")
 }
