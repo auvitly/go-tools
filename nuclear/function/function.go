@@ -20,7 +20,7 @@ func New(fn any) Info {
 	}
 
 	if ptr := (*types.Interface)(unsafe.Pointer(&fn)).Data; ptr != nil {
-		return Info(*ptr)
+		return Info(ptr)
 	}
 
 	return 0
