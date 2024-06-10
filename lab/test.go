@@ -1,25 +1,24 @@
 package lab
 
-// SimpleTest - a simplified form of the unified test without establishing behavior.
-type SimpleTest[R Request, E Expect] struct {
+// Test - unified test with establishing behavior.
+type Test[R Request, E Expect] struct {
 	// Title - allows you to set a short title that can be easily found when needed.
 	Title string
 	// Request - request parameters for the test.
 	Request R
+	// Behavior - behavior system data.
+	Behavior []Behavior
 	// Expected - result of program execution.
 	Expected E
 }
 
-// Test - unified test format.
-type Test[R Request, B Behavior, E Expect] struct {
-	// Title - allows you to set a short title that can be easily found when needed.
-	Title string
-	// Request - request parameters for the test.
-	Request R
-	// Behaviour - behavior system data.
-	Behavior B
-	// Expected - result of program execution.
-	Expected E
+// SetBehavior - method for setting behavior from test description.
+func (t Test[R, E]) SetBehavior(ctrl any) Test[R, E] {
+	for _, item := range t.Behavior {
+		item.Set(ctrl)
+	}
+
+	return t
 }
 
 // Interface that is used to implement a set of models within a package
@@ -45,8 +44,7 @@ type Error[E error] struct {
 	Error E
 }
 
-func (Test[P, B, E]) implRequestData() {}
-func (Payload[P]) implRequestData()    {}
-func (Payload[P]) implExpectData()     {}
-func (Result[P, E]) implExpectData()   {}
-func (Error[E]) implExpectData()       {}
+func (Payload[P]) implRequestData()  {}
+func (Payload[P]) implExpectData()   {}
+func (Result[P, E]) implExpectData() {}
+func (Error[E]) implExpectData()     {}
