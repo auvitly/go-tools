@@ -16,31 +16,31 @@ func TestData(t *testing.T) {
 	}
 
 	var tests = []lab.Test[
-		lab.Data[Arguments],
-		lab.Data[bool],
+		lab.Payload[Arguments],
+		lab.Payload[bool],
 	]{
 		{
 			Title: "#1 Equal",
-			Request: lab.Data[Arguments]{
-				Data: Arguments{
+			Request: lab.Payload[Arguments]{
+				Payload: Arguments{
 					Arg1: 1,
 					Arg2: 1,
 				},
 			},
-			Expected: lab.Data[bool]{
-				Data: true,
+			Expected: lab.Payload[bool]{
+				Payload: true,
 			},
 		},
 		{
 			Title: "#2 Not Equal",
-			Request: lab.Data[Arguments]{
-				Data: Arguments{
+			Request: lab.Payload[Arguments]{
+				Payload: Arguments{
 					Arg1: 0,
 					Arg2: 1,
 				},
 			},
-			Expected: lab.Data[bool]{
-				Data: false,
+			Expected: lab.Payload[bool]{
+				Payload: false,
 			},
 		},
 	}
@@ -55,14 +55,14 @@ func TestData(t *testing.T) {
 
 			assert.Equal(
 				tt,
-				test.Expected.Data,
-				fn(test.Request.Data.Arg1, test.Request.Data.Arg2),
+				test.Expected.Payload,
+				fn(test.Request.Payload.Arg1, test.Request.Payload.Arg2),
 			)
 		})
 	}
 }
 
-func TestDataError(t *testing.T) {
+func TestError(t *testing.T) {
 	t.Parallel()
 
 	type Arguments struct {
@@ -73,25 +73,25 @@ func TestDataError(t *testing.T) {
 	var target = errors.New("div by zero")
 
 	var tests = []lab.Test[
-		lab.Data[Arguments],
+		lab.Payload[Arguments],
 		lab.Result[float64, error],
 	]{
 		{
 			Title: "#1 Equal",
-			Request: lab.Data[Arguments]{
-				Data: Arguments{
+			Request: lab.Payload[Arguments]{
+				Payload: Arguments{
 					Arg1: 2,
 					Arg2: 1,
 				},
 			},
 			Expected: lab.Result[float64, error]{
-				Data: 2,
+				Payload: 2,
 			},
 		},
 		{
 			Title: "#2 Not Equal",
-			Request: lab.Data[Arguments]{
-				Data: Arguments{
+			Request: lab.Payload[Arguments]{
+				Payload: Arguments{
 					Arg1: 1,
 					Arg2: 0,
 				},
@@ -116,14 +116,14 @@ func TestDataError(t *testing.T) {
 		t.Run(test.Title, func(tt *testing.T) {
 			tt.Parallel()
 
-			result, err := fn(test.Request.Data.Arg1, test.Request.Data.Arg2)
+			result, err := fn(test.Request.Payload.Arg1, test.Request.Payload.Arg2)
 			if err != nil {
 				assert.ErrorIs(tt, err, test.Expected.Error)
 
 				return
 			}
 
-			assert.Equal(tt, test.Expected.Data, result)
+			assert.Equal(tt, test.Expected.Payload, result)
 		})
 	}
 }

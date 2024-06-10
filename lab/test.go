@@ -15,42 +15,41 @@ type Tester interface {
 	implTester()
 }
 
-func (Test[R, E]) implTester() {}
-
-// Data - an adapter model for your implementation of parameters.
-type Data[D any] struct {
-	Data D
+// Payload - unified payload model.
+type Payload[P any] struct {
+	Payload P
 }
-
-func (Data[D]) implExpectData()  {}
-func (Data[D]) implRequestData() {}
 
 // RequestData - an interface that is used to implement a set of models within a package.
 type RequestData interface {
 	implRequestData()
 }
 
-// DataWithBehavior - an adapter model for your implementation of parameters.
-type DataWithBehavior[D, B any] struct {
-	Data     D
+// Behavior - an adapter model for your implementation of parameters.
+type Behavior[P, B any] struct {
+	Payload  P
 	Behavior B
 }
-
-func (DataWithBehavior[D, B]) implRequestData() {}
 
 // ExpectData - an interface that is used to implement a set of models within a package.
 type ExpectData interface {
 	implExpectData()
 }
 
-type Result[D any, E error] struct {
-	Data  D
-	Error E
+// Result - unified results model format.
+type Result[P any, E error] struct {
+	Payload P
+	Error   E
 }
 
+// Error - payload-free unified result model format.
 type Error[E error] struct {
 	Error E
 }
 
-func (Result[D, E]) implExpectData() {}
-func (Error[E]) implExpectData()     {}
+func (Test[R, E]) implTester()          {}
+func (Behavior[D, B]) implRequestData() {}
+func (Payload[D]) implRequestData()     {}
+func (Payload[D]) implExpectData()      {}
+func (Result[D, E]) implExpectData()    {}
+func (Error[E]) implExpectData()        {}

@@ -1,5 +1,6 @@
 package lab
 
+// Empty - .
 type Empty struct{}
 
 func (Empty) Error() string    { return "" }
