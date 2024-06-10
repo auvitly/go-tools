@@ -3,6 +3,7 @@ go 1.21
 use (
 	./async
 	./compare
+	./lab
 	./nuclear
 	./recovery
 	./stderrs
