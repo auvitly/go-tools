@@ -12,9 +12,7 @@ Package `lab` provides toolkit for organizing table tests.
 
 --- 
 
-[//]: # (## Documentation)
+## Documentation
 
-[//]: # ()
-[//]: # (* [English - EN]&#40;docs/lang/en/tools.md&#41;)
-
-[//]: # (* [Русский - RU]&#40;docs/lang/ru/ru_tools.md&#41;)
+* [English - EN](docs/en/main.md)
+* [Русский - RU](docs/ru/main.md)
