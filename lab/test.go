@@ -1,7 +1,7 @@
 package lab
 
 // Test - unified test format.
-type Test[R RequestData, E ExpectData] struct {
+type Test[R Request, E Expect] struct {
 	// Title - allows you to set a short title that can be easily found when needed.
 	Title string
 	// Request - request parameters for the test.
@@ -10,30 +10,22 @@ type Test[R RequestData, E ExpectData] struct {
 	Expected E
 }
 
-// Tester - an interface that is used to implement a set of models within a package.
-type Tester interface {
-	implTester()
-}
+// Interface that is used to implement a set of models within a package
+type (
+	Tester  interface{ implTester() }
+	Request interface{ implRequestData() }
+	Expect  interface{ implExpectData() }
+)
 
 // Payload - unified payload model.
 type Payload[P any] struct {
 	Payload P
 }
 
-// RequestData - an interface that is used to implement a set of models within a package.
-type RequestData interface {
-	implRequestData()
-}
-
 // Behavior - an adapter model for your implementation of parameters.
 type Behavior[P, B any] struct {
 	Payload  P
 	Behavior B
-}
-
-// ExpectData - an interface that is used to implement a set of models within a package.
-type ExpectData interface {
-	implExpectData()
 }
 
 // Result - unified results model format.
