@@ -27,48 +27,48 @@ var behavior = lab.Calls[KV, map[string]string]{
 	},
 }
 
+var testsBehavior = []lab.Test[
+	lab.Payload[string],
+	lab.Payload[string],
+]{
+	{
+		Title: "#1 TestKV",
+		Behavior: []lab.Behavior{
+			&behavior,
+		},
+		Request: lab.Payload[string]{
+			Payload: "key_1",
+		},
+		Expected: lab.Payload[string]{
+			Payload: "value_1",
+		},
+	},
+	{
+		Title: "#2 TestKV",
+		Behavior: []lab.Behavior{
+			&behavior,
+		},
+		Request: lab.Payload[string]{
+			Payload: "key_2",
+		},
+		Expected: lab.Payload[string]{
+			Payload: "value_2",
+		},
+	},
+}
+
 func TestBehavior(t *testing.T) {
 	t.Parallel()
 
-	var tests = []lab.Test[
-		lab.Payload[string],
-		lab.Payload[string],
-	]{
-		{
-			Title: "#1 TestKV",
-			Behavior: []lab.Behavior{
-				&behavior,
-			},
-			Request: lab.Payload[string]{
-				Payload: "key_1",
-			},
-			Expected: lab.Payload[string]{
-				Payload: "value_1",
-			},
-		},
-		{
-			Title: "#2 TestKV",
-			Behavior: []lab.Behavior{
-				&behavior,
-			},
-			Request: lab.Payload[string]{
-				Payload: "key_2",
-			},
-			Expected: lab.Payload[string]{
-				Payload: "value_2",
-			},
-		},
-	}
-
-	for i := range tests {
-		var test = tests[i]
+	for i := range testsBehavior {
+		var test = testsBehavior[i]
 
 		t.Run(test.Title, func(tt *testing.T) {
-			var storage = make(map[string]string)
+			var ctrl = make(map[string]string)
 
-			test.ApplyBehavior(storage)
+			test.ApplyBehavior(ctrl)
 
-			assert.Equal(tt, test.Expected.Payload, storage[test.Request.Payload])
+			assert.Equal(tt, test.Expected.Payload, ctrl[test.Request.Payload])
 		})
 	}
 }
