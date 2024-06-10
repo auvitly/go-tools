@@ -6,13 +6,13 @@ import (
 	"testing"
 )
 
-type kv struct {
+type Item struct {
 	Key   string
 	Value string
 }
 
-var behavior = lab.Calls[kv, map[string]string]{
-	Data: []kv{
+var behavior = lab.Calls[Item, map[string]string]{
+	Data: []Item{
 		{
 			Key:   "key_1",
 			Value: "value_1",
@@ -22,7 +22,7 @@ var behavior = lab.Calls[kv, map[string]string]{
 			Value: "value_2",
 		},
 	},
-	Setter: func(ctrl map[string]string, data kv) {
+	Setter: func(ctrl map[string]string, data Item) {
 		ctrl[data.Key] = data.Value
 	},
 }
