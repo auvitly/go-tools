@@ -1,7 +1,7 @@
 package lab
 
-// Test - unified test format.
-type Test[R Request, E Expect] struct {
+// SimpleTest - a simplified form of the unified test without establishing behavior.
+type SimpleTest[R Request, E Expect] struct {
 	// Title - allows you to set a short title that can be easily found when needed.
 	Title string
 	// Request - request parameters for the test.
@@ -10,21 +10,28 @@ type Test[R Request, E Expect] struct {
 	Expected E
 }
 
+// Test - unified test format.
+type Test[R Request, B Behavior, E Expect] struct {
+	// Title - allows you to set a short title that can be easily found when needed.
+	Title string
+	// Request - request parameters for the test.
+	Request R
+	// Behaviour - behavior system data.
+	Behavior B
+	// Expected - result of program execution.
+	Expected E
+}
+
 // Interface that is used to implement a set of models within a package
 type (
-	Request interface{ implRequestData() }
-	Expect  interface{ implExpectData() }
+	Behavior interface{ Set(ctrl any) }
+	Request  interface{ implRequestData() }
+	Expect   interface{ implExpectData() }
 )
 
 // Payload - unified payload model.
 type Payload[P any] struct {
 	Payload P
-}
-
-// Behavior - an adapter model for your implementation of parameters.
-type Behavior[P, B any] struct {
-	Payload  P
-	Behavior B
 }
 
 // Result - unified results model format.
@@ -38,8 +45,8 @@ type Error[E error] struct {
 	Error E
 }
 
-func (Behavior[D, B]) implRequestData() {}
-func (Payload[D]) implRequestData()     {}
-func (Payload[D]) implExpectData()      {}
-func (Result[D, E]) implExpectData()    {}
-func (Error[E]) implExpectData()        {}
+func (Test[P, B, E]) implRequestData() {}
+func (Payload[P]) implRequestData()    {}
+func (Payload[P]) implExpectData()     {}
+func (Result[P, E]) implExpectData()   {}
+func (Error[E]) implExpectData()       {}

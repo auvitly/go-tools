@@ -15,7 +15,7 @@ func TestData(t *testing.T) {
 		Arg2 int
 	}
 
-	var tests = []lab.Test[
+	var tests = []lab.SimpleTest[
 		lab.Payload[Arguments],
 		lab.Payload[bool],
 	]{
@@ -72,7 +72,7 @@ func TestError(t *testing.T) {
 
 	var target = errors.New("div by zero")
 
-	var tests = []lab.Test[
+	var tests = []lab.SimpleTest[
 		lab.Payload[Arguments],
 		lab.Result[float64, error],
 	]{
