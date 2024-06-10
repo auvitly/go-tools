@@ -10,19 +10,19 @@ import (
 func TestData(t *testing.T) {
 	t.Parallel()
 
-	type request struct {
+	type Arguments struct {
 		Arg1 int
 		Arg2 int
 	}
 
-	var equalTests = []lab.Test[
-		lab.Data[request],
+	var tests = []lab.Test[
+		lab.Data[Arguments],
 		lab.Data[bool],
 	]{
 		{
 			Title: "#1 Equal",
-			Request: lab.Data[request]{
-				Data: request{
+			Request: lab.Data[Arguments]{
+				Data: Arguments{
 					Arg1: 1,
 					Arg2: 1,
 				},
@@ -33,8 +33,8 @@ func TestData(t *testing.T) {
 		},
 		{
 			Title: "#2 Not Equal",
-			Request: lab.Data[request]{
-				Data: request{
+			Request: lab.Data[Arguments]{
+				Data: Arguments{
 					Arg1: 0,
 					Arg2: 1,
 				},
@@ -47,8 +47,8 @@ func TestData(t *testing.T) {
 
 	var fn = func(a, b int) bool { return a == b }
 
-	for i := range equalTests {
-		var test = equalTests[i]
+	for i := range tests {
+		var test = tests[i]
 
 		t.Run(test.Title, func(tt *testing.T) {
 			tt.Parallel()
@@ -65,21 +65,21 @@ func TestData(t *testing.T) {
 func TestDataError(t *testing.T) {
 	t.Parallel()
 
-	type request struct {
+	type Arguments struct {
 		Arg1 int
 		Arg2 int
 	}
 
 	var target = errors.New("div by zero")
 
-	var equalTests = []lab.Test[
-		lab.Data[request],
+	var tests = []lab.Test[
+		lab.Data[Arguments],
 		lab.Result[float64, error],
 	]{
 		{
 			Title: "#1 Equal",
-			Request: lab.Data[request]{
-				Data: request{
+			Request: lab.Data[Arguments]{
+				Data: Arguments{
 					Arg1: 2,
 					Arg2: 1,
 				},
@@ -90,8 +90,8 @@ func TestDataError(t *testing.T) {
 		},
 		{
 			Title: "#2 Not Equal",
-			Request: lab.Data[request]{
-				Data: request{
+			Request: lab.Data[Arguments]{
+				Data: Arguments{
 					Arg1: 1,
 					Arg2: 0,
 				},
@@ -110,8 +110,8 @@ func TestDataError(t *testing.T) {
 		return float64(a) / float64(b), nil
 	}
 
-	for i := range equalTests {
-		var test = equalTests[i]
+	for i := range tests {
+		var test = tests[i]
 
 		t.Run(test.Title, func(tt *testing.T) {
 			tt.Parallel()

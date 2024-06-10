@@ -32,7 +32,7 @@ type RequestData interface {
 
 // DataWithBehavior - an adapter model for your implementation of parameters.
 type DataWithBehavior[D, B any] struct {
-	Data     D
+	Data[D]
 	Behavior B
 }
 
@@ -44,7 +44,7 @@ type ExpectData interface {
 }
 
 type Result[D any, E error] struct {
-	Data  D
+	Data[D]
 	Error E
 }
 
