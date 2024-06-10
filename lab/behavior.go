@@ -12,7 +12,7 @@ type Call[D, C any] struct {
 
 // Set - setting behavior on controller.
 func (c *Call[D, C]) Set(ctrl any) {
-	if c.Setter == nil || ctrl == nil {
+	if c.Setter == nil || ctrl == nil || c.fn != nil {
 		return
 	}
 
