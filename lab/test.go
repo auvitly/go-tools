@@ -12,7 +12,6 @@ type Test[R Request, E Expect] struct {
 
 // Interface that is used to implement a set of models within a package
 type (
-	Tester  interface{ implTester() }
 	Request interface{ implRequestData() }
 	Expect  interface{ implExpectData() }
 )
@@ -39,7 +38,6 @@ type Error[E error] struct {
 	Error E
 }
 
-func (Test[R, E]) implTester()          {}
 func (Behavior[D, B]) implRequestData() {}
 func (Payload[D]) implRequestData()     {}
 func (Payload[D]) implExpectData()      {}
