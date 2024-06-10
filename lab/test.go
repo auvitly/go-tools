@@ -12,10 +12,12 @@ type Test[R Request, E Expect] struct {
 	Expected E
 }
 
-// SetBehavior - method for setting behavior from test description.
-func (t Test[R, E]) SetBehavior(ctrl any) Test[R, E] {
-	for _, item := range t.Behavior {
-		item.Set(ctrl)
+// ApplyBehavior - method for setting behavior from test description.
+func (t Test[R, E]) ApplyBehavior(ctrl ...any) Test[R, E] {
+	for _, _ctrl := range ctrl {
+		for _, item := range t.Behavior {
+			item.Set(_ctrl)
+		}
 	}
 
 	return t

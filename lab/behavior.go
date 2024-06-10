@@ -1,29 +1,28 @@
 package lab
 
-import "sync"
-
-// Call - method call model.
-type Call[D, C any] struct {
-	Data   D
+// Calls - method call model.
+type Calls[D, C any] struct {
+	Data   []D
 	Setter func(ctrl C, data D)
-	fn     func(ctrl C, data D) func()
-	once   sync.Once
+	fn     func(ctrl C, data []D) func()
 }
 
 // Set - setting behavior on controller.
-func (c *Call[D, C]) Set(ctrl any) {
-	if c.Setter == nil || ctrl == nil || c.fn != nil {
+func (c *Calls[D, C]) Set(ctrl any) {
+	if c.Setter == nil || ctrl == nil {
 		return
 	}
 
-	c.fn = func(ctrl C, data D) func() {
+	c.fn = func(ctrl C, data []D) func() {
 		return func() {
-			c.Setter(ctrl, c.Data)
+			for _, item := range c.Data {
+				c.Setter(ctrl, item)
+			}
 		}
 	}
 
 	impl, ok := ctrl.(C)
 	if ok {
-		c.once.Do(c.fn(impl, c.Data))
+		c.fn(impl, c.Data)()
 	}
 }
