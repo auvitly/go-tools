@@ -2,21 +2,36 @@ package lab
 
 import "testing"
 
-// Test - unified test with establishing behavior.
-type Test[I, O any] struct {
-	Title       string
-	Preparation []Preparation
-	Input       I
-	Output      O
+// Experiment - unified test data model with preparatory actions.
+type Experiment[I, O any] struct {
+	Preparations Preparations
+	Name         string
+	Input        I
+	Output       O
 }
 
-// Prepare - method for setting behavior from test description.
-func (test Test[I, O]) Prepare(t *testing.T, objects ...any) Test[I, O] {
-	for _, object := range objects {
-		for _, item := range test.Preparation {
-			item.Exec(t, object)
-		}
+// Init - method for setting behavior from test description.
+func (exp Experiment[I, O]) Init(t *testing.T, objects ...any) {
+	for _, item := range exp.Preparations {
+		item.Init(t, objects...)
 	}
+}
 
-	return test
+func (exp Experiment[I, O]) Run(t *testing.T, f func(*testing.T, Experiment[I, O])) {
+	t.Helper()
+
+	t.Run(exp.Name, func(tt *testing.T) {
+		f(tt, exp)
+	})
+}
+
+// Test -  unified test model. The concept is that a test consists of experiments that are run as table tests.
+type Test[I, O any] []Experiment[I, O]
+
+func (test Test[I, O]) Run(t *testing.T, f func(t *testing.T, test Experiment[I, O])) {
+	t.Helper()
+
+	for i := range test {
+		test[i].Run(t, f)
+	}
 }

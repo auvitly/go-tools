@@ -2,9 +2,18 @@ package lab
 
 import "testing"
 
+// Preparations - list of defines a model for preparation operations.
+type Preparations []Preparation
+
 // Preparation - defines a model for preparation operations.
 type Preparation interface {
-	Exec(t *testing.T, object any)
+	Init(t *testing.T, args ...any)
+}
+
+func (p Preparations) Init(t *testing.T, args ...any) {
+	for _, item := range p {
+		item.Init(t, args...)
+	}
 }
 
 // Behavior - description of dependency calls with set method.
@@ -14,9 +23,9 @@ type Behavior[D, C any] struct {
 	fn     func(t *testing.T, ctrl C, data []D) func()
 }
 
-// Exec - setting behavior on controller.
-func (d *Behavior[D, C]) Exec(t *testing.T, ctrl any) {
-	if d.Setter == nil || ctrl == nil {
+// Init - setting behavior on arguments.
+func (d *Behavior[D, C]) Init(t *testing.T, args ...any) {
+	if d.Setter == nil || args == nil {
 		return
 	}
 
@@ -28,8 +37,10 @@ func (d *Behavior[D, C]) Exec(t *testing.T, ctrl any) {
 		}
 	}
 
-	impl, ok := ctrl.(C)
-	if ok {
-		d.fn(t, impl, d.Data)()
+	for _, arg := range args {
+		impl, ok := arg.(C)
+		if ok {
+			d.fn(t, impl, d.Data)()
+		}
 	}
 }
