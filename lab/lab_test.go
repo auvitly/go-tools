@@ -66,7 +66,7 @@ func TestBehavior_Case2(t *testing.T) {
 		return &lab.Behavior[Data, *context.Context]{
 			Data: data,
 			Setter: func(t *testing.T, ctx *context.Context, data Data) {
-				*ctx = lab.NewContext().WithValue(data.Input, data.Output).Context
+				*ctx = context.WithValue(*ctx, data.Input, data.Output)
 			},
 		}
 	}
