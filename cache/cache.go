@@ -6,6 +6,7 @@ import (
 	"sync"
 )
 
+// Cache - contains in memory storage that allows concurrent writing and reading.
 type Cache[K comparable, V any] struct {
 	storage map[K]internal.Item[V]
 	cfg     config
