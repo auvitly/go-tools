@@ -7,20 +7,20 @@ import (
 
 type Cache[K comparable, V any] struct {
 	storage map[K]internal.Item[V]
-	config  Config
+	cfg     config
 	mu      sync.Mutex
 }
 
 func New[K comparable, V any](options ...Option) *Cache[K, V] {
-	var config Config
+	var cfg config
 
 	for _, option := range options {
-		option(&config)
+		option(&cfg)
 	}
 
 	return &Cache[K, V]{
 		storage: make(map[K]internal.Item[V]),
-		config:  config,
+		cfg:     cfg,
 	}
 }
 
@@ -52,17 +52,17 @@ func (c *Cache[K, V]) Set(key K, value V, options ...Option) {
 	}
 
 	var (
-		item   internal.Item[V]
-		config = c.config
+		item internal.Item[V]
+		cfg  = c.cfg
 	)
 
 	item.Value = value
 
 	for _, option := range options {
-		option(&config)
+		option(&cfg)
 	}
 
-	item.Expirations = config.getExpirations()
+	item.Expirations = cfg.getExpirations()
 
 	c.storage[key] = item
 }

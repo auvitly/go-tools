@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-type Config struct {
+type config struct {
 	TTL     time.Duration
 	Context context.Context
 }
 
-func (c Config) getExpirations() (expirations []internal.Expiration) {
+func (c config) getExpirations() (expirations []internal.Expiration) {
 	if c.TTL != 0 {
 		expirations = append(expirations, &internal.ExpirationTTL{TS: time.Now().Add(c.TTL)})
 	}
@@ -23,25 +23,25 @@ func (c Config) getExpirations() (expirations []internal.Expiration) {
 	return expirations
 }
 
-type Option func(config *Config)
+type Option func(config *config)
 
 // WithTTL - set record lifetime.
 func WithTTL(ttl time.Duration) Option {
-	return func(config *Config) {
+	return func(config *config) {
 		config.TTL = ttl
 	}
 }
 
 // WithTimestamp - set record lifetime.
 func WithTimestamp(ts time.Time) Option {
-	return func(config *Config) {
+	return func(config *config) {
 		config.TTL = time.Until(ts)
 	}
 }
 
 // WithContext - set the lifetime of a record by context.
 func WithContext(ctx context.Context) Option {
-	return func(config *Config) {
+	return func(config *config) {
 		config.Context = ctx
 	}
 }
