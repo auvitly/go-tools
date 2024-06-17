@@ -35,10 +35,9 @@ func (e *ExpirationContext) IsExpired() bool {
 		return true
 	}
 
-	select {
-	case <-e.Context.Done():
+	if deadline, ok := e.Context.Deadline(); ok && time.Until(deadline) < 0 {
 		return true
-	default:
-		return false
 	}
+
+	return false
 }

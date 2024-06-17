@@ -16,7 +16,7 @@ func TestGetTTL(t *testing.T) {
 	_, ok := c.Get("key")
 	require.True(t, ok)
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(time.Second)
 
 	_, ok = c.Get("key")
 	require.False(t, ok)
@@ -33,7 +33,7 @@ func TestGetContextDeadline(t *testing.T) {
 	_, ok := c.Get("key")
 	require.True(t, ok)
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 
 	_, ok = c.Get("key")
 	require.False(t, ok)
