@@ -1,3 +1,4 @@
+// Package cache provides an in memory cache model.
 package cache
 
 import (
