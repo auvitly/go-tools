@@ -26,9 +26,11 @@ func New[K comparable, V any](options ...Option) *Cache[K, V] {
 }
 
 // Get - getting value by key.
-func (c *Cache[K, V]) Get(key K) (value V, ok bool) {
+func (c *Cache[K, V]) Get(key K) (V, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+
+	var value V
 
 	if result, ok := c.storage[key]; ok {
 		for _, fn := range result.Expirations {
