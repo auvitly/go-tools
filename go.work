@@ -7,4 +7,5 @@ use (
 	./nuclear
 	./recovery
 	./stderrs
+	./cache
 )
