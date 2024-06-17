@@ -47,9 +47,8 @@ func TestDelete(t *testing.T) {
 	_, ok := c.Get("key")
 	require.True(t, ok)
 
-	time.Sleep(2 * time.Second)
-
 	c.Delete("key")
+
 	_, ok = c.Get("key")
 	require.False(t, ok)
 }
