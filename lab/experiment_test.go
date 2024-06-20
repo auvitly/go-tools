@@ -105,3 +105,48 @@ func TestBehavior_Case2(t *testing.T) {
 		assert.Equal(tt, exp.Output, ctx.Value(exp.Input))
 	})
 }
+
+func TestBehavior_Panic(t *testing.T) {
+	t.Parallel()
+
+	var preparation = func(data []Data) lab.Preparation {
+		return &lab.Behavior[Data, *context.Context]{
+			Data: data,
+		}
+	}
+
+	var test = lab.Test[string, any]{
+		{
+			Preparations: lab.Preparations{
+				preparation([]Data{{Input: "key_1", Output: lab.Pointer(lab.Now)}}),
+			},
+			Name:   "#1 TestKV",
+			Input:  "key_1",
+			Output: lab.Pointer(lab.Now),
+		},
+		{
+			Preparations: lab.Preparations{
+				preparation([]Data{{Input: "key_2", Output: lab.Pointer(lab.Now.Add(time.Hour))}}),
+			},
+			Name:   "#2 TestKV",
+			Input:  "key_2",
+			Output: lab.Pointer(lab.Now.Add(time.Hour)),
+		},
+	}
+
+	test.Run(t, func(tt *testing.T, exp lab.Experiment[string, any]) {
+		var use = func() {
+			tt.Parallel()
+
+			var ctx = context.Background()
+
+			exp.Init(tt, &ctx)
+		}
+
+		if len(exp.Preparations) != 0 {
+			assert.Panics(tt, use)
+		} else {
+			assert.NotPanics(tt, use)
+		}
+	})
+}

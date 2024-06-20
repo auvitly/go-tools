@@ -1,6 +1,9 @@
 package lab
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 // Preparations - list of defines a model for preparation operations.
 type Preparations []Preparation
@@ -28,7 +31,7 @@ type Behavior[D, C any] struct {
 // Init - setting behavior on arguments.
 func (d *Behavior[D, C]) Init(t *testing.T, ctrl any) {
 	if d.Setter == nil {
-		t.Fatalf("behavior %T not contains setter", *d)
+		panic(fmt.Sprintf("behavior %T not contains setter", *d))
 	}
 
 	d.fn = func(t *testing.T, ctrl C, data []D) func() {
