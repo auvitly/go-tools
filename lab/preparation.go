@@ -31,10 +31,6 @@ func (d *Behavior[D, C]) Init(t *testing.T, ctrl any) {
 		t.Fatalf("behavior %T not contains setter", *d)
 	}
 
-	if ctrl == nil {
-		t.Fatalf("behavior %T got nil controller", *d)
-	}
-
 	d.fn = func(t *testing.T, ctrl C, data []D) func() {
 		return func() {
 			for _, item := range d.Data {
