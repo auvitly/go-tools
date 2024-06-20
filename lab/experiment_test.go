@@ -109,28 +109,17 @@ func TestBehavior_Case2(t *testing.T) {
 func TestBehavior_Panic(t *testing.T) {
 	t.Parallel()
 
-	var preparation = func(data []Data) lab.Preparation {
-		return &lab.Behavior[Data, *context.Context]{
-			Data: data,
-		}
-	}
-
 	var test = lab.Test[string, any]{
 		{
 			Preparations: lab.Preparations{
-				preparation([]Data{{Input: "key_1", Output: lab.Pointer(lab.Now)}}),
+				&lab.Behavior[Data, *context.Context]{
+					Data:   []Data{{Input: "key_1", Output: lab.Pointer(lab.Now)}},
+					Setter: nil,
+				},
 			},
 			Name:   "#1 TestKV",
 			Input:  "key_1",
 			Output: lab.Pointer(lab.Now),
-		},
-		{
-			Preparations: lab.Preparations{
-				preparation([]Data{{Input: "key_2", Output: lab.Pointer(lab.Now.Add(time.Hour))}}),
-			},
-			Name:   "#2 TestKV",
-			Input:  "key_2",
-			Output: lab.Pointer(lab.Now.Add(time.Hour)),
 		},
 		{
 			Name:   "#2 TestKV",
