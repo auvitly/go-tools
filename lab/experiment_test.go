@@ -132,6 +132,11 @@ func TestBehavior_Panic(t *testing.T) {
 			Input:  "key_2",
 			Output: lab.Pointer(lab.Now.Add(time.Hour)),
 		},
+		{
+			Name:   "#2 TestKV",
+			Input:  "key_2",
+			Output: lab.Pointer(lab.Now.Add(time.Hour)),
+		},
 	}
 
 	test.Run(t, func(tt *testing.T, exp lab.Experiment[string, any]) {
