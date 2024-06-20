@@ -122,6 +122,22 @@ func TestBehavior_Panic(t *testing.T) {
 			Output: lab.Pointer(lab.Now),
 		},
 		{
+			Preparations: lab.Preparations{
+				&lab.Behavior[Data, *context.Context]{
+					Data: []Data{
+						{Input: "key_1", Output: lab.Pointer(lab.Now)},
+						{Input: "key_2", Output: lab.Pointer(lab.Now.Add(time.Hour))},
+					},
+					Setter: func(t *testing.T, ctx *context.Context, data Data) {
+						*ctx = context.WithValue(*ctx, data.Input, data.Output)
+					},
+				},
+			},
+			Name:   "#2 TestKV",
+			Input:  "key_2",
+			Output: lab.Pointer(lab.Now.Add(time.Hour)),
+		},
+		{
 			Name:   "#2 TestKV",
 			Input:  "key_2",
 			Output: lab.Pointer(lab.Now.Add(time.Hour)),
@@ -138,7 +154,18 @@ func TestBehavior_Panic(t *testing.T) {
 		}
 
 		if len(exp.Preparations) != 0 {
-			assert.Panics(tt, use)
+			for _, preparation := range exp.Preparations {
+				behavior, ok := preparation.(*lab.Behavior[Data, *context.Context])
+				if !ok {
+					continue
+				}
+
+				if behavior.Setter == nil {
+					assert.Panics(tt, use)
+				} else {
+					assert.NotPanics(tt, use)
+				}
+			}
 		} else {
 			assert.NotPanics(tt, use)
 		}
