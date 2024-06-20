@@ -11,10 +11,8 @@ type Experiment[I, O any] struct {
 }
 
 // Init - method for setting behavior from test description.
-func (exp Experiment[I, O]) Init(t *testing.T, objects ...any) {
-	for _, item := range exp.Preparations {
-		item.Init(t, objects...)
-	}
+func (exp Experiment[I, O]) Init(t *testing.T, controllers ...any) {
+	exp.Preparations.Init(t, controllers...)
 }
 
 func (exp Experiment[I, O]) Run(t *testing.T, f func(*testing.T, Experiment[I, O])) {

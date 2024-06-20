@@ -7,12 +7,14 @@ type Preparations []Preparation
 
 // Preparation - defines a model for preparation operations.
 type Preparation interface {
-	Init(t *testing.T, args ...any)
+	Init(t *testing.T, ctrl any)
 }
 
-func (p Preparations) Init(t *testing.T, args ...any) {
+func (p Preparations) Init(t *testing.T, controllers ...any) {
 	for _, item := range p {
-		item.Init(t, args...)
+		for _, controller := range controllers {
+			item.Init(t, controller)
+		}
 	}
 }
 
@@ -24,9 +26,13 @@ type Behavior[D, C any] struct {
 }
 
 // Init - setting behavior on arguments.
-func (d *Behavior[D, C]) Init(t *testing.T, args ...any) {
-	if d.Setter == nil || args == nil {
-		return
+func (d *Behavior[D, C]) Init(t *testing.T, ctrl any) {
+	if d.Setter == nil {
+		t.Fatalf("behavior %T not contains setter", *d)
+	}
+
+	if ctrl == nil {
+		t.Fatalf("behavior %T got nil controller", *d)
 	}
 
 	d.fn = func(t *testing.T, ctrl C, data []D) func() {
@@ -37,10 +43,8 @@ func (d *Behavior[D, C]) Init(t *testing.T, args ...any) {
 		}
 	}
 
-	for _, arg := range args {
-		impl, ok := arg.(C)
-		if ok {
-			d.fn(t, impl, d.Data)()
-		}
+	impl, ok := ctrl.(C)
+	if ok {
+		d.fn(t, impl, d.Data)()
 	}
 }
