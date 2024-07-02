@@ -2,43 +2,23 @@ package object
 
 import "slices"
 
-// Slice - interface for explicitly passing slices.
-type Slice interface {
-	implSlice()
-}
+// Slice - slice model of type T.
+type Slice[T any] []T
 
-// SliceOf - slice model for type T.
-type SliceOf[T any] []T
+func (s Slice[T]) Len() int { return len(s) }
 
-func (s SliceOf[T]) implSlice()                            {}
-func (s SliceOf[T]) Append(elems ...T) SliceOf[T]          { return append(s, elems...) }
-func (s SliceOf[T]) Len() int                              { return len(s) }
-func (s SliceOf[T]) Cap() int                              { return cap(s) }
-func (s SliceOf[T]) Clone() SliceOf[T]                     { return slices.Clone(s) }
-func (s SliceOf[T]) Scan(src SliceOf[T]) SliceOf[T]        { copy(s, src); return s }
-func (s SliceOf[T]) Copy(dst SliceOf[T]) SliceOf[T]        { copy(dst, s); return s }
-func (s SliceOf[T]) Sort(rule func(a, b T) int) SliceOf[T] { slices.SortFunc(s, rule); return s }
-func (s SliceOf[T]) Reverse() SliceOf[T]                   { slices.Reverse(s); return s }
-func (s SliceOf[T]) Clip() SliceOf[T]                      { slices.Clip(s); return s }
+func (s Slice[T]) Cap() int { return cap(s) }
 
-func (s SliceOf[T]) Delete(condition func(item T) bool) SliceOf[T] {
-	if condition == nil {
-		return s
-	}
+func (s Slice[T]) Append(elems ...T) Slice[T] { return append(s, elems...) }
 
-	slices.DeleteFunc(s, condition)
-
-	return s
-}
-
-func (s SliceOf[T]) Join(elems ...SliceOf[T]) SliceOf[T] {
+func (s Slice[T]) AppendSlice(elems ...Slice[T]) Slice[T] {
 	var capacity = s.Cap()
 
 	for _, elem := range elems {
 		capacity += elem.Cap()
 	}
 
-	var result = make(SliceOf[T], 0, capacity)
+	var result = make(Slice[T], 0, capacity)
 
 	result = result.Append(s...)
 
@@ -49,7 +29,59 @@ func (s SliceOf[T]) Join(elems ...SliceOf[T]) SliceOf[T] {
 	return result
 }
 
-func (s SliceOf[T]) IsCondition(condition func(index int, item T) bool) (ok bool) {
+func (s Slice[T]) CopyFrom(src Slice[T]) Slice[T] { copy(s, src); return s }
+
+func (s Slice[T]) CopyTo(dst Slice[T]) Slice[T] { copy(dst, s); return s }
+
+func (s Slice[T]) Sort(rule func(a, b T) int) Slice[T] { slices.SortFunc(s, rule); return s }
+
+func (s Slice[T]) Reverse() Slice[T] { slices.Reverse(s); return s }
+
+func (s Slice[T]) Clip() Slice[T] { return s[:len(s):len(s)] }
+
+func (s Slice[T]) Clone() Slice[T] { return make(Slice[T], s.Len(), s.Cap()).CopyFrom(s) }
+
+func (s Slice[T]) Chunk(size uint) Chunk[T] {
+	if size == 0 {
+		size = 1
+	}
+
+	var num = s.Len() / int(size)
+
+	if num == 0 {
+		return Chunk[T]{s}
+	}
+
+	if len(s)%int(size) != 0 {
+		num++
+	}
+
+	var result = make(Chunk[T], 0, num)
+
+	for i := 0; i < num; i++ {
+		var last = (i + 1) * int(size)
+
+		if last > s.Len() {
+			last = s.Len()
+		}
+
+		result = append(result, s[i*int(size):last])
+	}
+
+	return result
+}
+
+func (s Slice[T]) Delete(condition func(item T) bool) Slice[T] {
+	if condition == nil {
+		return s
+	}
+
+	slices.DeleteFunc(s, condition)
+
+	return s
+}
+
+func (s Slice[T]) IsCondition(condition func(index int, item T) bool) (ok bool) {
 	if condition == nil {
 		return false
 	}
@@ -63,7 +95,7 @@ func (s SliceOf[T]) IsCondition(condition func(index int, item T) bool) (ok bool
 	return false
 }
 
-func (s SliceOf[T]) Index(condition func(index int, item T) bool) (index int) {
+func (s Slice[T]) Index(condition func(index int, item T) bool) (index int) {
 	if condition == nil {
 		return -1
 	}
@@ -77,7 +109,7 @@ func (s SliceOf[T]) Index(condition func(index int, item T) bool) (index int) {
 	return -1
 }
 
-func (s SliceOf[T]) Find(condition func(index int, item T) bool) (index int, item T) {
+func (s Slice[T]) Find(condition func(index int, item T) bool) (index int, item T) {
 	if condition == nil {
 		return -1, item
 	}
@@ -91,7 +123,7 @@ func (s SliceOf[T]) Find(condition func(index int, item T) bool) (index int, ite
 	return -1, item
 }
 
-func (s SliceOf[T]) ForEach(fn func(index int, item *T)) SliceOf[T] {
+func (s Slice[T]) ForEach(fn func(index int, item *T)) Slice[T] {
 	if fn == nil {
 		return s
 	}
