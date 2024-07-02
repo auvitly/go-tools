@@ -6,7 +6,8 @@ import (
 )
 
 func TestSlice(t *testing.T) {
-	var m = make(object.Map[int, int]).ScanKV([]int{1, 2}, []int{3, 4})
+	var m = object.Map[int, int]{3: 1}.
+		ScanKV([]int{1, 2}, []int{3, 4})
 
 	t.Log(m)
 }

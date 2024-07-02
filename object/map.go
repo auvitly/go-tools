@@ -57,7 +57,7 @@ func (m Map[K, V]) Delete(condition func(key K, value V) bool) Map[K, V] {
 }
 
 func (m Map[K, V]) Keys() Slice[K] {
-	var keys = make(Slice[K], m.Len())
+	var keys = make(Slice[K], 0, m.Len())
 
 	for key := range m {
 		keys = keys.Append(key)
@@ -67,7 +67,7 @@ func (m Map[K, V]) Keys() Slice[K] {
 }
 
 func (m Map[K, V]) Values() Slice[V] {
-	var values = make(Slice[V], m.Len())
+	var values = make(Slice[V], 0, m.Len())
 
 	for key := range m {
 		values = values.Append(m[key])
