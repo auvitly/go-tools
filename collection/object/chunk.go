@@ -1,13 +1,21 @@
 package object
 
-import "slices"
+import (
+	"slices"
+	"unsafe"
+)
 
 // Chunk - slice of elements split into groups the length of size.
 type Chunk[T any] []Slice[T]
 
-func (c Chunk[T]) Append(elems ...Slice[T]) Chunk[T]          { return append(c, elems...) }
+// ChunkOf - method for converting a two-dimensional slice into a chunk.
+func ChunkOf[T any](c [][]T) Chunk[T] { return *(*Chunk[T])(unsafe.Pointer(&c)) }
+
+func (c Chunk[T]) Append(elems ...Slice[T]) Chunk[T] { return append(c, elems...) }
+
 func (c Chunk[T]) Sort(rule func(a, b Slice[T]) int) Chunk[T] { slices.SortFunc(c, rule); return c }
-func (c Chunk[T]) Reverse() Chunk[T]                          { slices.Reverse(c); return c }
+
+func (c Chunk[T]) Reverse() Chunk[T] { slices.Reverse(c); return c }
 
 func (c Chunk[T]) SortItems(rule func(a, b T) int) Chunk[T] {
 	return c.ForEach(func(index int, item *Slice[T]) {

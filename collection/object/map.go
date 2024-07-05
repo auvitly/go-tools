@@ -2,9 +2,17 @@ package object
 
 import (
 	"maps"
+	"slices"
 )
 
-type Map[K comparable, V any] map[K]V
+type (
+	Map[K comparable, V any]          map[K]V
+	MapAction[K comparable, V any]    func(Map[K, V]) Map[K, V]
+	MapCondition[K comparable, V any] func(K, V) bool
+)
+
+// MapOf - method for converting a map into object.Map.
+func MapOf[K comparable, V any](m map[K]V) Map[K, V] { return m }
 
 func (m Map[K, V]) Len() int { return len(m) }
 
@@ -32,28 +40,47 @@ func (m Map[K, V]) ScanSlice(src Slice[V], fn func(item V) (key K)) Map[K, V] {
 	return m
 }
 
-func (m Map[K, V]) IsCondition(condition func(key K, item V) bool) (ok bool) {
-	if condition == nil {
+func (m Map[K, V]) Is(conditions ...MapCondition[K, V]) (ok bool) {
+	if conditions == nil {
 		return false
 	}
 
 	for key, value := range m {
-		if condition(key, value) {
-			return true
+		for i := range conditions {
+			if !conditions[i](key, value) {
+				return false
+			}
+		}
+
+	}
+
+	return true
+}
+
+func (m Map[K, V]) Delete(keys ...K) Map[K, V] {
+	for key := range m {
+		if slices.Contains(keys, key) {
+			delete(m, key)
 		}
 	}
 
-	return false
+	return m
 }
 
-func (m Map[K, V]) Delete(condition func(key K, value V) bool) Map[K, V] {
-	if condition == nil {
-		return m
-	}
-
-	maps.DeleteFunc(m, condition)
+func (m Map[K, V]) DeleteFunc(del func(K, V) bool) Map[K, V] {
+	maps.DeleteFunc(m, del)
 
 	return m
+}
+
+func (m Map[K, V]) Action(actions ...MapAction[K, V]) Map[K, V] {
+	var result = m
+
+	for i := range actions {
+		result = actions[i](result)
+	}
+
+	return result
 }
 
 func (m Map[K, V]) Keys() Slice[K] {

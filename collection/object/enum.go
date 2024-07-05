@@ -2,20 +2,19 @@ package object
 
 import (
 	"errors"
-	"reflect"
 )
 
-// Enum - enumeration model for type T.
-type Enum[T any] []T
+// Enum - enumeration model for type E.
+type Enum[T comparable] []T
 
 // ErrAlreadyExists - the object is already contained in the enumeration.
 var ErrAlreadyExists = errors.New("already exists")
 
 // Add - add an object to the enumeration.
-func (e *Enum[T]) Add(value T) (T, error) {
+func (e *Enum[T]) Add(value T) (result T, err error) {
 	for _, item := range *e {
-		if reflect.DeepEqual(item, value) {
-			return *new(T), ErrAlreadyExists
+		if item == value {
+			return result, ErrAlreadyExists
 		}
 	}
 
@@ -31,7 +30,7 @@ func (e *Enum[T]) Contains(value T) bool {
 	}
 
 	for _, item := range *e {
-		if reflect.DeepEqual(item, value) {
+		if item == value {
 			return true
 		}
 	}

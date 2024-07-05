@@ -9,5 +9,5 @@ use (
 	./recovery
 	./reflector
 	./stderrs
-	./object
+	./collection
 )
