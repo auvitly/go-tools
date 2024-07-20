@@ -58,7 +58,7 @@ func ElemGreatOrEqual[I cmp.Ordered](value I) object.SliceCondition[I] {
 
 func ElemLess[I cmp.Ordered](value I) object.SliceCondition[I] {
 	return func(index int, item I) bool {
-		if item > value {
+		if item < value {
 			return true
 		}
 
@@ -68,7 +68,7 @@ func ElemLess[I cmp.Ordered](value I) object.SliceCondition[I] {
 
 func ElemLessOrEqual[I cmp.Ordered](value I) object.SliceCondition[I] {
 	return func(index int, item I) bool {
-		if item >= value {
+		if item <= value {
 			return true
 		}
 
@@ -76,9 +76,19 @@ func ElemLessOrEqual[I cmp.Ordered](value I) object.SliceCondition[I] {
 	}
 }
 
-func ElemRange[I cmp.Ordered](i, j I) object.SliceCondition[I] {
+func ElemInRange[I cmp.Ordered](i, j I) object.SliceCondition[I] {
 	return func(index int, item I) bool {
-		if item >= i && item < j {
+		if item >= i && item <= j {
+			return true
+		}
+
+		return false
+	}
+}
+
+func ElemNotInRange[I cmp.Ordered](i, j I) object.SliceCondition[I] {
+	return func(index int, item I) bool {
+		if item <= i || item >= j {
 			return true
 		}
 

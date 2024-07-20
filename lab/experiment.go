@@ -4,15 +4,10 @@ import "testing"
 
 // Experiment - unified test data model with preparatory actions.
 type Experiment[I, O any] struct {
-	Preparations Preparations
-	Name         string
-	Input        I
-	Output       O
-}
-
-// Init - method for setting behavior from test description.
-func (exp Experiment[I, O]) Init(t *testing.T, controllers ...any) {
-	exp.Preparations.Init(t, controllers...)
+	Name        string
+	Description string
+	In          I
+	Out         O
 }
 
 func (exp Experiment[I, O]) Run(t *testing.T, f func(*testing.T, Experiment[I, O])) {
