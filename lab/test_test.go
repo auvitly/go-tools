@@ -21,7 +21,7 @@ func TestBehavior_Case1(t *testing.T) {
 			In: lab.In[string, lab.TODO]{
 				Behavior: func(t *testing.T, payload string, suite lab.TODO) {
 					t.Helper()
-				},"U"
+				},
 			},
 			Out: lab.Out[*time.Time]{},
 		},
