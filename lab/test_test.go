@@ -6,20 +6,17 @@ import (
 	"time"
 )
 
-func TestBehavior_Case1(t *testing.T) {
-	t.Parallel()
+func TestBehavior_Case1(ctrl *testing.T) {
+	ctrl.Parallel()
 
 	var tests = []lab.Test[
-		lab.In[
-			string,
-			lab.TODO,
-		],
+		lab.In[string, lab.TODO],
 		lab.Out[*time.Time],
 	]{
 		{
 			Name: "#1",
 			In: lab.In[string, lab.TODO]{
-				Behavior: func(t *testing.T, payload string, suite lab.TODO) {
+				Behavior: func(t *testing.T, suite lab.TODO) {
 					t.Helper()
 				},
 			},
@@ -30,7 +27,7 @@ func TestBehavior_Case1(t *testing.T) {
 	for i := range tests {
 		var test = tests[i]
 
-		t.Run(test.Name, func(t *testing.T) {
+		ctrl.Run(test.Name, func(t *testing.T) {
 			t.Parallel()
 		})
 	}
