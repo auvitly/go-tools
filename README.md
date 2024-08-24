@@ -11,7 +11,7 @@
 Tools that should help organize routine tasks and improve code quality. Contains:
 * [`stderrs`](stderrs/README.md)- error unification
 * [`recovery`](recovery/README.md) - exception handling
-* [`compare`](compare/README.md) - object comparison
+* [`compare`](archived/compare/README.md) - object comparison
 * [`lab`](lab/README.md) - organizing tests
 
 Other packages:

@@ -1,4 +1,4 @@
-package kit
+package lab
 
 type (
 	Empty struct{}

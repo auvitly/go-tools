@@ -1,4 +1,4 @@
-package kit
+package lab
 
 import (
 	"github.com/stretchr/testify/require"

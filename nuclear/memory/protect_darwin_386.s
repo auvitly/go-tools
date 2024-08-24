@@ -14,6 +14,7 @@ TEXT ·taskSelfTrap(SB), $4-0
     RET
 
 // func vmProtect(targetTask uint32, address uintptr, size int, setMaximum, newProtection uint32) (ret uint32)
+// 4 + 4 + 8 + 4 + 4 = +4
 TEXT ·vmProtect(SB), $28-24
         PUSHL AX
         PUSHL DI

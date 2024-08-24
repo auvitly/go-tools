@@ -1,4 +1,4 @@
-package kit
+package lab
 
 type Out[E any] struct {
 	Expected E
