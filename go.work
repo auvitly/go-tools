@@ -1,13 +1,14 @@
 go 1.21
 
 use (
+	./archived/collection
+	./archived/compare
 	./async
 	./cache
-	./standard/lab
 	./nuclear
-	./standard/recovery
 	./reflector
+	./standard/lab
+	./standard/recovery
 	./standard/stderrs
-	./archived/compare
-	./archived/collection
+	./standard/telemetry
 )
