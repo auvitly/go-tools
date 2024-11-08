@@ -9,10 +9,10 @@
 ---
 
 Tools that should help organize routine tasks and improve code quality. Contains:
-* [`stderrs`](stderrs/README.md)- error unification
-* [`recovery`](recovery/README.md) - exception handling
+* [`stderrs`](standard/stderrs/README.md)- error unification
+* [`recovery`](standard/recovery/README.md) - exception handling
 * [`compare`](archived/compare/README.md) - object comparison
-* [`lab`](lab/README.md) - organizing tests
+* [`lab`](standard/lab/README.md) - organizing tests
 
 Other packages:
 * [`async`](async/README.md) - expansion of standard synchronization solutions

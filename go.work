@@ -3,11 +3,11 @@ go 1.21
 use (
 	./async
 	./cache
-	./lab
+	./standard/lab
 	./nuclear
-	./recovery
+	./standard/recovery
 	./reflector
-	./stderrs
+	./standard/stderrs
 	./archived/compare
 	./archived/collection
 )
