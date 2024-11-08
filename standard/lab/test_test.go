@@ -10,7 +10,7 @@ import (
 func TestBehavior_Case1(t *testing.T) {
 	t.Parallel()
 
-	var test = lab.Tests[
+	var tests = lab.Tests[
 		lab.In[string, lab.TODO],
 		lab.Out[*time.Time, lab.Empty],
 	]{
@@ -28,7 +28,7 @@ func TestBehavior_Case1(t *testing.T) {
 		},
 	}
 
-	test.Run(t, func(t *testing.T, test lab.Test[lab.In[string, lab.TODO], lab.Out[*time.Time, lab.Empty]]) {
+	tests.Run(t, func(t *testing.T, test lab.Test[lab.In[string, lab.TODO], lab.Out[*time.Time, lab.Empty]]) {
 		t.Parallel()
 	})
 }
