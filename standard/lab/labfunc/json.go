@@ -1,4 +1,4 @@
-package labkit
+package labfunc
 
 import (
 	"encoding/json"
