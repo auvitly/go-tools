@@ -1,6 +1,7 @@
 package vault
 
 import (
+	"fmt"
 	"github.com/davecgh/go-spew/spew"
 	"reflect"
 	"sync"
@@ -13,59 +14,59 @@ var (
 	vault = make(map[*testing.T]map[string]any)
 )
 
+type Vault struct {
+	mu      sync.Mutex
+	storage map[string]any
+}
+
+func New() *Vault {
+	return &Vault{
+		storage: make(map[string]any),
+	}
+}
+
 // Store - stores the specified value within the active pointer to the testing object *testing.T.
 // After the test is completed, the data will be deleted.
-func Store[V any](t *testing.T, key string, value V) (result V) {
-	t.Helper()
+func Store[V any](vault *Vault, key string, value V) (result V) {
+	vault.mu.Lock()
+	defer vault.mu.Unlock()
 
-	t.Cleanup(func() {
-		mu.Lock()
-		defer mu.Unlock()
-
-		delete(vault, t)
-	})
-
-	mu.Lock()
-	defer mu.Unlock()
-
-	if vault[t] == nil {
-		vault[t] = make(map[string]any)
-	}
-
-	stored, ok := vault[t][key].(V)
+	stored, ok := vault.storage[key].(V)
 
 	switch {
 	case ok && !reflect.DeepEqual(stored, value):
-		t.Fatalf("value with key '%s' already stored with value %#v",
+		panic(fmt.Sprintf("value with key '%s' already stored with value %#v",
 			key,
 			spew.Sprintf("%v", stored),
-		)
-
-		return result
-
+		))
 	case ok && reflect.DeepEqual(stored, value):
 		value = stored
 	case !ok:
-		vault[t][key] = value
+		vault.storage[key] = value
 	}
 
 	return value
 }
 
 // Load - loading an object of type V from the testing object storage *testing.T.
-func Load[V any](t *testing.T, key string) (value V) {
-	t.Helper()
+func Load[V any](vault *Vault, key string) (value V) {
 
 	mu.Lock()
 	defer mu.Unlock()
 
-	if vault[t] == nil || vault[t][key] == nil {
-		t.Fatalf("not found value with key '%s'", key)
+	if vault == nil || vault.storage[key] == nil {
+		panic(fmt.Sprintf(
+			"not found value with key '%s'",
+			key,
+		))
 	}
 
-	stored, ok := vault[t][key].(V)
+	stored, ok := vault.storage[key].(V)
 	if !ok {
-		t.Fatalf("stored value with key '%s' error: expected type %T, actual type %T", key, value, stored)
+		panic(fmt.Sprintf(
+			"stored value with key '%s' error: expected type %T, actual type %T",
+			key, value, stored,
+		))
 	}
 
 	return stored
