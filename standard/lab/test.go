@@ -36,7 +36,7 @@ type Out[R any, E error] struct {
 }
 
 // Any placeholder for base fields that should contain values.
-type Any any
+type Any = any
 
 // Empty is an empty placeholder for any field of the base constructs.
 type Empty struct{}
