@@ -14,8 +14,8 @@ func TestVault(t *testing.T) {
 	t.Parallel()
 
 	var tests = []lab.Test[
-		lab.TODO,
-		lab.TODO,
+		lab.Any,
+		lab.Any,
 	]{
 		{
 			Name: "#1:Vault:EqualValues:net.HardwareAddr",
