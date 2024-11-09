@@ -1,10 +1,5 @@
 package lab
 
-import "testing"
-
-// Tests - model of test scenarios.
-type Tests[I, O any] []Test[I, O]
-
 // Test - unified testcase data model with preparatory actions.
 type Test[I, O any] struct {
 	// Name - short name of the test script.
@@ -48,16 +43,3 @@ type Empty struct{}
 
 // Error returns empty string.
 func (Empty) Error() string { return "" }
-
-// Run runs table tests.
-func (tests Tests[I, O]) Run(t *testing.T, fn func(t *testing.T, test Test[I, O])) {
-	t.Helper()
-
-	for _, test := range tests {
-		t.Run(test.Name, func(t *testing.T) {
-			t.Helper()
-
-			fn(t, test)
-		})
-	}
-}

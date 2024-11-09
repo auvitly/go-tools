@@ -1,4 +1,4 @@
-package labmock
+package labhttp
 
 import (
 	"crypto/tls"
@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type HTTPServer struct {
+type Server struct {
 	mu       sync.Mutex
 	server   *http.Server
 	router   *mux.Router
@@ -19,7 +19,7 @@ type HTTPServer struct {
 }
 
 // NewHTTPServer a method for creating a test server for HTTP clients.
-func NewHTTPServer() *HTTPServer {
+func NewHTTPServer() *Server {
 	addr, err := net.ResolveTCPAddr("tcp", "0.0.0.0:0")
 	if err != nil {
 		panic(err)
@@ -45,26 +45,26 @@ func NewHTTPServer() *HTTPServer {
 		}
 	)
 
-	return &HTTPServer{
+	return &Server{
 		router: router,
 		server: server,
 	}
 }
 
 // Host return server host.
-func (s *HTTPServer) Host() string {
+func (s *Server) Host() string {
 	return s.server.Addr
 }
 
 // SetTLSConfig set the configuration for TLS connection.
-func (s *HTTPServer) SetTLSConfig(config *tls.Config) *HTTPServer {
+func (s *Server) SetTLSConfig(config *tls.Config) *Server {
 	s.server.TLSConfig = config
 
 	return s
 }
 
 // SetReadTimeout set the timeout for http server.
-func (s *HTTPServer) SetReadTimeout(timeout time.Duration) *HTTPServer {
+func (s *Server) SetReadTimeout(timeout time.Duration) *Server {
 	s.server.ReadTimeout = timeout
 
 	return s
@@ -72,7 +72,7 @@ func (s *HTTPServer) SetReadTimeout(timeout time.Duration) *HTTPServer {
 
 // Serve - call ListenAndServe on http.Server. Listens on the TCP network address srv.Addr and then calls Serve to
 // handle requests on incoming connections. Accepted connections are configured to enable TCP keep-alives.
-func (s *HTTPServer) Serve() {
+func (s *Server) Serve() {
 	go func() {
 		err := s.server.ListenAndServe()
 		if err != nil {
@@ -83,7 +83,7 @@ func (s *HTTPServer) Serve() {
 
 // Close - immediately closes all active net.Listeners and any connections in state StateNew, StateActive,
 // or StateIdle. For a graceful shutdown, use Shutdown.
-func (s *HTTPServer) Close() {
+func (s *Server) Close() {
 	err := s.server.Close()
 	if err != nil {
 		panic(err)
@@ -91,7 +91,7 @@ func (s *HTTPServer) Close() {
 }
 
 // HandlerFunc adds a handler for the router. Takes the test handler as the first argument.
-func (s *HTTPServer) HandlerFunc(t *testing.T, path string, fn func(http.ResponseWriter, *http.Request)) *HTTPServer {
+func (s *Server) HandlerFunc(t *testing.T, path string, fn func(http.ResponseWriter, *http.Request)) *Server {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

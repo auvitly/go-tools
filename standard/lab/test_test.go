@@ -2,33 +2,33 @@ package lab_test
 
 import (
 	"github.com/auvitly/go-tools/lab"
-	"github.com/auvitly/go-tools/lab/labvar"
+	"github.com/auvitly/go-tools/lab/vault"
+	"github.com/stretchr/testify/require"
+	"net"
 	"testing"
-	"time"
 )
 
-func TestBehavior_Case1(t *testing.T) {
+func TestStoreLoad(t *testing.T) {
 	t.Parallel()
 
-	var tests = lab.Tests[
-		lab.In[string, lab.TODO],
-		lab.Out[*time.Time, lab.Empty],
+	var tests = []lab.Test[
+		net.HardwareAddr,
+		net.HardwareAddr,
 	]{
 		{
-			Name: "#1",
-			In: lab.In[string, lab.TODO]{
-				Request: labvar.Timestamp.Format(time.RFC3339),
-				Behavior: func(t *testing.T) {
-					t.Helper()
-				},
-			},
-			Out: lab.Out[*time.Time, lab.Empty]{
-				Response: labvar.Pointer(labvar.Timestamp),
-			},
+			Name: "#1:Storage:EqualValues",
+			In:   vault.Store(t, "mac", lab.Value(net.ParseMAC("b1:b2:1e:68:ab:d4"))),
+			Out:  vault.Load[net.HardwareAddr](t, "mac"),
 		},
 	}
 
-	tests.Run(t, func(t *testing.T, test lab.Test[lab.In[string, lab.TODO], lab.Out[*time.Time, lab.Empty]]) {
-		t.Parallel()
-	})
+	for i := range tests {
+		var test = tests[i]
+
+		t.Run(test.Name, func(t *testing.T) {
+			t.Parallel()
+
+			require.Equal(t, test.In, test.Out)
+		})
+	}
 }
