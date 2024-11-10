@@ -2,7 +2,6 @@ package vault
 
 import (
 	"fmt"
-	"github.com/auvitly/go-tools/afmt"
 	"reflect"
 	"sync"
 )
