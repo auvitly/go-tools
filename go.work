@@ -11,4 +11,5 @@ use (
 	./standard/recovery
 	./standard/stderrs
 	./standard/telemetry
+	standard/afmt
 )

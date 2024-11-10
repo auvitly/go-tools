@@ -2,16 +2,9 @@ package vault
 
 import (
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
+	"github.com/auvitly/go-tools/afmt"
 	"reflect"
 	"sync"
-
-	"testing"
-)
-
-var (
-	mu    sync.Mutex
-	vault = make(map[*testing.T]map[string]any)
 )
 
 type Vault struct {
@@ -37,7 +30,7 @@ func Store[V any](vault *Vault, key string, value V) (result V) {
 	case ok && !reflect.DeepEqual(stored, value):
 		panic(fmt.Sprintf("value with key '%s' already stored with value %#v",
 			key,
-			spew.Sprintf("%v", stored),
+			afmt.Sprintf("%v", stored),
 		))
 	case ok && reflect.DeepEqual(stored, value):
 		value = stored
@@ -50,9 +43,8 @@ func Store[V any](vault *Vault, key string, value V) (result V) {
 
 // Load - loading an object of type V from the testing object storage *testing.T.
 func Load[V any](vault *Vault, key string) (value V) {
-
-	mu.Lock()
-	defer mu.Unlock()
+	vault.mu.Lock()
+	defer vault.mu.Unlock()
 
 	if vault == nil || vault.storage[key] == nil {
 		panic(fmt.Sprintf(
