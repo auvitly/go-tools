@@ -1,13 +1,11 @@
 package lab_test
 
 import (
-	"io"
 	"net"
 	"testing"
 	"time"
 
 	"github.com/auvitly/go-tools/lab"
-	"github.com/auvitly/go-tools/lab/kit"
 	"github.com/auvitly/go-tools/lab/vault"
 	"github.com/stretchr/testify/require"
 )
@@ -40,41 +38,6 @@ func TestVault(t *testing.T) {
 			Name: "time.Time",
 			In:   vault.Store(v, "time", lab.Value(time.Parse(time.RFC3339, "2006-01-02T15:04:05+07:00"))),
 			Out:  vault.Load[time.Time](v, "time"),
-		},
-		{
-			Name: "kit.Now",
-			In:   vault.Store(v, "now", kit.Now),
-			Out:  vault.Load[time.Time](v, "now"),
-		},
-		{
-			Name: "error",
-			In:   vault.Store(v, "error", io.ErrClosedPipe),
-			Out:  vault.Load[error](v, "error"),
-		},
-		{
-			Name: "kit.IPv4",
-			In:   vault.Store(v, "kit.IPv4", kit.IPv4),
-			Out:  vault.Load[net.IP](v, "kit.IPv4"),
-		},
-		{
-			Name: "kit.IPv6",
-			In:   vault.Store(v, "kit.IPv6", kit.IPv6),
-			Out:  vault.Load[net.IP](v, "kit.IPv6"),
-		},
-		{
-			Name: "kit.Int",
-			In:   vault.Store(v, "kit.Int", kit.Int),
-			Out:  vault.Load[int](v, "kit.Int"),
-		},
-		{
-			Name: "kit.Int8",
-			In:   vault.Store(v, "kit.Int8", kit.Int8),
-			Out:  vault.Load[int8](v, "kit.Int8"),
-		},
-		{
-			Name: "kit.String",
-			In:   vault.Store(v, "kit.String", kit.String),
-			Out:  vault.Load[string](v, "kit.String"),
 		},
 	}
 

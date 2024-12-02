@@ -29,7 +29,7 @@ func Store[V any](vault *Vault, key string, value V) (result V) {
 	case ok && !reflect.DeepEqual(stored, value):
 		panic(fmt.Sprintf("value with key '%s' already stored with value %#v",
 			key,
-			afmt.Sprintf("%v", stored),
+			fmt.Sprintf("%v", stored),
 		))
 	case ok && reflect.DeepEqual(stored, value):
 		value = stored

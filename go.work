@@ -1,8 +1,6 @@
 go 1.21
 
 use (
-	archived/collection
-	archived/compare
 	async
 	cache
 	nuclear
@@ -11,5 +9,5 @@ use (
 	standard/recovery
 	standard/stderrs
 	standard/telemetry
-	standard/afmt
+	standard/collection/enum
 )
