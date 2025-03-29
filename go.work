@@ -1,13 +1,11 @@
 go 1.21
 
 use (
-	async
 	cache
 	nuclear
 	reflector
+	standard/collection/enum
 	standard/lab
 	standard/recovery
 	standard/stderrs
-	standard/telemetry
-	standard/collection/enum
 )

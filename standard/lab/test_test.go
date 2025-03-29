@@ -21,22 +21,22 @@ func TestVault(t *testing.T) {
 	]{
 		{
 			Name: "net.HardwareAddr",
-			In:   vault.Store(v, "mac", lab.Value(net.ParseMAC("b1:b2:1e:68:ab:d4"))),
+			In:   vault.Store(v, "mac", lab.Return[net.HardwareAddr](net.ParseMAC("b1:b2:1e:68:ab:d4"))(lab.FirstValue)),
 			Out:  vault.Load[net.HardwareAddr](v, "mac"),
 		},
 		{
 			Name: "net.IP",
-			In:   vault.Store(v, "ip", lab.FirstValue(net.ParseCIDR("127.0.0.1/24"))),
+			In:   vault.Store(v, "ip", lab.Return[net.IP](net.ParseCIDR("127.0.0.1/24"))(lab.FirstValue)),
 			Out:  vault.Load[net.IP](v, "ip"),
 		},
 		{
 			Name: "*net.IPNet",
-			In:   vault.Store(v, "cidr", lab.SecondValue(net.ParseCIDR("127.0.0.1/24"))),
+			In:   vault.Store(v, "cidr", lab.Return[*net.IPNet](net.ParseCIDR("127.0.0.1/24"))(lab.SecondValue)),
 			Out:  vault.Load[*net.IPNet](v, "cidr"),
 		},
 		{
 			Name: "time.Time",
-			In:   vault.Store(v, "time", lab.Value(time.Parse(time.RFC3339, "2006-01-02T15:04:05+07:00"))),
+			In:   vault.Store(v, "time", lab.First(time.Parse(time.RFC3339, "2006-01-02T15:04:05+07:00"))),
 			Out:  vault.Load[time.Time](v, "time"),
 		},
 	}
