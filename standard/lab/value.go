@@ -1,5 +1,7 @@
 package lab
 
+import "fmt"
+
 // Pointer - returns pointer on copy value.
 func Pointer[T any](v T) *T {
 	return &v
@@ -21,7 +23,13 @@ func Return[T any](args ...any) func(i ReturnStatement) T {
 		case len(args) == 0:
 			panic("not found return values")
 		case len(args) > int(i):
-			return args[i].(T)
+			var ok bool
+
+			if t, ok = args[i].(T); !ok {
+				panic(fmt.Sprintf("value by statement %d is %T not %T", i, args[i], t))
+			}
+
+			return t
 		default:
 			panic("out of range from args")
 		}
