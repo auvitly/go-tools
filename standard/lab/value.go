@@ -18,18 +18,16 @@ const (
 
 // Return - returns function with return value if the error is nil.
 func Return[T any](args ...any) func(i ReturnStatement) T {
-	return func(i ReturnStatement) (t T) {
+	return func(i ReturnStatement) T {
 		switch {
 		case len(args) == 0:
 			panic("not found return values")
 		case len(args) > int(i):
-			var ok bool
-
-			if t, ok = args[i].(T); !ok {
+			if t, ok := args[i].(T); !ok {
 				panic(fmt.Sprintf("value by statement %d is %T not %T", i, args[i], t))
+			} else {
+				return t
 			}
-
-			return t
 		default:
 			panic("out of range from args")
 		}
