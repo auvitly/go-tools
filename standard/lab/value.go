@@ -8,13 +8,13 @@ func Pointer[T any](v T) *T {
 type ReturnStatement int
 
 const (
-	FirstValue  ReturnStatement = 0
-	SecondValue ReturnStatement = 1
-	ThirdValue  ReturnStatement = 2
+	FirstValue ReturnStatement = iota
+	SecondValue
+	ThirdValue
+	FourthValue
 )
 
 // Return - returns function with return value if the error is nil.
-// Signature: func(*) (V1, V2).
 func Return[T any](args ...any) func(i ReturnStatement) T {
 	return func(i ReturnStatement) (t T) {
 		switch {
@@ -28,13 +28,13 @@ func Return[T any](args ...any) func(i ReturnStatement) T {
 	}
 }
 
-// First - returns the first value if the error is nil.
+// First - returns the first value.
 // Signature: func(*) (V1, V2).
 func First[V1 any, V2 any](value V1, _ V2) V1 {
 	return value
 }
 
-// Second - returns the error.
+// Second - returns the second value.
 // Signature: func(*) (V1, V2).
 func Second[V1 any, V2 any](_ V1, value V2) V2 {
 	return value
