@@ -2,10 +2,11 @@ package recovery
 
 import (
 	"fmt"
-	"github.com/auvitly/go-tools/stderrs"
 	"maps"
 	"runtime/debug"
 	"slices"
+
+	"github.com/auvitly/go-tools/stderrs"
 )
 
 // Handler - user panic handler.
@@ -226,8 +227,6 @@ func (b Builder) recovery(msg any) {
 	}
 
 	b.setError(errs, msg)
-
-	return
 }
 
 func (b Builder) setError(errs []error, msg any) {

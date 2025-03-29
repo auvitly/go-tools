@@ -1,13 +1,13 @@
 package recovery_test
 
 import (
-	"errors"
 	"fmt"
+	"io/fs"
+	"testing"
+
 	"github.com/auvitly/go-tools/recovery"
 	"github.com/auvitly/go-tools/stderrs"
 	"github.com/stretchr/testify/require"
-	"io/fs"
-	"testing"
 )
 
 func TestDo(t *testing.T) {
@@ -96,8 +96,6 @@ func TestPanicInHandler(t *testing.T) {
 	func() {
 		defer recovery.WithHandlers(func(msg any) error {
 			panic(_panic)
-
-			return nil
 		}).
 			SetMessage(_message).
 			On(&err).
@@ -143,7 +141,7 @@ func BenchmarkDefaultPanicHandler(b *testing.B) {
 
 func BenchmarkDoWithHandler(b *testing.B) {
 	var fn = func(msg any) error {
-		return errors.New(fmt.Sprintf("%s", msg))
+		return fmt.Errorf("%v", msg)
 	}
 
 	var fns []recovery.Handler
