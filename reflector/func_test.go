@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestScanFunction(t *testing.T) {
-	fn, err := reflector.ParseFunc(TestScanFunction)
+func TestParseFunc(t *testing.T) {
+	fn, err := reflector.ParseFunc(TestParseFunc)
 	require.NoError(t, err)
 
 	t.Log(fn)
