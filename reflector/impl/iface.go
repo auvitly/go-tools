@@ -1,6 +1,8 @@
-package reflector
+package impl
 
-import "unsafe"
+import (
+	"unsafe"
+)
 
 type Interface struct {
 	Type uintptr

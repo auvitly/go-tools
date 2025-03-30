@@ -1,4 +1,4 @@
-package reflector
+package impl
 
 type Slice struct {
 	Data uintptr
