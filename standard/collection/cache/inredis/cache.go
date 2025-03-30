@@ -45,7 +45,9 @@ func (c *Cache[K, V]) Set(ctx context.Context, key K, value V, options cache.Opt
 		}(),
 	})
 	if err != nil {
-		return stderrs.Internal.SetMessage(err.Error())
+		return stderrs.Internal.
+			EmbedErrors(err).
+			SetMessage(err.Error())
 	}
 
 	return nil
@@ -56,7 +58,9 @@ func (c *Cache[K, V]) Get(ctx context.Context, key K) (V, *stderrs.Error) {
 
 	err := c.storage.Get(ctx, fmt.Sprintf("%v", key), &value)
 	if err != nil {
-		return value, stderrs.Internal.SetMessage(err.Error())
+		return value, stderrs.Internal.
+			EmbedErrors(err).
+			SetMessage(err.Error())
 	}
 
 	return value, nil
@@ -66,7 +70,9 @@ func (c *Cache[K, V]) Delete(ctx context.Context, keys ...K) *stderrs.Error {
 	for _, key := range keys {
 		err := c.storage.Delete(ctx, fmt.Sprintf("%v", key))
 		if err != nil {
-			return stderrs.Internal.SetMessage(err.Error())
+			return stderrs.Internal.
+				EmbedErrors(err).
+				SetMessage(err.Error())
 		}
 	}
 
