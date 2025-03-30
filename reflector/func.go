@@ -9,10 +9,8 @@ import (
 
 // Func - .
 type Func struct {
-	Name    string
-	Pkg     string
-	rv      reflect.Value
-	runtime *runtime.Func
+	Name string
+	Pkg  string
 }
 
 // ScanFunc - .
@@ -35,10 +33,8 @@ func ScanFunc(fn any) (Func, error) {
 	rfn := runtime.FuncForPC(ptr)
 
 	return Func{
-		rv:      rv,
-		runtime: rfn,
-		Pkg:     pkgName(rfn),
-		Name:    name(rfn),
+		Pkg:  pkgName(rfn),
+		Name: name(rfn),
 	}, nil
 }
 
