@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/auvitly/go-tools/cache"
+	"github.com/auvitly/go-tools/standard/collection/cache"
 )
 
 // Cache - contains in memory storage that allows concurrent writing and reading.

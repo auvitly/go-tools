@@ -3,8 +3,8 @@ package inmemory_test
 import (
 	"testing"
 
-	"github.com/auvitly/go-tools/cache"
-	"github.com/auvitly/go-tools/cache/inmemory"
+	"github.com/auvitly/go-tools/standard/collection/cache"
+	"github.com/auvitly/go-tools/standard/collection/cache/inmemory"
 )
 
 func TestCache(t *testing.T) {
