@@ -67,3 +67,10 @@ func Load[V any](t *testing.T, key string) (value V) {
 
 	return stored
 }
+
+func Clean(t *testing.T) {
+	vault.mu.Lock()
+	defer vault.mu.Unlock()
+
+	delete(vault.storage, t)
+}

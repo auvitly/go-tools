@@ -1,9 +1,9 @@
 go 1.21
 
 use (
-	cache
 	nuclear
 	reflector
+	standard/collection/cache
 	standard/collection/enum
 	standard/lab
 	standard/recovery
