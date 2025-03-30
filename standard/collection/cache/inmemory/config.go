@@ -5,6 +5,6 @@ import (
 )
 
 type Config struct {
-	RecordLifeTime time.Duration
-	RecordLimit    int
+	DefaultTTL  time.Duration
+	RecordLimit int
 }

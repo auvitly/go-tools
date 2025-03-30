@@ -1,4 +1,4 @@
-package redis
+package inredis
 
 import (
 	"context"
@@ -29,18 +29,19 @@ func New[K comparable, V any](config Config) (*Cache[K, V], *stderrs.Error) {
 	}, nil
 }
 
-func (c *Cache[K, V]) Set(ctx context.Context, key K, value cache.Item[V]) *stderrs.Error {
+func (c *Cache[K, V]) Set(ctx context.Context, key K, value V, options cache.Options) *stderrs.Error {
 	err := c.storage.Set(&redis_cache.Item{
 		Ctx:            ctx,
 		Key:            fmt.Sprintf("%v", key),
 		Value:          value,
 		SkipLocalCache: c.config.LocalCache == nil,
 		TTL: func() time.Duration {
-			if value.Deadline != nil {
-				return time.Until(*value.Deadline)
+			switch {
+			case options.TTL != nil:
+				return *options.TTL
+			default:
+				return c.config.DefaultTTL
 			}
-
-			return 0
 		}(),
 	})
 	if err != nil {
@@ -50,10 +51,10 @@ func (c *Cache[K, V]) Set(ctx context.Context, key K, value cache.Item[V]) *stde
 	return nil
 }
 
-func (c *Cache[K, V]) Get(ctx context.Context, key K) (cache.Item[V], *stderrs.Error) {
-	var value cache.Item[V]
+func (c *Cache[K, V]) Get(ctx context.Context, key K) (V, *stderrs.Error) {
+	var value V
 
-	err := c.storage.Get(ctx, fmt.Sprintf("%v", key), &value.Value)
+	err := c.storage.Get(ctx, fmt.Sprintf("%v", key), &value)
 	if err != nil {
 		return value, stderrs.Internal.SetMessage(err.Error())
 	}

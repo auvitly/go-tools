@@ -9,15 +9,13 @@ import (
 )
 
 // Cache - unified interface model.
-type Cache[K comparable, V any] interface {
-	Get(ctx context.Context, key K) (Item[V], *stderrs.Error)
-	Set(ctx context.Context, key K, item Item[V]) *stderrs.Error
+type Cache[K comparable, R any] interface {
+	Get(ctx context.Context, key K) (R, *stderrs.Error)
+	Set(ctx context.Context, key K, item R, options Options) *stderrs.Error
 	Delete(ctx context.Context, keys ...K) *stderrs.Error
 	GC() *stderrs.Error
 }
 
-// Item - unificated item model.
-type Item[V any] struct {
-	Value    V
-	Deadline *time.Time
+type Options struct {
+	TTL *time.Duration
 }
