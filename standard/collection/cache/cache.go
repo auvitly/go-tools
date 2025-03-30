@@ -2,16 +2,17 @@
 package cache
 
 import (
+	"context"
 	"time"
 )
 
 // Cache - unified interface model.
 type Cache[K comparable, V any] interface {
-	Get(key K) Item[V]
-	Lookup(key K) (Item[V], bool)
-	Set(key K, item Item[V])
-	Delete(keys ...K)
-	GC()
+	Get(ctx context.Context, key K) Item[V]
+	Lookup(ctx context.Context, key K) (Item[V], bool)
+	Set(ctx context.Context, key K, item Item[V])
+	Delete(ctx context.Context, keys ...K)
+	GC(ctx context.Context)
 }
 
 // Item - unificated item model.

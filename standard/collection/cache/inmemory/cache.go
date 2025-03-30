@@ -1,6 +1,7 @@
 package inmemory
 
 import (
+	"context"
 	"sync"
 	"time"
 
@@ -23,7 +24,7 @@ func New[K comparable, V any](config Config) *Cache[K, V] {
 }
 
 // Lookup - getting value by key.
-func (c *Cache[K, V]) Lookup(key K) (cache.Item[V], bool) {
+func (c *Cache[K, V]) Lookup(_ context.Context, key K) (cache.Item[V], bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -33,14 +34,14 @@ func (c *Cache[K, V]) Lookup(key K) (cache.Item[V], bool) {
 }
 
 // Get - getting value by key.
-func (c *Cache[K, V]) Get(key K) cache.Item[V] {
-	item, _ := c.Lookup(key)
+func (c *Cache[K, V]) Get(ctx context.Context, key K) cache.Item[V] {
+	item, _ := c.Lookup(ctx, key)
 
 	return item
 }
 
 // Set - setting value by key.
-func (c *Cache[K, V]) Set(key K, value cache.Item[V]) {
+func (c *Cache[K, V]) Set(_ context.Context, key K, value cache.Item[V]) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -66,7 +67,7 @@ func (c *Cache[K, V]) Set(key K, value cache.Item[V]) {
 }
 
 // Delete - delete value by key.
-func (c *Cache[K, V]) Delete(keys ...K) {
+func (c *Cache[K, V]) Delete(_ context.Context, keys ...K) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -76,7 +77,7 @@ func (c *Cache[K, V]) Delete(keys ...K) {
 }
 
 // GC - clear cache.
-func (c *Cache[K, V]) GC() {
+func (c *Cache[K, V]) GC(_ context.Context) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 

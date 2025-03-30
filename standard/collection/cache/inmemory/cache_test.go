@@ -1,6 +1,7 @@
 package inmemory_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/auvitly/go-tools/standard/collection/cache"
@@ -14,10 +15,10 @@ func TestCache(t *testing.T) {
 	})
 
 	for i := 0; i < 500; i++ {
-		c.Set(i, cache.Item[int]{Value: i})
+		c.Set(context.Background(), i, cache.Item[int]{Value: i})
 	}
 
-	c.GC()
+	c.GC(context.Background())
 
 	t.Log(c)
 }
