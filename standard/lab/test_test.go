@@ -13,31 +13,29 @@ import (
 func TestVault(t *testing.T) {
 	t.Parallel()
 
-	var v = vault.New()
-
 	var tests = []lab.Test[
 		lab.Any,
 		lab.Any,
 	]{
 		{
 			Name: "net.HardwareAddr",
-			In:   vault.Store(v, "mac", lab.Return[net.HardwareAddr](net.ParseMAC("b1:b2:1e:68:ab:d4"))(lab.FirstValue)),
-			Out:  vault.Load[net.HardwareAddr](v, "mac"),
+			In:   vault.Store(t, "mac", lab.Glue(net.ParseMAC("b1:b2:1e:68:ab:d4"))[0]),
+			Out:  vault.Load[net.HardwareAddr](t, "mac"),
 		},
 		{
 			Name: "net.IP",
-			In:   vault.Store(v, "ip", lab.Return[net.IP](net.ParseCIDR("127.0.0.1/24"))(lab.FirstValue)),
-			Out:  vault.Load[net.IP](v, "ip"),
+			In:   vault.Store(t, "ip", lab.Glue(net.ParseCIDR("127.0.0.1/24"))[0]),
+			Out:  vault.Load[net.IP](t, "ip"),
 		},
 		{
 			Name: "*net.IPNet",
-			In:   vault.Store(v, "cidr", lab.Return[*net.IPNet](net.ParseCIDR("127.0.0.1/24"))(lab.SecondValue)),
-			Out:  vault.Load[*net.IPNet](v, "cidr"),
+			In:   vault.Store(t, "cidr", lab.Glue(net.ParseCIDR("127.0.0.1/24"))[1]),
+			Out:  vault.Load[*net.IPNet](t, "cidr"),
 		},
 		{
 			Name: "time.Time",
-			In:   vault.Store(v, "time", lab.First(time.Parse(time.RFC3339, "2006-01-02T15:04:05+07:00"))),
-			Out:  vault.Load[time.Time](v, "time"),
+			In:   vault.Store(t, "time", lab.First(time.Parse(time.RFC3339, "2006-01-02T15:04:05+07:00"))),
+			Out:  vault.Load[time.Time](t, "time"),
 		},
 	}
 

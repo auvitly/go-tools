@@ -1,37 +1,13 @@
 package lab
 
-import "fmt"
-
 // Pointer - returns pointer on copy value.
 func Pointer[T any](v T) *T {
 	return &v
 }
 
-type ReturnStatement int
-
-const (
-	FirstValue ReturnStatement = iota
-	SecondValue
-	ThirdValue
-	FourthValue
-)
-
-// Return - returns function with return value if the error is nil.
-func Return[T any](args ...any) func(i ReturnStatement) T {
-	return func(i ReturnStatement) T {
-		switch {
-		case len(args) == 0:
-			panic("not found return values")
-		case len(args) > int(i):
-			if t, ok := args[i].(T); !ok {
-				panic(fmt.Sprintf("value by statement %d is %T not %T", i, args[i], t))
-			} else {
-				return t
-			}
-		default:
-			panic("out of range from args")
-		}
-	}
+// Glue - convert any values to slice any.
+func Glue(args ...any) []any {
+	return args
 }
 
 // First - returns the first value.

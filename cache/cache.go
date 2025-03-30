@@ -2,8 +2,9 @@
 package cache
 
 import (
-	"github.com/auvitly/go-tools/cache/internal"
 	"sync"
+
+	"github.com/auvitly/go-tools/cache/internal"
 )
 
 // Cache - contains in memory storage that allows concurrent writing and reading.
@@ -97,7 +98,7 @@ func (c *Cache[K, V]) Snapshot() map[K]V {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	var result = make(map[K]V)
+	var result = make(map[K]V, len(c.storage))
 
 	for key, item := range c.storage {
 		result[key] = item.Value
