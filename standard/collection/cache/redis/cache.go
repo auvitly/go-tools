@@ -29,13 +29,9 @@ func New[K comparable, V any](config Config) (*Cache[K, V], *stderrs.Error) {
 	}, nil
 }
 
-func (c *Cache[K, V]) Set(key K, value cache.Item[V]) *stderrs.Error {
-	return c.SetWithContext(context.Background(), key, value)
-}
-
-func (c *Cache[K, V]) SetWithContext(ctx context.Context, key K, value cache.Item[V]) *stderrs.Error {
+func (c *Cache[K, V]) Set(ctx context.Context, key K, value cache.Item[V]) *stderrs.Error {
 	err := c.storage.Set(&redis_cache.Item{
-		Ctx:            context.Background(),
+		Ctx:            ctx,
 		Key:            fmt.Sprintf("%v", key),
 		Value:          value,
 		SkipLocalCache: c.config.LocalCache == nil,
@@ -54,11 +50,7 @@ func (c *Cache[K, V]) SetWithContext(ctx context.Context, key K, value cache.Ite
 	return nil
 }
 
-func (c *Cache[K, V]) Get(key K) (cache.Item[V], *stderrs.Error) {
-	return c.GetWithContext(context.Background(), key)
-}
-
-func (c *Cache[K, V]) GetWithContext(ctx context.Context, key K) (cache.Item[V], *stderrs.Error) {
+func (c *Cache[K, V]) Get(ctx context.Context, key K) (cache.Item[V], *stderrs.Error) {
 	var value cache.Item[V]
 
 	err := c.storage.Get(ctx, fmt.Sprintf("%v", key), &value.Value)
@@ -69,11 +61,7 @@ func (c *Cache[K, V]) GetWithContext(ctx context.Context, key K) (cache.Item[V],
 	return value, nil
 }
 
-func (c *Cache[K, V]) Delete(keys ...K) *stderrs.Error {
-	return c.DeleteWithContext(context.Background(), keys...)
-}
-
-func (c *Cache[K, V]) DeleteWithContext(ctx context.Context, keys ...K) *stderrs.Error {
+func (c *Cache[K, V]) Delete(ctx context.Context, keys ...K) *stderrs.Error {
 	for _, key := range keys {
 		err := c.storage.Delete(ctx, fmt.Sprintf("%v", key))
 		if err != nil {

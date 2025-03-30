@@ -10,12 +10,9 @@ import (
 
 // Cache - unified interface model.
 type Cache[K comparable, V any] interface {
-	Get(key K) (Item[V], *stderrs.Error)
-	GetWithContext(ctx context.Context, key K) (Item[V], *stderrs.Error)
-	Set(key K, item Item[V]) *stderrs.Error
-	SetWithContext(ctx context.Context, key K, item Item[V]) *stderrs.Error
-	Delete(keys ...K) *stderrs.Error
-	DeleteWithContext(ctx context.Context, keys ...K) *stderrs.Error
+	Get(ctx context.Context, key K) (Item[V], *stderrs.Error)
+	Set(ctx context.Context, key K, item Item[V]) *stderrs.Error
+	Delete(ctx context.Context, keys ...K) *stderrs.Error
 	GC() *stderrs.Error
 }
 

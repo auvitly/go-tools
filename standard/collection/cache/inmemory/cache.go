@@ -25,7 +25,7 @@ func New[K comparable, V any](config Config) *Cache[K, V] {
 }
 
 // Get - getting value by key.
-func (c *Cache[K, V]) Get(key K) (cache.Item[V], *stderrs.Error) {
+func (c *Cache[K, V]) Get(_ context.Context, key K) (cache.Item[V], *stderrs.Error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -38,13 +38,8 @@ func (c *Cache[K, V]) Get(key K) (cache.Item[V], *stderrs.Error) {
 	return item, nil
 }
 
-// Get - getting value by key.
-func (c *Cache[K, V]) GetWithContext(_ context.Context, key K) (cache.Item[V], *stderrs.Error) {
-	return c.Get(key)
-}
-
 // Set - setting value by key.
-func (c *Cache[K, V]) Set(key K, value cache.Item[V]) *stderrs.Error {
+func (c *Cache[K, V]) Set(_ context.Context, key K, value cache.Item[V]) *stderrs.Error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -71,13 +66,8 @@ func (c *Cache[K, V]) Set(key K, value cache.Item[V]) *stderrs.Error {
 	return nil
 }
 
-// SetWithContext - setting value by key.
-func (c *Cache[K, V]) SetWithContext(_ context.Context, key K, value cache.Item[V]) *stderrs.Error {
-	return c.Set(key, value)
-}
-
-// Del - delete value by key.
-func (c *Cache[K, V]) Delete(keys ...K) *stderrs.Error {
+// Delete - delete value by key.
+func (c *Cache[K, V]) Delete(_ context.Context, keys ...K) *stderrs.Error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -86,11 +76,6 @@ func (c *Cache[K, V]) Delete(keys ...K) *stderrs.Error {
 	}
 
 	return nil
-}
-
-// DeleteWithContext - delete value by key.
-func (c *Cache[K, V]) DeleteWithContext(_ context.Context, keys ...K) *stderrs.Error {
-	return c.Delete(keys...)
 }
 
 // GC - clear cache.
