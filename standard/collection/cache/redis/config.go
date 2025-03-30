@@ -6,6 +6,8 @@ import (
 )
 
 type Config struct {
-	Redis      redis.RingOptions
-	LocalCache cache.LocalCache
+	Redis         redis.RingOptions
+	LocalCache    cache.LocalCache
+	MarshalFunc   cache.MarshalFunc
+	UnmarshalFunc cache.UnmarshalFunc
 }

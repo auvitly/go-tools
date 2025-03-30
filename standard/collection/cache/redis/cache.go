@@ -23,6 +23,8 @@ func New[K comparable, V any](config Config) (*Cache[K, V], *stderrs.Error) {
 		storage: redis_cache.New(&redis_cache.Options{
 			Redis:      redis.NewRing(&config.Redis),
 			LocalCache: config.LocalCache,
+			Marshal:    config.MarshalFunc,
+			Unmarshal:  config.UnmarshalFunc,
 		}),
 	}, nil
 }
