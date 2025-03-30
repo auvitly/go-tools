@@ -17,6 +17,10 @@ var vault = struct {
 // Store - stores the specified value within the active pointer to the testing object *testing.T.
 // After the test is completed, the data will be deleted.
 func Store[V any](t *testing.T, key string, value V) (result V) {
+	if t == nil {
+		panic(fmt.Sprintf("*testing.T is nil for key=%s, value=%v", key, value))
+	}
+
 	vault.mu.Lock()
 	defer vault.mu.Unlock()
 
