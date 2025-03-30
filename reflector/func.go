@@ -13,8 +13,8 @@ type Func struct {
 	Pkg  string
 }
 
-// ScanFunc - .
-func ScanFunc(fn any) (Func, error) {
+// ParseFunc - .
+func ParseFunc(fn any) (Func, error) {
 	if fn == nil {
 		return Func{}, fmt.Errorf("no value found")
 	}

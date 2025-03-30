@@ -8,7 +8,7 @@ import (
 )
 
 func TestScanFunction(t *testing.T) {
-	fn, err := reflector.ScanFunc(TestScanFunction)
+	fn, err := reflector.ParseFunc(TestScanFunction)
 	require.NoError(t, err)
 
 	t.Log(fn)
