@@ -4,15 +4,19 @@ package cache
 import (
 	"context"
 	"time"
+
+	"github.com/auvitly/go-tools/stderrs"
 )
 
 // Cache - unified interface model.
 type Cache[K comparable, V any] interface {
-	Get(ctx context.Context, key K) Item[V]
-	Lookup(ctx context.Context, key K) (Item[V], bool)
-	Set(ctx context.Context, key K, item Item[V])
-	Delete(ctx context.Context, keys ...K)
-	GC(ctx context.Context)
+	Get(key K) (Item[V], *stderrs.Error)
+	GetWithContext(ctx context.Context, key K) (Item[V], *stderrs.Error)
+	Set(key K, item Item[V]) *stderrs.Error
+	SetWithContext(ctx context.Context, key K, item Item[V]) *stderrs.Error
+	Delete(keys ...K) *stderrs.Error
+	DeleteWithContext(ctx context.Context, keys ...K) *stderrs.Error
+	GC() *stderrs.Error
 }
 
 // Item - unificated item model.

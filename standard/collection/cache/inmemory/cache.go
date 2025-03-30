@@ -6,11 +6,12 @@ import (
 	"time"
 
 	"github.com/auvitly/go-tools/standard/collection/cache"
+	"github.com/auvitly/go-tools/stderrs"
 )
 
 // Cache - contains in memory storage that allows concurrent writing and reading.
 type Cache[K comparable, V any] struct {
-	storage map[K]*cache.Item[V]
+	storage map[K]cache.Item[V]
 	config  Config
 	mu      sync.RWMutex
 }
@@ -18,38 +19,40 @@ type Cache[K comparable, V any] struct {
 // New - creating a cache instance with options.
 func New[K comparable, V any](config Config) *Cache[K, V] {
 	return &Cache[K, V]{
-		storage: make(map[K]*cache.Item[V]),
+		storage: make(map[K]cache.Item[V]),
 		config:  config,
 	}
 }
 
-// Lookup - getting value by key.
-func (c *Cache[K, V]) Lookup(_ context.Context, key K) (cache.Item[V], bool) {
+// Get - getting value by key.
+func (c *Cache[K, V]) Get(key K) (cache.Item[V], *stderrs.Error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
 	item, ok := c.storage[key]
+	if !ok {
+		return cache.Item[V]{}, stderrs.NotFound.
+			SetMessage("not found value in cache with key %v", key)
+	}
 
-	return *item, ok
+	return item, nil
 }
 
 // Get - getting value by key.
-func (c *Cache[K, V]) Get(ctx context.Context, key K) cache.Item[V] {
-	item, _ := c.Lookup(ctx, key)
-
-	return item
+func (c *Cache[K, V]) GetWithContext(_ context.Context, key K) (cache.Item[V], *stderrs.Error) {
+	return c.Get(key)
 }
 
 // Set - setting value by key.
-func (c *Cache[K, V]) Set(_ context.Context, key K, value cache.Item[V]) {
+func (c *Cache[K, V]) Set(key K, value cache.Item[V]) *stderrs.Error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	if c.storage == nil {
-		c.storage = make(map[K]*cache.Item[V])
+		c.storage = make(map[K]cache.Item[V])
 	}
 
-	c.storage[key] = &cache.Item[V]{
+	c.storage[key] = cache.Item[V]{
 		Value: value.Value,
 		Deadline: func() *time.Time {
 			switch {
@@ -64,20 +67,34 @@ func (c *Cache[K, V]) Set(_ context.Context, key K, value cache.Item[V]) {
 			}
 		}(),
 	}
+
+	return nil
 }
 
-// Delete - delete value by key.
-func (c *Cache[K, V]) Delete(_ context.Context, keys ...K) {
+// SetWithContext - setting value by key.
+func (c *Cache[K, V]) SetWithContext(_ context.Context, key K, value cache.Item[V]) *stderrs.Error {
+	return c.Set(key, value)
+}
+
+// Del - delete value by key.
+func (c *Cache[K, V]) Delete(keys ...K) *stderrs.Error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	for _, key := range keys {
 		delete(c.storage, key)
 	}
+
+	return nil
+}
+
+// DeleteWithContext - delete value by key.
+func (c *Cache[K, V]) DeleteWithContext(_ context.Context, keys ...K) *stderrs.Error {
+	return c.Delete(keys...)
 }
 
 // GC - clear cache.
-func (c *Cache[K, V]) GC(_ context.Context) {
+func (c *Cache[K, V]) GC() *stderrs.Error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -92,11 +109,11 @@ func (c *Cache[K, V]) GC(_ context.Context) {
 	}
 
 	if c.config.RecordLimit == 0 {
-		return
+		return nil
 	}
 
 	if len(c.storage) < c.config.RecordLimit {
-		return
+		return nil
 	}
 
 	for key := range c.storage {
@@ -106,4 +123,6 @@ func (c *Cache[K, V]) GC(_ context.Context) {
 			break
 		}
 	}
+
+	return nil
 }
