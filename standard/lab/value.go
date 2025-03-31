@@ -5,9 +5,11 @@ func Pointer[T any](v T) *T {
 	return &v
 }
 
-// Glue - convert any values to slice any.
-func Glue(args ...any) []any {
-	return args
+// Get - convert any values to slice any.
+func Get[T any](args ...any) func(index int) T {
+	return func(index int) T {
+		return args[index].(T)
+	}
 }
 
 // First - returns the first value.
