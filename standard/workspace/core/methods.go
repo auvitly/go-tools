@@ -83,7 +83,7 @@ func (c *Core[T, M, S]) ReportState(ctx context.Context, params ReportStateParam
 	case *task.SessionID != params.SessionID:
 		return stderrs.InvalidArgument.SetMessage("worker session not match")
 	case task.AssignTS.Sub(task.UpdatedTS) < c.config.TaskDowntime:
-		_, stderr = c.dependencies.SessionStorage.Done(ctx, storage.SessionDoneParams{
+		stderr = c.dependencies.SessionStorage.Done(ctx, storage.SessionDoneParams{
 			SessionID: *task.SessionID,
 		})
 		if stderr != nil {
@@ -138,7 +138,7 @@ func (c *Core[T, M, S]) ReportState(ctx context.Context, params ReportStateParam
 		return nil
 	}
 
-	_, stderr = c.dependencies.SessionStorage.Done(ctx, storage.SessionDoneParams{
+	stderr = c.dependencies.SessionStorage.Done(ctx, storage.SessionDoneParams{
 		SessionID: params.SessionID,
 	})
 	if stderr != nil {

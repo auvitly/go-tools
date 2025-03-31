@@ -15,11 +15,17 @@ import (
 type SessionStorage struct {
 	mu      sync.RWMutex
 	storage map[uuid.UUID]*entity.Session
+	config  SessionConfig
 }
 
-func NewSessionStorage() *SessionStorage {
+type SessionConfig struct {
+	DeleteCompleted bool
+}
+
+func NewSessionStorage(config SessionConfig) *SessionStorage {
 	return &SessionStorage{
 		storage: map[uuid.UUID]*entity.Session{},
+		config:  config,
 	}
 }
 
@@ -82,18 +88,22 @@ func (s *SessionStorage) Drop(ctx context.Context, params storage.SessionDropPar
 	return nil
 }
 
-func (s *SessionStorage) Done(ctx context.Context, params storage.SessionDoneParams) (*entity.Session, *stderrs.Error) {
+func (s *SessionStorage) Done(ctx context.Context, params storage.SessionDoneParams) *stderrs.Error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	session, ok := s.storage[params.SessionID]
 	if !ok {
-		return nil, stderrs.NotFound.SetMessage("not found session with id=%s", params.SessionID.String())
+		return stderrs.NotFound.SetMessage("not found session with id=%s", params.SessionID.String())
 	}
 
-	var ts = time.Now()
+	if s.config.DeleteCompleted {
+		delete(s.storage, params.SessionID)
+	} else {
+		var ts = time.Now()
 
-	session.DoneAT = &ts
+		session.DoneAT = &ts
+	}
 
-	return session, nil
+	return nil
 }

@@ -15,11 +15,17 @@ import (
 type TaskStorage[T, M, S cmp.Ordered] struct {
 	mu      sync.RWMutex
 	storage map[uuid.UUID]*entity.Task[T, M, S]
+	config  TaskConfig
 }
 
-func NewTaskStorage[T, M, S cmp.Ordered]() *TaskStorage[T, M, S] {
+type TaskConfig struct {
+	DeleteCompleted bool
+}
+
+func NewTaskStorage[T, M, S cmp.Ordered](config TaskConfig) *TaskStorage[T, M, S] {
 	return &TaskStorage[T, M, S]{
 		storage: map[uuid.UUID]*entity.Task[T, M, S]{},
+		config:  config,
 	}
 }
 
@@ -30,6 +36,14 @@ func (s *TaskStorage[T, M, S]) Update(ctx context.Context, params storage.TaskUp
 	task, ok := s.storage[params.TaskID]
 	if !ok {
 		return nil, stderrs.NotFound.SetMessage("not found task with id=%s", params.TaskID.String())
+	}
+
+	if task.DoneTS != nil {
+		return nil, stderrs.Aborted.SetMessage("task already done")
+	}
+
+	if s.config.DeleteCompleted && params.DoneTS != nil {
+		defer delete(s.storage, params.TaskID)
 	}
 
 	task.StatusCode = params.StatusCode

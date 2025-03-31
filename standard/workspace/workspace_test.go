@@ -23,9 +23,9 @@ func TestCore(t *testing.T) {
 
 	workspace, stderr := core.New(
 		core.Dependencies[Type, Mode, codes.Code]{
-			TaskStorage:    inmemory.NewTaskStorage[Type, Mode, codes.Code](),
+			TaskStorage:    inmemory.NewTaskStorage[Type, Mode, codes.Code](inmemory.TaskConfig{DeleteCompleted: true}),
 			WorkerStorage:  inmemory.NewWorkerStorage[Type](),
-			SessionStorage: inmemory.NewSessionStorage(),
+			SessionStorage: inmemory.NewSessionStorage(inmemory.SessionConfig{DeleteCompleted: true}),
 		},
 		core.Config{
 			TaskDowntime:    time.Second,
