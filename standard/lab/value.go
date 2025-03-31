@@ -5,9 +5,9 @@ func Pointer[T any](v T) *T {
 	return &v
 }
 
-// Get - convert any values to slice any.
-func Get[T any](args ...any) func(index int) T {
-	return func(index int) T {
+// PullOut - convert any values to slice any.
+func PullOut[T any](index int) func(args ...any) T {
+	return func(args ...any) T {
 		return args[index].(T)
 	}
 }

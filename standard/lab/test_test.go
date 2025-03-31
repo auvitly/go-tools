@@ -19,22 +19,22 @@ func TestVault(t *testing.T) {
 	]{
 		{
 			Name: "net.HardwareAddr",
-			In:   vault.Store(t, "mac", lab.Get[net.HardwareAddr](net.ParseMAC("b1:b2:1e:68:ab:d4"))(0)),
+			In:   vault.Store(t, "mac", lab.PullOut[net.HardwareAddr](0)(net.ParseMAC("b1:b2:1e:68:ab:d4"))),
 			Out:  vault.Load[net.HardwareAddr](t, "mac"),
 		},
 		{
 			Name: "net.IP",
-			In:   vault.Store(t, "ip", lab.Get[net.IP](net.ParseCIDR("127.0.0.1/24"))(0)),
+			In:   vault.Store(t, "ip", lab.PullOut[net.IP](0)(net.ParseCIDR("127.0.0.1/24"))),
 			Out:  vault.Load[net.IP](t, "ip"),
 		},
 		{
 			Name: "*net.IPNet",
-			In:   vault.Store(t, "cidr", lab.Get[*net.IPNet](net.ParseCIDR("127.0.0.1/24"))(1)),
+			In:   vault.Store(t, "cidr", lab.PullOut[*net.IPNet](1)(net.ParseCIDR("127.0.0.1/24"))),
 			Out:  vault.Load[*net.IPNet](t, "cidr"),
 		},
 		{
 			Name: "time.Time",
-			In:   vault.Store(t, "time", lab.Get[time.Time](time.Parse(time.RFC3339, "2006-01-02T15:04:05+07:00"))(0)),
+			In:   vault.Store(t, "time", lab.PullOut[time.Time](0)(time.Parse(time.RFC3339, "2006-01-02T15:04:05+07:00"))),
 			Out:  vault.Load[time.Time](t, "time"),
 		},
 	}
