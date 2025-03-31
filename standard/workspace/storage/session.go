@@ -13,7 +13,7 @@ type SessionStorage[T cmp.Ordered] interface {
 	New(ctx context.Context, params SessionNewParams) (*entity.Session, *stderrs.Error)
 	Get(ctx context.Context, params SessionGetParams) (*entity.Session, *stderrs.Error)
 	List(ctx context.Context, params SessionListParams) ([]*entity.Session, *stderrs.Error)
-	Drop(ctx context.Context, params SessionDropParams) (*entity.Session, *stderrs.Error)
+	Drop(ctx context.Context, params SessionDropParams) *stderrs.Error
 	Done(ctx context.Context, params SessionDoneParams) (*entity.Session, *stderrs.Error)
 }
 

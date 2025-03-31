@@ -19,7 +19,7 @@ type Task[T, M cmp.Ordered] struct {
 	Result       *json.RawMessage
 	CreatedTS    time.Time
 	UpdatedTS    time.Time
-	CatchLaterTS time.Time
+	CatchLaterTS *time.Time
 	DoneTS       *time.Time
 	SessionID    *uuid.UUID
 	AssignTS     *time.Time

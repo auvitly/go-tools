@@ -17,7 +17,7 @@ type WorkerStorage[T cmp.Ordered] interface {
 }
 
 type WorkerSaveParams[T cmp.Ordered] struct {
-	ID        uuid.UUID
+	WorkerID  uuid.UUID
 	Type      T
 	Version   string
 	Labels    map[string]string
@@ -26,9 +26,9 @@ type WorkerSaveParams[T cmp.Ordered] struct {
 }
 
 type WorkerGetParams struct {
-	ID uuid.UUID
+	WorkerID uuid.UUID
 }
 
 type WorkerDeleteParams struct {
-	ID uuid.UUID
+	WorkerID uuid.UUID
 }
