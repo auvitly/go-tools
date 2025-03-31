@@ -77,12 +77,15 @@ func (c *Core[T, M, S]) ReportState(ctx context.Context, params ReportStateParam
 		return stderr
 	}
 
+	var sub = time.Since(task.UpdatedTS)
+	_ = sub
+
 	switch {
 	case task.SessionID == nil || task.AssignTS == nil:
 		return stderrs.FailedPrecondition.SetMessage("task unassigned")
 	case *task.SessionID != params.SessionID:
 		return stderrs.InvalidArgument.SetMessage("worker session not match")
-	case task.AssignTS.Sub(task.UpdatedTS) < c.config.TaskDowntime:
+	case time.Since(task.UpdatedTS) > c.config.TaskDowntime:
 		stderr = c.dependencies.SessionStorage.Done(ctx, storage.SessionDoneParams{
 			SessionID: *task.SessionID,
 		})
@@ -95,6 +98,7 @@ func (c *Core[T, M, S]) ReportState(ctx context.Context, params ReportStateParam
 			StateData:    task.StateData,
 			StatusCode:   task.StatusCode,
 			Result:       task.Result,
+			UpdatedTS:    ts,
 			CatchLaterTS: nil,
 			DoneTS:       nil,
 			SessionID:    nil,

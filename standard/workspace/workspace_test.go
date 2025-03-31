@@ -22,10 +22,15 @@ func TestCore(t *testing.T) {
 	)
 
 	workspace, stderr := core.New(
+		ctx,
 		core.Dependencies[Type, Mode, codes.Code]{
-			TaskStorage:    inmemory.NewTaskStorage[Type, Mode, codes.Code](inmemory.TaskConfig{DeleteCompleted: true}),
-			WorkerStorage:  inmemory.NewWorkerStorage[Type](),
-			SessionStorage: inmemory.NewSessionStorage(inmemory.SessionConfig{DeleteCompleted: true}),
+			TaskStorage: inmemory.NewTaskStorage[Type, Mode, codes.Code](inmemory.TaskConfig{
+				DeleteCompleted: true,
+			}),
+			WorkerStorage: inmemory.NewWorkerStorage[Type](),
+			SessionStorage: inmemory.NewSessionStorage(inmemory.SessionConfig{
+				DeleteCompleted: true,
+			}),
 		},
 		core.Config{
 			TaskDowntime:    time.Second,
@@ -72,7 +77,7 @@ func TestCore(t *testing.T) {
 		Type:     1,
 		Version:  "version",
 		Labels: map[string]string{
-			"key": "value",
+			"worker": "A",
 		},
 	})
 	require.Nil(t, stderr)

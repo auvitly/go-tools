@@ -13,10 +13,10 @@ import (
 
 type TaskStorage[T, M, S cmp.Ordered] interface {
 	Update(ctx context.Context, params TaskUpdateParams[S]) (*entity.Task[T, M, S], *stderrs.Error)
+	List(ctx context.Context, params TaskListParams) ([]*entity.Task[T, M, S], *stderrs.Error)
 	Push(ctx context.Context, params TaskPushParams[T, M, S]) (*entity.Task[T, M, S], *stderrs.Error)
 	Pop(ctx context.Context, params TaskPopParams[T]) (*entity.Task[T, M, S], *stderrs.Error)
 	Get(ctx context.Context, params TaskGetParams) (*entity.Task[T, M, S], *stderrs.Error)
-	Flush(ctx context.Context, params TaskFlushParams) *stderrs.Error
 }
 
 type TaskUpdateParams[S cmp.Ordered] struct {
@@ -29,6 +29,10 @@ type TaskUpdateParams[S cmp.Ordered] struct {
 	DoneTS       *time.Time
 	SessionID    *uuid.UUID
 	AssignTS     *time.Time
+}
+
+type TaskListParams struct {
+	OnlyAssigned bool
 }
 
 type TaskPushParams[T, M, S cmp.Ordered] struct {
@@ -47,8 +51,4 @@ type TaskPopParams[T cmp.Ordered] struct {
 
 type TaskGetParams struct {
 	TaskID uuid.UUID
-}
-
-type TaskFlushParams struct {
-	Downtime time.Duration
 }

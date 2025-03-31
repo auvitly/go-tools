@@ -118,7 +118,7 @@ loop:
 		task.AssignTS = &ts
 		task.SessionID = &params.SessionID
 
-		return task, nil
+		return task.Clone(), nil
 	}
 
 	return nil, stderrs.NotFound.SetMessage("not found task for worker")
@@ -136,19 +136,17 @@ func (s *TaskStorage[T, M, S]) Get(ctx context.Context, params storage.TaskGetPa
 	return task.Clone(), nil
 }
 
-func (s *TaskStorage[T, M, S]) Flush(ctx context.Context, params storage.TaskFlushParams) *stderrs.Error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+func (s *TaskStorage[T, M, S]) List(ctx context.Context, params storage.TaskListParams) ([]*entity.Task[T, M, S], *stderrs.Error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	var tasks []*entity.Task[T, M, S]
 
 	for _, task := range s.storage {
-		switch {
-		case task.AssignTS == nil, task.SessionID == nil, task.UpdatedTS.Sub(*task.AssignTS) > params.Downtime:
-			continue
-		default:
-			task.SessionID = nil
-			task.AssignTS = nil
+		if task.AssignTS != nil && params.OnlyAssigned {
+			tasks = append(tasks, task.Clone())
 		}
 	}
 
-	return nil
+	return tasks, nil
 }
