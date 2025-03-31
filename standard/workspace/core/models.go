@@ -24,11 +24,30 @@ type ReceiveTaskParams[T cmp.Ordered] struct {
 	Labels   map[string]string
 }
 
-type SetStateParams[T, S cmp.Ordered] struct {
-	TaskID       uuid.UUID
-	SessionID    uuid.UUID
-	StatusCode   S
-	State        json.RawMessage
-	Result       *json.RawMessage
-	CatchLaterAT *time.Time
+type ReportStateParams[S cmp.Ordered] struct {
+	TaskID      uuid.UUID
+	SessionID   uuid.UUID
+	ReportState ReportState
 }
+
+type ReportState interface {
+	implReportState()
+}
+
+type SetStateDone[S cmp.Ordered] struct {
+	StatusCode S
+	Result     json.RawMessage
+}
+
+type SetStateInWork struct {
+	StateData json.RawMessage
+}
+
+type SetStatePutOff struct {
+	StateData    json.RawMessage
+	CatchLaterAT time.Time
+}
+
+func (SetStateDone[S]) implReportState() {}
+func (SetStateInWork) implReportState()  {}
+func (SetStatePutOff) implReportState()  {}

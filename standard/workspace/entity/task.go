@@ -14,7 +14,7 @@ type Task[T, M, S cmp.Ordered] struct {
 	Type         T
 	Mode         M
 	Args         json.RawMessage
-	State        json.RawMessage
+	StateData    json.RawMessage
 	Result       *json.RawMessage
 	StatusCode   *S
 	CreatedTS    time.Time

@@ -10,6 +10,7 @@ import (
 	"github.com/auvitly/go-tools/standard/workspace/storage/inmemory"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/codes"
 )
 
 func TestCore(t *testing.T) {
@@ -59,11 +60,13 @@ func TestCore(t *testing.T) {
 
 	var result = json.RawMessage([]byte("{}"))
 
-	stderr = workspace.SetState(ctx, core.SetStateParams[Type, StatusCode]{
-		TaskID:     task.ID,
-		SessionID:  *task.SessionID,
-		StatusCode: 1,
-		Result:     &result,
+	stderr = workspace.ReportState(ctx, core.ReportStateParams[StatusCode]{
+		TaskID:    task.ID,
+		SessionID: *task.SessionID,
+		ReportState: core.SetStateDone[StatusCode]{
+			StatusCode: StatusCode(codes.OK),
+			Result:     result,
+		},
 	})
 	require.Nil(t, stderr)
 

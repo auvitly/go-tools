@@ -7,7 +7,6 @@ import (
 	"github.com/auvitly/go-tools/standard/workspace/entity"
 	"github.com/auvitly/go-tools/standard/workspace/storage"
 	"github.com/auvitly/go-tools/stderrs"
-	"github.com/google/uuid"
 )
 
 func (c *Core[T, M, S]) CreateTask(ctx context.Context, params CreateTaskParams[T, M]) (*entity.Task[T, M, S], *stderrs.Error) {
@@ -68,7 +67,7 @@ func (c *Core[T, M, S]) ReceiveTask(ctx context.Context, params ReceiveTaskParam
 	}
 }
 
-func (c *Core[T, M, S]) SetState(ctx context.Context, params SetStateParams[T, S]) *stderrs.Error {
+func (c *Core[T, M, S]) ReportState(ctx context.Context, params ReportStateParams[S]) *stderrs.Error {
 	var ts = time.Now()
 
 	task, stderr := c.dependencies.TaskStorage.Get(ctx, storage.TaskGetParams{
@@ -85,40 +84,34 @@ func (c *Core[T, M, S]) SetState(ctx context.Context, params SetStateParams[T, S
 		return stderrs.InvalidArgument.SetMessage("worker session not match")
 	}
 
-	_, stderr = c.dependencies.TaskStorage.Update(ctx, storage.TaskUpdateParams[S]{
-		TaskID: params.TaskID,
-		SessionID: func() *uuid.UUID {
-			if params.Result != nil || params.CatchLaterAT != nil {
-				return nil
-			}
+	var updateParams = storage.TaskUpdateParams[S]{
+		TaskID:    params.TaskID,
+		UpdatedAT: ts,
+	}
 
-			return &params.SessionID
-		}(),
-		AssignTS: func() *time.Time {
-			if params.Result != nil || params.CatchLaterAT != nil {
-				return nil
-			}
+	switch state := params.ReportState.(type) {
+	case SetStateDone[S]:
+		updateParams.AssignTS = nil
+		updateParams.SessionID = nil
+		updateParams.CatchLaterAT = nil
+		updateParams.DoneTS = &ts
+		updateParams.Result = &state.Result
+		updateParams.StatusCode = &state.StatusCode
+	case SetStateInWork:
+		updateParams.StateData = state.StateData
+	case SetStatePutOff:
+		updateParams.StateData = state.StateData
+		updateParams.CatchLaterAT = &state.CatchLaterAT
+	default:
+		return stderrs.InvalidArgument.SetMessage("not found state in report")
+	}
 
-			return &ts
-		}(),
-		StatusCode:   params.StatusCode,
-		State:        params.State,
-		Result:       params.Result,
-		CatchLaterAT: params.CatchLaterAT,
-		UpdatedAT:    ts,
-		DoneTS: func() *time.Time {
-			if params.Result == nil {
-				return nil
-			}
-
-			return &ts
-		}(),
-	})
+	task, stderr = c.dependencies.TaskStorage.Update(ctx, updateParams)
 	if stderr != nil {
 		return stderr
 	}
 
-	if params.CatchLaterAT == nil && params.Result == nil {
+	if task.DoneTS == nil {
 		return nil
 	}
 

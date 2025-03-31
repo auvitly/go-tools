@@ -32,8 +32,8 @@ func (s *TaskStorage[T, M, S]) Update(ctx context.Context, params storage.TaskUp
 		return nil, stderrs.NotFound.SetMessage("not found task with id=%s", params.TaskID.String())
 	}
 
-	task.StatusCode = &params.StatusCode
-	task.State = params.State
+	task.StatusCode = params.StatusCode
+	task.StateData = params.StateData
 	task.Result = params.Result
 	task.UpdatedTS = params.UpdatedAT
 	task.CatchLaterTS = params.CatchLaterAT
@@ -60,7 +60,7 @@ func (s *TaskStorage[T, M, S]) Push(ctx context.Context, params storage.TaskPush
 		Mode:         params.Mode,
 		StatusCode:   nil,
 		Args:         params.Args,
-		State:        nil,
+		StateData:    nil,
 		Result:       nil,
 		CreatedTS:    ts,
 		UpdatedTS:    ts,
