@@ -11,17 +11,17 @@ import (
 	"github.com/google/uuid"
 )
 
-type TaskStorage[T, M cmp.Ordered] interface {
-	Update(ctx context.Context, params TaskUpdateParams) (*entity.Task[T, M], *stderrs.Error)
-	Push(ctx context.Context, params TaskPushParams[T, M]) (*entity.Task[T, M], *stderrs.Error)
-	Pop(ctx context.Context, params TaskPopParams[T]) (*entity.Task[T, M], *stderrs.Error)
-	Get(ctx context.Context, params TaskGetParams) (*entity.Task[T, M], *stderrs.Error)
+type TaskStorage[T, M, S cmp.Ordered] interface {
+	Update(ctx context.Context, params TaskUpdateParams[S]) (*entity.Task[T, M, S], *stderrs.Error)
+	Push(ctx context.Context, params TaskPushParams[T, M, S]) (*entity.Task[T, M, S], *stderrs.Error)
+	Pop(ctx context.Context, params TaskPopParams[T]) (*entity.Task[T, M, S], *stderrs.Error)
+	Get(ctx context.Context, params TaskGetParams) (*entity.Task[T, M, S], *stderrs.Error)
 	Flush(ctx context.Context, params TaskFlushParams) *stderrs.Error
 }
 
-type TaskUpdateParams struct {
+type TaskUpdateParams[S cmp.Ordered] struct {
 	TaskID       uuid.UUID
-	Status       string
+	StatusCode   S
 	State        json.RawMessage
 	Result       *json.RawMessage
 	UpdatedAT    time.Time
@@ -31,11 +31,10 @@ type TaskUpdateParams struct {
 	AssignTS     *time.Time
 }
 
-type TaskPushParams[T, M cmp.Ordered] struct {
+type TaskPushParams[T, M, S cmp.Ordered] struct {
 	ParentTaskID *uuid.UUID
 	Type         T
 	Mode         M
-	Status       string
 	Args         json.RawMessage
 	Labels       map[string]string
 }

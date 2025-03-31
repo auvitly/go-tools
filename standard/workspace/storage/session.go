@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"cmp"
 	"context"
 
 	"github.com/auvitly/go-tools/standard/workspace/entity"
@@ -9,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type SessionStorage[T cmp.Ordered] interface {
+type SessionStorage interface {
 	New(ctx context.Context, params SessionNewParams) (*entity.Session, *stderrs.Error)
 	Get(ctx context.Context, params SessionGetParams) (*entity.Session, *stderrs.Error)
 	List(ctx context.Context, params SessionListParams) ([]*entity.Session, *stderrs.Error)

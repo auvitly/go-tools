@@ -1,7 +1,6 @@
 package inmemory
 
 import (
-	"cmp"
 	"context"
 	"slices"
 	"sync"
@@ -13,18 +12,18 @@ import (
 	"github.com/google/uuid"
 )
 
-type SessionStorage[T cmp.Ordered] struct {
+type SessionStorage struct {
 	mu      sync.RWMutex
 	storage map[uuid.UUID]*entity.Session
 }
 
-func NewSessionStorage[T cmp.Ordered]() *SessionStorage[T] {
-	return &SessionStorage[T]{
+func NewSessionStorage() *SessionStorage {
+	return &SessionStorage{
 		storage: map[uuid.UUID]*entity.Session{},
 	}
 }
 
-func (s *SessionStorage[T]) New(ctx context.Context, params storage.SessionNewParams) (*entity.Session, *stderrs.Error) {
+func (s *SessionStorage) New(ctx context.Context, params storage.SessionNewParams) (*entity.Session, *stderrs.Error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -41,7 +40,7 @@ func (s *SessionStorage[T]) New(ctx context.Context, params storage.SessionNewPa
 	return s.storage[id], nil
 }
 
-func (s *SessionStorage[T]) Get(ctx context.Context, params storage.SessionGetParams) (*entity.Session, *stderrs.Error) {
+func (s *SessionStorage) Get(ctx context.Context, params storage.SessionGetParams) (*entity.Session, *stderrs.Error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -53,7 +52,7 @@ func (s *SessionStorage[T]) Get(ctx context.Context, params storage.SessionGetPa
 	return session, nil
 }
 
-func (s *SessionStorage[T]) List(ctx context.Context, params storage.SessionListParams) ([]*entity.Session, *stderrs.Error) {
+func (s *SessionStorage) List(ctx context.Context, params storage.SessionListParams) ([]*entity.Session, *stderrs.Error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -74,7 +73,7 @@ func (s *SessionStorage[T]) List(ctx context.Context, params storage.SessionList
 	return list, nil
 }
 
-func (s *SessionStorage[T]) Drop(ctx context.Context, params storage.SessionDropParams) *stderrs.Error {
+func (s *SessionStorage) Drop(ctx context.Context, params storage.SessionDropParams) *stderrs.Error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -83,7 +82,7 @@ func (s *SessionStorage[T]) Drop(ctx context.Context, params storage.SessionDrop
 	return nil
 }
 
-func (s *SessionStorage[T]) Done(ctx context.Context, params storage.SessionDoneParams) (*entity.Session, *stderrs.Error) {
+func (s *SessionStorage) Done(ctx context.Context, params storage.SessionDoneParams) (*entity.Session, *stderrs.Error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

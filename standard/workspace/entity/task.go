@@ -8,15 +8,15 @@ import (
 	"github.com/google/uuid"
 )
 
-type Task[T, M cmp.Ordered] struct {
+type Task[T, M, S cmp.Ordered] struct {
 	ID           uuid.UUID
 	ParentTaskID *uuid.UUID
 	Type         T
 	Mode         M
-	Status       string
 	Args         json.RawMessage
 	State        json.RawMessage
 	Result       *json.RawMessage
+	StatusCode   *S
 	CreatedTS    time.Time
 	UpdatedTS    time.Time
 	CatchLaterTS *time.Time

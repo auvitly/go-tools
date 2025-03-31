@@ -12,18 +12,18 @@ import (
 	"github.com/google/uuid"
 )
 
-type TaskStorage[T, M cmp.Ordered] struct {
+type TaskStorage[T, M, S cmp.Ordered] struct {
 	mu      sync.RWMutex
-	storage map[uuid.UUID]*entity.Task[T, M]
+	storage map[uuid.UUID]*entity.Task[T, M, S]
 }
 
-func NewTaskStorage[T, M cmp.Ordered]() *TaskStorage[T, M] {
-	return &TaskStorage[T, M]{
-		storage: map[uuid.UUID]*entity.Task[T, M]{},
+func NewTaskStorage[T, M, S cmp.Ordered]() *TaskStorage[T, M, S] {
+	return &TaskStorage[T, M, S]{
+		storage: map[uuid.UUID]*entity.Task[T, M, S]{},
 	}
 }
 
-func (s *TaskStorage[T, M]) Update(ctx context.Context, params storage.TaskUpdateParams) (*entity.Task[T, M], *stderrs.Error) {
+func (s *TaskStorage[T, M, S]) Update(ctx context.Context, params storage.TaskUpdateParams[S]) (*entity.Task[T, M, S], *stderrs.Error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -32,7 +32,7 @@ func (s *TaskStorage[T, M]) Update(ctx context.Context, params storage.TaskUpdat
 		return nil, stderrs.NotFound.SetMessage("not found task with id=%s", params.TaskID.String())
 	}
 
-	task.Status = params.Status
+	task.StatusCode = &params.StatusCode
 	task.State = params.State
 	task.Result = params.Result
 	task.UpdatedTS = params.UpdatedAT
@@ -44,7 +44,7 @@ func (s *TaskStorage[T, M]) Update(ctx context.Context, params storage.TaskUpdat
 	return task, nil
 }
 
-func (s *TaskStorage[T, M]) Push(ctx context.Context, params storage.TaskPushParams[T, M]) (*entity.Task[T, M], *stderrs.Error) {
+func (s *TaskStorage[T, M, S]) Push(ctx context.Context, params storage.TaskPushParams[T, M, S]) (*entity.Task[T, M, S], *stderrs.Error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -53,12 +53,12 @@ func (s *TaskStorage[T, M]) Push(ctx context.Context, params storage.TaskPushPar
 		ts = time.Now()
 	)
 
-	s.storage[id] = &entity.Task[T, M]{
+	s.storage[id] = &entity.Task[T, M, S]{
 		ID:           id,
 		ParentTaskID: params.ParentTaskID,
 		Type:         params.Type,
 		Mode:         params.Mode,
-		Status:       params.Status,
+		StatusCode:   nil,
 		Args:         params.Args,
 		State:        nil,
 		Result:       nil,
@@ -74,7 +74,7 @@ func (s *TaskStorage[T, M]) Push(ctx context.Context, params storage.TaskPushPar
 	return s.storage[id], nil
 }
 
-func (s *TaskStorage[T, M]) Pop(ctx context.Context, params storage.TaskPopParams[T]) (*entity.Task[T, M], *stderrs.Error) {
+func (s *TaskStorage[T, M, S]) Pop(ctx context.Context, params storage.TaskPopParams[T]) (*entity.Task[T, M, S], *stderrs.Error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -82,7 +82,7 @@ func (s *TaskStorage[T, M]) Pop(ctx context.Context, params storage.TaskPopParam
 
 loop:
 	for _, task := range s.storage {
-		if task.SessionID != nil || task.AssignTS != nil {
+		if task.SessionID != nil || task.AssignTS != nil || task.DoneTS != nil {
 			continue loop
 		}
 
@@ -110,7 +110,7 @@ loop:
 	return nil, stderrs.NotFound.SetMessage("not found task for worker")
 }
 
-func (s *TaskStorage[T, M]) Get(ctx context.Context, params storage.TaskGetParams) (*entity.Task[T, M], *stderrs.Error) {
+func (s *TaskStorage[T, M, S]) Get(ctx context.Context, params storage.TaskGetParams) (*entity.Task[T, M, S], *stderrs.Error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -122,7 +122,7 @@ func (s *TaskStorage[T, M]) Get(ctx context.Context, params storage.TaskGetParam
 	return task, nil
 }
 
-func (s *TaskStorage[T, M]) Flush(ctx context.Context, params storage.TaskFlushParams) *stderrs.Error {
+func (s *TaskStorage[T, M, S]) Flush(ctx context.Context, params storage.TaskFlushParams) *stderrs.Error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

@@ -6,8 +6,8 @@ import (
 	"github.com/auvitly/go-tools/standard/workspace/storage"
 )
 
-type Dependencies[T, M cmp.Ordered] struct {
-	TaskStorage    storage.TaskStorage[T, M]
-	SessionStorage storage.SessionStorage[T]
+type Dependencies[T, M, S cmp.Ordered] struct {
 	WorkerStorage  storage.WorkerStorage[T]
+	SessionStorage storage.SessionStorage
+	TaskStorage    storage.TaskStorage[T, M, S]
 }

@@ -24,10 +24,10 @@ type ReceiveTaskParams[T cmp.Ordered] struct {
 	Labels   map[string]string
 }
 
-type SetStateParams[T cmp.Ordered] struct {
+type SetStateParams[T, S cmp.Ordered] struct {
 	TaskID       uuid.UUID
 	SessionID    uuid.UUID
-	Status       string
+	StatusCode   S
 	State        json.RawMessage
 	Result       *json.RawMessage
 	CatchLaterAT *time.Time

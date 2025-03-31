@@ -10,14 +10,13 @@ import (
 	"github.com/google/uuid"
 )
 
-func (c *Core[T, M]) CreateTask(ctx context.Context, params CreateTaskParams[T, M]) (*entity.Task[T, M], *stderrs.Error) {
-	task, stderr := c.dependencies.TaskStorage.Push(ctx, storage.TaskPushParams[T, M]{
+func (c *Core[T, M, S]) CreateTask(ctx context.Context, params CreateTaskParams[T, M]) (*entity.Task[T, M, S], *stderrs.Error) {
+	task, stderr := c.dependencies.TaskStorage.Push(ctx, storage.TaskPushParams[T, M, S]{
 		ParentTaskID: params.ParentTaskID,
 		Type:         params.Type,
 		Mode:         params.Mode,
 		Args:         params.Args,
 		Labels:       params.Labels,
-		Status:       params.Status,
 	})
 	if stderr != nil {
 		return nil, stderr
@@ -26,7 +25,7 @@ func (c *Core[T, M]) CreateTask(ctx context.Context, params CreateTaskParams[T, 
 	return task, nil
 }
 
-func (c *Core[T, M]) ReceiveTask(ctx context.Context, params ReceiveTaskParams[T]) (*entity.Task[T, M], *stderrs.Error) {
+func (c *Core[T, M, S]) ReceiveTask(ctx context.Context, params ReceiveTaskParams[T]) (*entity.Task[T, M, S], *stderrs.Error) {
 	worker, stderr := c.dependencies.WorkerStorage.Save(ctx, storage.WorkerSaveParams[T]{
 		WorkerID:  params.WorkerID,
 		Type:      params.Type,
@@ -69,7 +68,7 @@ func (c *Core[T, M]) ReceiveTask(ctx context.Context, params ReceiveTaskParams[T
 	}
 }
 
-func (c *Core[T, M]) SetState(ctx context.Context, params SetStateParams[T]) *stderrs.Error {
+func (c *Core[T, M, S]) SetState(ctx context.Context, params SetStateParams[T, S]) *stderrs.Error {
 	var ts = time.Now()
 
 	task, stderr := c.dependencies.TaskStorage.Get(ctx, storage.TaskGetParams{
@@ -86,7 +85,7 @@ func (c *Core[T, M]) SetState(ctx context.Context, params SetStateParams[T]) *st
 		return stderrs.InvalidArgument.SetMessage("worker session not match")
 	}
 
-	_, stderr = c.dependencies.TaskStorage.Update(ctx, storage.TaskUpdateParams{
+	_, stderr = c.dependencies.TaskStorage.Update(ctx, storage.TaskUpdateParams[S]{
 		TaskID: params.TaskID,
 		SessionID: func() *uuid.UUID {
 			if params.Result != nil || params.CatchLaterAT != nil {
@@ -102,7 +101,7 @@ func (c *Core[T, M]) SetState(ctx context.Context, params SetStateParams[T]) *st
 
 			return &ts
 		}(),
-		Status:       params.Status,
+		StatusCode:   params.StatusCode,
 		State:        params.State,
 		Result:       params.Result,
 		CatchLaterAT: params.CatchLaterAT,

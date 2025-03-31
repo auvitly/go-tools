@@ -15,11 +15,17 @@ import (
 func TestCore(t *testing.T) {
 	var ctx = context.Background()
 
+	type (
+		Type       int
+		Mode       int
+		StatusCode int
+	)
+
 	workspace, stderr := core.New(
-		core.Dependencies[int, int]{
-			TaskStorage:    inmemory.NewTaskStorage[int, int](),
-			WorkerStorage:  inmemory.NewWorkerStorage[int](),
-			SessionStorage: inmemory.NewSessionStorage[int](),
+		core.Dependencies[Type, Mode, StatusCode]{
+			TaskStorage:    inmemory.NewTaskStorage[Type, Mode, StatusCode](),
+			WorkerStorage:  inmemory.NewWorkerStorage[Type](),
+			SessionStorage: inmemory.NewSessionStorage(),
 		},
 		core.Config{
 			SessionDecayTime: time.Hour,
@@ -28,7 +34,7 @@ func TestCore(t *testing.T) {
 	)
 	require.Nil(t, stderr)
 
-	_, stderr = workspace.CreateTask(ctx, core.CreateTaskParams[int, int]{
+	_, stderr = workspace.CreateTask(ctx, core.CreateTaskParams[Type, Mode]{
 		Type:   1,
 		Mode:   1,
 		Status: "created",
@@ -41,7 +47,7 @@ func TestCore(t *testing.T) {
 
 	var workerID = uuid.New()
 
-	task, stderr := workspace.ReceiveTask(ctx, core.ReceiveTaskParams[int]{
+	task, stderr := workspace.ReceiveTask(ctx, core.ReceiveTaskParams[Type]{
 		WorkerID: workerID,
 		Type:     1,
 		Version:  "version",
@@ -53,11 +59,11 @@ func TestCore(t *testing.T) {
 
 	var result = json.RawMessage([]byte("{}"))
 
-	stderr = workspace.SetState(ctx, core.SetStateParams[int]{
-		TaskID:    task.ID,
-		SessionID: *task.SessionID,
-		Status:    "done",
-		Result:    &result,
+	stderr = workspace.SetState(ctx, core.SetStateParams[Type, StatusCode]{
+		TaskID:     task.ID,
+		SessionID:  *task.SessionID,
+		StatusCode: 1,
+		Result:     &result,
 	})
 	require.Nil(t, stderr)
 
