@@ -35,13 +35,13 @@ func (s *TaskStorage[T, M, S]) Update(ctx context.Context, params storage.TaskUp
 	task.StatusCode = params.StatusCode
 	task.StateData = params.StateData
 	task.Result = params.Result
-	task.UpdatedTS = params.UpdatedAT
-	task.CatchLaterTS = params.CatchLaterAT
+	task.UpdatedTS = params.UpdatedTS
+	task.CatchLaterTS = params.CatchLaterTS
 	task.DoneTS = params.DoneTS
 	task.SessionID = params.SessionID
 	task.AssignTS = params.AssignTS
 
-	return task, nil
+	return task.Clone(), nil
 }
 
 func (s *TaskStorage[T, M, S]) Push(ctx context.Context, params storage.TaskPushParams[T, M, S]) (*entity.Task[T, M, S], *stderrs.Error) {
@@ -71,7 +71,7 @@ func (s *TaskStorage[T, M, S]) Push(ctx context.Context, params storage.TaskPush
 		Labels:       params.Labels,
 	}
 
-	return s.storage[id], nil
+	return s.storage[id].Clone(), nil
 }
 
 func (s *TaskStorage[T, M, S]) Pop(ctx context.Context, params storage.TaskPopParams[T]) (*entity.Task[T, M, S], *stderrs.Error) {
@@ -119,7 +119,7 @@ func (s *TaskStorage[T, M, S]) Get(ctx context.Context, params storage.TaskGetPa
 		return nil, stderrs.NotFound.SetMessage("not found task with id=%s", params.TaskID.String())
 	}
 
-	return task, nil
+	return task.Clone(), nil
 }
 
 func (s *TaskStorage[T, M, S]) Flush(ctx context.Context, params storage.TaskFlushParams) *stderrs.Error {
@@ -127,12 +127,13 @@ func (s *TaskStorage[T, M, S]) Flush(ctx context.Context, params storage.TaskFlu
 	defer s.mu.Unlock()
 
 	for _, task := range s.storage {
-		if task.AssignTS == nil || task.SessionID == nil {
+		switch {
+		case task.AssignTS == nil, task.SessionID == nil, task.UpdatedTS.Sub(*task.AssignTS) > params.Downtime:
 			continue
+		default:
+			task.SessionID = nil
+			task.AssignTS = nil
 		}
-
-		task.SessionID = nil
-		task.AssignTS = nil
 	}
 
 	return nil

@@ -17,20 +17,19 @@ func TestCore(t *testing.T) {
 	var ctx = context.Background()
 
 	type (
-		Type       int
-		Mode       int
-		StatusCode int
+		Type int
+		Mode int
 	)
 
 	workspace, stderr := core.New(
-		core.Dependencies[Type, Mode, StatusCode]{
-			TaskStorage:    inmemory.NewTaskStorage[Type, Mode, StatusCode](),
+		core.Dependencies[Type, Mode, codes.Code]{
+			TaskStorage:    inmemory.NewTaskStorage[Type, Mode, codes.Code](),
 			WorkerStorage:  inmemory.NewWorkerStorage[Type](),
 			SessionStorage: inmemory.NewSessionStorage(),
 		},
 		core.Config{
-			SessionDecayTime: time.Hour,
-			PullingInterval:  time.Second,
+			TaskDowntime:    time.Second,
+			PullingInterval: time.Second,
 		},
 	)
 	require.Nil(t, stderr)
@@ -41,15 +40,35 @@ func TestCore(t *testing.T) {
 		Status: "created",
 		Args:   nil,
 		Labels: map[string]string{
-			"key": "value",
+			"worker": "A",
 		},
 	})
 	require.Nil(t, stderr)
 
-	var workerID = uuid.New()
-
 	task, stderr := workspace.ReceiveTask(ctx, core.ReceiveTaskParams[Type]{
-		WorkerID: workerID,
+		WorkerID: uuid.New(),
+		Type:     1,
+		Version:  "version",
+		Labels: map[string]string{
+			"worker": "A",
+		},
+	})
+	require.Nil(t, stderr)
+
+	time.Sleep(time.Second)
+
+	stderr = workspace.ReportState(ctx, core.ReportStateParams[codes.Code]{
+		TaskID:    task.ID,
+		SessionID: *task.SessionID,
+		ReportState: core.SetStatePutOff{
+			StateData:    json.RawMessage([]byte("{}")),
+			CatchLaterAT: time.Now().Add(time.Second),
+		},
+	})
+	require.NotNil(t, stderr)
+
+	task, stderr = workspace.ReceiveTask(ctx, core.ReceiveTaskParams[Type]{
+		WorkerID: uuid.New(),
 		Type:     1,
 		Version:  "version",
 		Labels: map[string]string{
@@ -58,14 +77,12 @@ func TestCore(t *testing.T) {
 	})
 	require.Nil(t, stderr)
 
-	var result = json.RawMessage([]byte("{}"))
-
-	stderr = workspace.ReportState(ctx, core.ReportStateParams[StatusCode]{
+	stderr = workspace.ReportState(ctx, core.ReportStateParams[codes.Code]{
 		TaskID:    task.ID,
 		SessionID: *task.SessionID,
-		ReportState: core.SetStateDone[StatusCode]{
-			StatusCode: StatusCode(codes.OK),
-			Result:     result,
+		ReportState: core.SetStatePutOff{
+			StateData:    json.RawMessage([]byte("{}")),
+			CatchLaterAT: time.Now().Add(time.Second),
 		},
 	})
 	require.Nil(t, stderr)

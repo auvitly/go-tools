@@ -24,8 +24,8 @@ type TaskUpdateParams[S cmp.Ordered] struct {
 	StatusCode   *S
 	StateData    json.RawMessage
 	Result       *json.RawMessage
-	UpdatedAT    time.Time
-	CatchLaterAT *time.Time
+	UpdatedTS    time.Time
+	CatchLaterTS *time.Time
 	DoneTS       *time.Time
 	SessionID    *uuid.UUID
 	AssignTS     *time.Time
