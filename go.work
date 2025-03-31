@@ -8,4 +8,5 @@ use (
 	standard/lab
 	standard/recovery
 	standard/stderrs
+	standard/workspace
 )
