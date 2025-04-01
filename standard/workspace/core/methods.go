@@ -77,9 +77,6 @@ func (c *Core[T, M, S]) ReportState(ctx context.Context, params ReportStateParam
 		return stderr
 	}
 
-	var sub = time.Since(task.UpdatedTS)
-	_ = sub
-
 	switch {
 	case task.SessionID == nil || task.AssignTS == nil:
 		return stderrs.FailedPrecondition.SetMessage("task unassigned")
@@ -109,6 +106,17 @@ func (c *Core[T, M, S]) ReportState(ctx context.Context, params ReportStateParam
 		}
 
 		return stderrs.FailedPrecondition.SetMessage("task unassigned")
+	}
+
+	session, stderr := c.dependencies.SessionStorage.Get(ctx, storage.SessionGetParams{
+		SessionID: *task.SessionID,
+	})
+	if stderr != nil {
+		return stderr
+	}
+
+	if session.WorkerID != params.WorkerID {
+		return stderrs.PermissionDenied.SetMessage("wrong worker for current session")
 	}
 
 	var updateParams = storage.TaskUpdateParams[S]{

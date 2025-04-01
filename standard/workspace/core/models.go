@@ -25,6 +25,7 @@ type ReceiveTaskParams[T cmp.Ordered] struct {
 
 type ReportStateParams[S cmp.Ordered] struct {
 	TaskID      uuid.UUID
+	WorkerID    uuid.UUID
 	SessionID   uuid.UUID
 	ReportState ReportState
 }
