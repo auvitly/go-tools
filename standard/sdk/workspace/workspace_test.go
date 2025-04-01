@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/auvitly/go-tools/standard/sdk/workspace/core"
+	"github.com/auvitly/go-tools/standard/sdk/workspace/service"
 	"github.com/auvitly/go-tools/standard/sdk/workspace/storage/inmemory"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
@@ -21,9 +21,9 @@ func TestCore(t *testing.T) {
 		Mode int
 	)
 
-	workspace, stderr := core.New(
+	workspace, stderr := service.New(
 		ctx,
-		core.Dependencies[Type, Mode, codes.Code]{
+		service.Dependencies[Type, Mode, codes.Code]{
 			TaskStorage: inmemory.NewTaskStorage[Type, Mode, codes.Code](inmemory.TaskConfig{
 				DeleteCompleted: true,
 			}),
@@ -32,14 +32,14 @@ func TestCore(t *testing.T) {
 				DeleteCompleted: true,
 			}),
 		},
-		core.Config{
+		service.Config{
 			TaskDowntime:    time.Second,
 			PullingInterval: time.Second,
 		},
 	)
 	require.Nil(t, stderr)
 
-	_, stderr = workspace.CreateTask(ctx, core.CreateTaskParams[Type, Mode]{
+	_, stderr = workspace.CreateTask(ctx, service.CreateTaskParams[Type, Mode]{
 		Type: 1,
 		Mode: 1,
 		Args: nil,
@@ -49,7 +49,7 @@ func TestCore(t *testing.T) {
 	})
 	require.Nil(t, stderr)
 
-	task, stderr := workspace.ReceiveTask(ctx, core.ReceiveTaskParams[Type]{
+	task, stderr := workspace.ReceiveTask(ctx, service.ReceiveTaskParams[Type]{
 		WorkerID: uuid.New(),
 		Type:     1,
 		Version:  "version",
@@ -61,17 +61,17 @@ func TestCore(t *testing.T) {
 
 	time.Sleep(time.Second)
 
-	stderr = workspace.ReportState(ctx, core.ReportStateParams[codes.Code]{
+	stderr = workspace.ReportState(ctx, service.ReportStateParams[codes.Code]{
 		TaskID:    task.ID,
 		SessionID: *task.SessionID,
-		ReportState: core.SetStatePutOff{
+		ReportState: service.SetStatePutOff{
 			StateData:    json.RawMessage([]byte("{}")),
 			CatchLaterAT: time.Now().Add(time.Second),
 		},
 	})
 	require.NotNil(t, stderr)
 
-	task, stderr = workspace.ReceiveTask(ctx, core.ReceiveTaskParams[Type]{
+	task, stderr = workspace.ReceiveTask(ctx, service.ReceiveTaskParams[Type]{
 		WorkerID: uuid.New(),
 		Type:     1,
 		Version:  "version",
@@ -81,10 +81,10 @@ func TestCore(t *testing.T) {
 	})
 	require.Nil(t, stderr)
 
-	stderr = workspace.ReportState(ctx, core.ReportStateParams[codes.Code]{
+	stderr = workspace.ReportState(ctx, service.ReportStateParams[codes.Code]{
 		TaskID:    task.ID,
 		SessionID: *task.SessionID,
-		ReportState: core.SetStatePutOff{
+		ReportState: service.SetStatePutOff{
 			StateData:    json.RawMessage([]byte("{}")),
 			CatchLaterAT: time.Now().Add(time.Second),
 		},

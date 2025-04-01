@@ -1,4 +1,4 @@
-package core
+package service
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/auvitly/go-tools/stderrs"
 )
 
-func (c *Core[T, M, S]) CreateTask(ctx context.Context, params CreateTaskParams[T, M]) (*entity.Task[T, M, S], *stderrs.Error) {
+func (c *Service[T, M, S]) CreateTask(ctx context.Context, params CreateTaskParams[T, M]) (*entity.Task[T, M, S], *stderrs.Error) {
 	task, stderr := c.dependencies.TaskStorage.Push(ctx, storage.TaskPushParams[T, M, S]{
 		ParentTaskID: params.ParentTaskID,
 		Type:         params.Type,
@@ -24,7 +24,7 @@ func (c *Core[T, M, S]) CreateTask(ctx context.Context, params CreateTaskParams[
 	return task, nil
 }
 
-func (c *Core[T, M, S]) ReceiveTask(ctx context.Context, params ReceiveTaskParams[T]) (*entity.Task[T, M, S], *stderrs.Error) {
+func (c *Service[T, M, S]) ReceiveTask(ctx context.Context, params ReceiveTaskParams[T]) (*entity.Task[T, M, S], *stderrs.Error) {
 	worker, stderr := c.dependencies.WorkerStorage.Save(ctx, storage.WorkerSaveParams[T]{
 		WorkerID:  params.WorkerID,
 		Type:      params.Type,
@@ -67,7 +67,7 @@ func (c *Core[T, M, S]) ReceiveTask(ctx context.Context, params ReceiveTaskParam
 	}
 }
 
-func (c *Core[T, M, S]) ReportState(ctx context.Context, params ReportStateParams[S]) *stderrs.Error {
+func (c *Service[T, M, S]) ReportState(ctx context.Context, params ReportStateParams[S]) *stderrs.Error {
 	var ts = time.Now()
 
 	task, stderr := c.dependencies.TaskStorage.Get(ctx, storage.TaskGetParams{
@@ -160,7 +160,7 @@ func (c *Core[T, M, S]) ReportState(ctx context.Context, params ReportStateParam
 	return nil
 }
 
-func (c *Core[T, M, S]) GetTask(ctx context.Context, params ReporGetParams) (*entity.Task[T, M, S], *stderrs.Error) {
+func (c *Service[T, M, S]) GetTask(ctx context.Context, params ReporGetParams) (*entity.Task[T, M, S], *stderrs.Error) {
 	task, stderr := c.dependencies.TaskStorage.Get(ctx, storage.TaskGetParams{
 		TaskID: params.TaskID,
 	})

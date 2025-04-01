@@ -1,4 +1,4 @@
-package core
+package service
 
 import (
 	"cmp"
@@ -9,7 +9,7 @@ import (
 	"github.com/auvitly/go-tools/stderrs"
 )
 
-type Core[T, M, S cmp.Ordered] struct {
+type Service[T, M, S cmp.Ordered] struct {
 	dependencies Dependencies[T, M, S]
 	config       Config
 }
@@ -19,9 +19,9 @@ func New[T, M, S cmp.Ordered](
 	dependencies Dependencies[T, M, S],
 	config Config,
 ) (
-	*Core[T, M, S], *stderrs.Error,
+	*Service[T, M, S], *stderrs.Error,
 ) {
-	var c = &Core[T, M, S]{
+	var c = &Service[T, M, S]{
 		dependencies: dependencies,
 		config:       config,
 	}
@@ -35,7 +35,7 @@ func New[T, M, S cmp.Ordered](
 	return c, nil
 }
 
-func (c *Core[T, M, S]) start(ctx context.Context) {
+func (c *Service[T, M, S]) start(ctx context.Context) {
 	var ticker = time.NewTicker(c.config.PullingInterval)
 
 	for {
