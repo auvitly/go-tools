@@ -12,7 +12,6 @@ type CreateTaskParams[T, M cmp.Ordered] struct {
 	ParentTaskID *uuid.UUID
 	Type         T
 	Mode         M
-	Status       string
 	Args         json.RawMessage
 	Labels       map[string]string
 }

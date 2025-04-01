@@ -40,10 +40,9 @@ func TestCore(t *testing.T) {
 	require.Nil(t, stderr)
 
 	_, stderr = workspace.CreateTask(ctx, core.CreateTaskParams[Type, Mode]{
-		Type:   1,
-		Mode:   1,
-		Status: "created",
-		Args:   nil,
+		Type: 1,
+		Mode: 1,
+		Args: nil,
 		Labels: map[string]string{
 			"worker": "A",
 		},
