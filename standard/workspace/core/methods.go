@@ -151,3 +151,14 @@ func (c *Core[T, M, S]) ReportState(ctx context.Context, params ReportStateParam
 
 	return nil
 }
+
+func (c *Core[T, M, S]) GetTask(ctx context.Context, params ReporGetParams) (*entity.Task[T, M, S], *stderrs.Error) {
+	task, stderr := c.dependencies.TaskStorage.Get(ctx, storage.TaskGetParams{
+		TaskID: params.TaskID,
+	})
+	if stderr != nil {
+		return nil, stderr
+	}
+
+	return task, nil
+}

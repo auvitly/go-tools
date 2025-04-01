@@ -29,6 +29,10 @@ type ReportStateParams[S cmp.Ordered] struct {
 	ReportState ReportState
 }
 
+type ReporGetParams struct {
+	TaskID uuid.UUID
+}
+
 type ReportState interface {
 	implReportState()
 }
