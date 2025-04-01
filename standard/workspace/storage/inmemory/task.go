@@ -3,6 +3,8 @@ package inmemory
 import (
 	"cmp"
 	"context"
+	"maps"
+	"slices"
 	"sync"
 	"time"
 
@@ -27,6 +29,32 @@ func NewTaskStorage[T, M, S cmp.Ordered](config TaskConfig) *TaskStorage[T, M, S
 		storage: map[uuid.UUID]*entity.Task[T, M, S]{},
 		config:  config,
 	}
+}
+
+func cloneTask[T, M, S cmp.Ordered](t *entity.Task[T, M, S]) *entity.Task[T, M, S] {
+	var task = *t
+
+	task.Args = slices.Clone(task.Args)
+	task.SessionID = clonePtr(task.SessionID)
+	task.CatchLaterTS = clonePtr(task.CatchLaterTS)
+	task.ParentTaskID = clonePtr(task.ParentTaskID)
+	task.StatusCode = clonePtr(task.StatusCode)
+	task.StateData = slices.Clone(task.StateData)
+	task.DoneTS = clonePtr(task.DoneTS)
+	task.AssignTS = clonePtr(task.AssignTS)
+	task.Labels = maps.Clone(task.Labels)
+
+	return &task
+}
+
+func clonePtr[T any](value *T) *T {
+	if value == nil {
+		return nil
+	}
+
+	var cloned = *value
+
+	return &cloned
 }
 
 func (s *TaskStorage[T, M, S]) Update(ctx context.Context, params storage.TaskUpdateParams[S]) (*entity.Task[T, M, S], *stderrs.Error) {
@@ -55,7 +83,7 @@ func (s *TaskStorage[T, M, S]) Update(ctx context.Context, params storage.TaskUp
 	task.SessionID = params.SessionID
 	task.AssignTS = params.AssignTS
 
-	return task.Clone(), nil
+	return cloneTask(task), nil
 }
 
 func (s *TaskStorage[T, M, S]) Push(ctx context.Context, params storage.TaskPushParams[T, M, S]) (*entity.Task[T, M, S], *stderrs.Error) {
@@ -85,7 +113,7 @@ func (s *TaskStorage[T, M, S]) Push(ctx context.Context, params storage.TaskPush
 		Labels:       params.Labels,
 	}
 
-	return s.storage[id].Clone(), nil
+	return cloneTask(s.storage[id]), nil
 }
 
 func (s *TaskStorage[T, M, S]) Pop(ctx context.Context, params storage.TaskPopParams[T]) (*entity.Task[T, M, S], *stderrs.Error) {
@@ -118,7 +146,7 @@ loop:
 		task.AssignTS = &ts
 		task.SessionID = &params.SessionID
 
-		return task.Clone(), nil
+		return cloneTask(task), nil
 	}
 
 	return nil, stderrs.NotFound.SetMessage("not found task for worker")
@@ -133,7 +161,7 @@ func (s *TaskStorage[T, M, S]) Get(ctx context.Context, params storage.TaskGetPa
 		return nil, stderrs.NotFound.SetMessage("not found task with id=%s", params.TaskID.String())
 	}
 
-	return task.Clone(), nil
+	return cloneTask(task), nil
 }
 
 func (s *TaskStorage[T, M, S]) List(ctx context.Context, params storage.TaskListParams) ([]*entity.Task[T, M, S], *stderrs.Error) {
@@ -144,7 +172,7 @@ func (s *TaskStorage[T, M, S]) List(ctx context.Context, params storage.TaskList
 
 	for _, task := range s.storage {
 		if task.AssignTS != nil && params.OnlyAssigned {
-			tasks = append(tasks, task.Clone())
+			tasks = append(tasks, cloneTask(task))
 		}
 	}
 

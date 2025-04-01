@@ -3,10 +3,9 @@ package entity
 import (
 	"cmp"
 	"encoding/json"
-	"maps"
-	"slices"
 	"time"
 
+	"github.com/auvitly/go-tools/stderrs"
 	"github.com/google/uuid"
 )
 
@@ -28,28 +27,118 @@ type Task[T, M, S cmp.Ordered] struct {
 	Labels       map[string]string
 }
 
-func clonePtr[T any](value *T) *T {
-	if value == nil {
-		return nil
-	}
-
-	var cloned = *value
-
-	return &cloned
+type SpecifiedTask[T, M, S cmp.Ordered, A, D, R any] struct {
+	ID           uuid.UUID
+	ParentTaskID *uuid.UUID
+	Type         T
+	Mode         M
+	Args         A
+	StateData    D
+	Result       *R
+	StatusCode   *S
+	CreatedTS    time.Time
+	UpdatedTS    time.Time
+	CatchLaterTS *time.Time
+	DoneTS       *time.Time
+	SessionID    *uuid.UUID
+	AssignTS     *time.Time
+	Labels       map[string]string
 }
 
-func (t *Task[T, M, S]) Clone() *Task[T, M, S] {
-	var task = *t
+func MarshalTask[T, M, S cmp.Ordered, A, D, R any](task *SpecifiedTask[T, M, S, A, D, R]) (*Task[T, M, S], *stderrs.Error) {
+	var (
+		args      json.RawMessage
+		stateData json.RawMessage
+		result    *json.RawMessage
+	)
 
-	task.Args = slices.Clone(task.Args)
-	task.SessionID = clonePtr(task.SessionID)
-	task.CatchLaterTS = clonePtr(task.CatchLaterTS)
-	task.ParentTaskID = clonePtr(task.ParentTaskID)
-	task.StatusCode = clonePtr(task.StatusCode)
-	task.StateData = slices.Clone(task.StateData)
-	task.DoneTS = clonePtr(task.DoneTS)
-	task.AssignTS = clonePtr(task.AssignTS)
-	task.Labels = maps.Clone(task.Labels)
+	args, err := json.Marshal(task.Args)
+	if err != nil {
+		return nil, stderrs.Internal.
+			EmbedErrors(err).
+			SetMessage("can't marshal args: %s", err.Error())
+	}
 
-	return &task
+	stateData, err = json.Marshal(task.StateData)
+	if err != nil {
+		return nil, stderrs.Internal.
+			EmbedErrors(err).
+			SetMessage("can't marshal state_data: %s", err.Error())
+	}
+
+	if task.Result != nil {
+		result = new(json.RawMessage)
+
+		*result, err = json.Marshal(task.Result)
+		if err != nil {
+			return nil, stderrs.Internal.
+				EmbedErrors(err).
+				SetMessage("can't marshal results: %s", err.Error())
+		}
+	}
+
+	return &Task[T, M, S]{
+		ID:           task.ID,
+		ParentTaskID: task.ParentTaskID,
+		Type:         task.Type,
+		Mode:         task.Mode,
+		Args:         args,
+		StateData:    stateData,
+		Result:       result,
+		StatusCode:   task.StatusCode,
+		CreatedTS:    task.CreatedTS,
+		UpdatedTS:    task.UpdatedTS,
+		CatchLaterTS: task.CatchLaterTS,
+		DoneTS:       task.DoneTS,
+		SessionID:    task.SessionID,
+		AssignTS:     task.AssignTS,
+		Labels:       task.Labels,
+	}, nil
+}
+
+func UnmarshalTask[T, M, S cmp.Ordered, A, D, R any](task *Task[T, M, S]) (*SpecifiedTask[T, M, S, A, D, R], *stderrs.Error) {
+	var (
+		args      A
+		stateData D
+		result    *R
+	)
+
+	err := json.Unmarshal(task.Args, &args)
+	if err != nil {
+		return nil, stderrs.Internal.
+			EmbedErrors(err).
+			SetMessage("can't unmarshal args: %s", err.Error())
+	}
+
+	err = json.Unmarshal(task.StateData, &stateData)
+	if err != nil {
+		return nil, stderrs.Internal.
+			EmbedErrors(err).
+			SetMessage("can't unmarshal state_data: %s", err.Error())
+	}
+
+	err = json.Unmarshal(*task.Result, &result)
+	if err != nil {
+		return nil, stderrs.Internal.
+			EmbedErrors(err).
+			SetMessage("can't unmarshal results: %s", err.Error())
+	}
+
+	return &SpecifiedTask[T, M, S, A, D, R]{
+		ID:           task.ID,
+		ParentTaskID: task.ParentTaskID,
+		Type:         task.Type,
+		Mode:         task.Mode,
+		Args:         args,
+		StateData:    stateData,
+		Result:       result,
+		StatusCode:   task.StatusCode,
+		CreatedTS:    task.CreatedTS,
+		UpdatedTS:    task.UpdatedTS,
+		CatchLaterTS: task.CatchLaterTS,
+		DoneTS:       task.DoneTS,
+		SessionID:    task.SessionID,
+		AssignTS:     task.AssignTS,
+		Labels:       task.Labels,
+	}, nil
 }
