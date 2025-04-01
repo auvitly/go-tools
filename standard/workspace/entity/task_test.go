@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/auvitly/go-tools/lab"
 	"github.com/auvitly/go-tools/standard/workspace/entity"
+	"github.com/auvitly/go-tools/test/lab"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )

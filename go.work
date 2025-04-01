@@ -5,8 +5,8 @@ use (
 	reflector
 	standard/collection/cache
 	standard/collection/enum
-	standard/lab
-	standard/recovery
-	standard/stderrs
+	standard/collection/stderrs
+	standard/test/lab
+	standard/utils/recovery
 	standard/workspace
 )
