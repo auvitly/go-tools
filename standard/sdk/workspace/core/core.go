@@ -5,7 +5,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/auvitly/go-tools/standard/workspace/storage"
+	"github.com/auvitly/go-tools/standard/sdk/workspace/storage"
 	"github.com/auvitly/go-tools/stderrs"
 )
 

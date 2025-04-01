@@ -1,0 +1,1 @@
+module github.com/auvitly/go-tools/test/container

@@ -1,4 +1,4 @@
-module github.com/auvitly/go-tools/reflector
+module github.com/auvitly/go-tools/standard/utils/reflector
 
 go 1.21
 

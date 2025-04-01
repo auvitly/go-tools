@@ -1,4 +1,4 @@
-module github.com/auvitly/go-tools/standard/workspace
+module github.com/auvitly/go-tools/standard/sdk/workspace
 
 go 1.21
 

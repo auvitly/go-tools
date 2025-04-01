@@ -3,7 +3,7 @@ package memory
 import (
 	"unsafe"
 
-	"github.com/auvitly/go-tools/reflector/impl"
+	"github.com/auvitly/go-tools/standard/utils/reflector/impl"
 )
 
 // As - performs a representation of a memory fragment as a slice of bytes

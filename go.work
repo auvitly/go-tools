@@ -2,11 +2,12 @@ go 1.21
 
 use (
 	nuclear
-	reflector
 	standard/collection/cache
 	standard/collection/enum
 	standard/collection/stderrs
 	standard/test/lab
+	standard/test/container
 	standard/utils/recovery
-	standard/workspace
+	standard/utils/reflector
+	standard/sdk/workspace
 )

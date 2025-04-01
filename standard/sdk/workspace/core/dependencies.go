@@ -3,7 +3,7 @@ package core
 import (
 	"cmp"
 
-	"github.com/auvitly/go-tools/standard/workspace/storage"
+	"github.com/auvitly/go-tools/standard/sdk/workspace/storage"
 )
 
 type Dependencies[T, M, S cmp.Ordered] struct {

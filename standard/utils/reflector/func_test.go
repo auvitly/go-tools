@@ -3,7 +3,7 @@ package reflector_test
 import (
 	"testing"
 
-	"github.com/auvitly/go-tools/reflector"
+	"github.com/auvitly/go-tools/standard/utils/reflector"
 	"github.com/stretchr/testify/require"
 )
 
