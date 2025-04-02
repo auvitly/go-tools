@@ -22,8 +22,8 @@ type TaskStorage[T, M, S cmp.Ordered] interface {
 type TaskUpdateParams[S cmp.Ordered] struct {
 	TaskID       uuid.UUID
 	StatusCode   *S
-	StateData    json.RawMessage
-	Result       *json.RawMessage
+	StateData    []byte
+	Result       *[]byte
 	UpdatedTS    time.Time
 	CatchLaterTS *time.Time
 	DoneTS       *time.Time

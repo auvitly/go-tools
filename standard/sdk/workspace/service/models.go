@@ -2,7 +2,6 @@ package service
 
 import (
 	"cmp"
-	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -12,7 +11,7 @@ type CreateTaskParams[T, M cmp.Ordered] struct {
 	ParentTaskID *uuid.UUID
 	Type         T
 	Mode         M
-	Args         json.RawMessage
+	Args         []byte
 	Labels       map[string]string
 }
 
@@ -40,15 +39,15 @@ type ReportState interface {
 
 type SetStateDone[S cmp.Ordered] struct {
 	StatusCode S
-	Result     json.RawMessage
+	Result     []byte
 }
 
 type SetStateInWork struct {
-	StateData json.RawMessage
+	StateData []byte
 }
 
 type SetStatePutOff struct {
-	StateData    json.RawMessage
+	StateData    []byte
 	CatchLaterAT time.Time
 }
 
