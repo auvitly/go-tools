@@ -28,6 +28,14 @@ type isWorkspace interface {
 func (w *Workspace[S]) mu() *sync.RWMutex      { return &w._mu }
 func (w *Workspace[S]) values() map[string]any { return w._values }
 
+func (w *Workspace[S]) Stage() S {
+	return w._stage
+}
+
+func (w *Workspace[S]) Description() string {
+	return w._message
+}
+
 func SetStage[S Stage](w *Workspace[S], stage S, message string) {
 	w.mu().Lock()
 	defer w.mu().Unlock()

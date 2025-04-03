@@ -7,17 +7,26 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type Stage int
+
+const (
+	StageInit Stage = iota
+	StageError
+	StageDone
+)
+
 func TestWorkspace(t *testing.T) {
-	type Stage int
 	type Struct struct {
 		A string `json:"a"`
 	}
 
-	var ws = workspace.New[Stage](0, "init")
+	var ws = workspace.New(StageInit, "my init stage")
 
 	workspace.Store(ws, "string", "string")
 	workspace.Store(ws, "int", 0)
 	workspace.Store(ws, "struct", Struct{A: "a"})
+
+	workspace.SetStage(ws, StageError, "it's error!")
 
 	ws2, stderr := workspace.FromMap[Stage](workspace.ToMap(ws))
 	require.Nil(t, stderr)
