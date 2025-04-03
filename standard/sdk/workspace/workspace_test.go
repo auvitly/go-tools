@@ -18,13 +18,20 @@ const (
 func TestWorkspace(t *testing.T) {
 	type Struct struct {
 		A string `json:"a"`
+		B struct {
+			C string `json:"c"`
+		} `json:"B"`
 	}
 
 	var ws = workspace.New(StageInit, "my init stage")
 
 	workspace.Store(ws, "string", "string")
 	workspace.Store(ws, "int", 0)
-	workspace.Store(ws, "struct", Struct{A: "a"})
+	workspace.Store(ws, "struct", Struct{A: "a", B: struct {
+		C string "json:\"c\""
+	}{
+		C: "c",
+	}})
 
 	workspace.SetStage(ws, StageError, "it's error!")
 
