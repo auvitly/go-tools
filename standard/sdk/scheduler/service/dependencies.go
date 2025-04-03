@@ -3,7 +3,7 @@ package service
 import (
 	"cmp"
 
-	"github.com/auvitly/go-tools/standard/sdk/workspace/storage"
+	"github.com/auvitly/go-tools/standard/sdk/scheduler/storage"
 )
 
 type Dependencies[T, M, S cmp.Ordered] struct {

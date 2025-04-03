@@ -1,4 +1,4 @@
-module github.com/auvitly/go-tools/standard/sdk/workspace
+module github.com/auvitly/go-tools/standard/sdk/scheduler
 
 go 1.21
 

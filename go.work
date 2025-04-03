@@ -9,5 +9,5 @@ use (
 	standard/test/container
 	standard/utils/recovery
 	standard/utils/reflector
-	standard/sdk/workspace
+	standard/sdk/scheduler
 )

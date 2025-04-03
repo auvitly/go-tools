@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/auvitly/go-tools/standard/sdk/workspace/entity"
+	"github.com/auvitly/go-tools/standard/sdk/scheduler/entity"
 	"github.com/auvitly/go-tools/stderrs"
 	"github.com/google/uuid"
 )

@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/auvitly/go-tools/standard/sdk/workspace/service"
-	"github.com/auvitly/go-tools/standard/sdk/workspace/storage/inmemory"
+	"github.com/auvitly/go-tools/standard/sdk/scheduler/service"
+	"github.com/auvitly/go-tools/standard/sdk/scheduler/storage/inmemory"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/codes"

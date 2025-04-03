@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/auvitly/go-tools/standard/sdk/workspace/entity"
-	"github.com/auvitly/go-tools/standard/sdk/workspace/storage"
+	"github.com/auvitly/go-tools/standard/sdk/scheduler/entity"
+	"github.com/auvitly/go-tools/standard/sdk/scheduler/storage"
 	"github.com/auvitly/go-tools/stderrs"
 )
 
