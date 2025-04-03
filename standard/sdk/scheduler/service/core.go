@@ -55,7 +55,7 @@ func (c *Service[T, M, S]) start(ctx context.Context) {
 					_, stderr = c.dependencies.TaskStorage.Update(ctx, storage.TaskUpdateParams[S]{
 						TaskID:       task.ID,
 						StatusCode:   task.StatusCode,
-						StateData:    task.StateData,
+						Data:         task.Data,
 						Result:       task.Result,
 						UpdatedTS:    time.Now(),
 						CatchLaterTS: nil,

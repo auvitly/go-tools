@@ -9,15 +9,15 @@ import (
 
 type Data = []byte
 
-type Task[T, M, S cmp.Ordered] SpecificTask[T, M, S, Data, Data, Data]
+type Task[T, M, S cmp.Ordered] SpecificTask[T, M, S, Data, Data]
 
-type SpecificTask[T, M, S cmp.Ordered, A, D, R any] struct {
+type SpecificTask[T, M, S cmp.Ordered, A, R any] struct {
 	ID           uuid.UUID
 	ParentTaskID *uuid.UUID
 	Type         T
 	Mode         M
 	Args         A
-	StateData    D
+	Data         map[string]any
 	Result       *R
 	StatusCode   *S
 	CreatedTS    time.Time

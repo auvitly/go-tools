@@ -2,7 +2,6 @@ package workspace_test
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 	"time"
 
@@ -65,7 +64,7 @@ func TestCore(t *testing.T) {
 		TaskID:    task.ID,
 		SessionID: *task.SessionID,
 		ReportState: service.SetStatePutOff{
-			StateData:    json.RawMessage([]byte("{}")),
+			StateData:    map[string]any{},
 			CatchLaterAT: time.Now().Add(time.Second),
 		},
 	})
@@ -85,7 +84,7 @@ func TestCore(t *testing.T) {
 		TaskID:    task.ID,
 		SessionID: *task.SessionID,
 		ReportState: service.SetStatePutOff{
-			StateData:    json.RawMessage([]byte("{}")),
+			StateData:    map[string]any{},
 			CatchLaterAT: time.Now().Add(time.Second),
 		},
 	})

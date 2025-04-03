@@ -92,7 +92,7 @@ func (c *Service[T, M, S]) ReportState(ctx context.Context, params ReportStatePa
 
 		_, stderr = c.dependencies.TaskStorage.Update(ctx, storage.TaskUpdateParams[S]{
 			TaskID:       task.ID,
-			StateData:    task.StateData,
+			Data:         task.Data,
 			StatusCode:   task.StatusCode,
 			Result:       task.Result,
 			UpdatedTS:    ts,
@@ -133,9 +133,9 @@ func (c *Service[T, M, S]) ReportState(ctx context.Context, params ReportStatePa
 		updateParams.Result = &state.Result
 		updateParams.StatusCode = &state.StatusCode
 	case SetStateInWork:
-		updateParams.StateData = state.StateData
+		updateParams.Data = state.StateData
 	case SetStatePutOff:
-		updateParams.StateData = state.StateData
+		updateParams.Data = state.StateData
 		updateParams.CatchLaterTS = &state.CatchLaterAT
 	default:
 		return stderrs.InvalidArgument.SetMessage("not found state in report")

@@ -39,7 +39,7 @@ func cloneTask[T, M, S cmp.Ordered](t *entity.Task[T, M, S]) *entity.Task[T, M, 
 	task.CatchLaterTS = clonePtr(task.CatchLaterTS)
 	task.ParentTaskID = clonePtr(task.ParentTaskID)
 	task.StatusCode = clonePtr(task.StatusCode)
-	task.StateData = slices.Clone(task.StateData)
+	task.Data = maps.Clone(task.Data)
 	task.DoneTS = clonePtr(task.DoneTS)
 	task.AssignTS = clonePtr(task.AssignTS)
 	task.Labels = maps.Clone(task.Labels)
@@ -75,7 +75,7 @@ func (s *TaskStorage[T, M, S]) Update(ctx context.Context, params storage.TaskUp
 	}
 
 	task.StatusCode = params.StatusCode
-	task.StateData = params.StateData
+	task.Data = params.Data
 	task.Result = params.Result
 	task.UpdatedTS = params.UpdatedTS
 	task.CatchLaterTS = params.CatchLaterTS
@@ -102,7 +102,7 @@ func (s *TaskStorage[T, M, S]) Push(ctx context.Context, params storage.TaskPush
 		Mode:         params.Mode,
 		StatusCode:   nil,
 		Args:         params.Args,
-		StateData:    nil,
+		Data:         nil,
 		Result:       nil,
 		CreatedTS:    ts,
 		UpdatedTS:    ts,

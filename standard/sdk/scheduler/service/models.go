@@ -43,11 +43,11 @@ type SetStateDone[S cmp.Ordered] struct {
 }
 
 type SetStateInWork struct {
-	StateData []byte
+	StateData map[string]any
 }
 
 type SetStatePutOff struct {
-	StateData    []byte
+	StateData    map[string]any
 	CatchLaterAT time.Time
 }
 

@@ -22,7 +22,7 @@ type TaskStorage[T, M, S cmp.Ordered] interface {
 type TaskUpdateParams[S cmp.Ordered] struct {
 	TaskID       uuid.UUID
 	StatusCode   *S
-	StateData    []byte
+	Data         map[string]any
 	Result       *[]byte
 	UpdatedTS    time.Time
 	CatchLaterTS *time.Time
