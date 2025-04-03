@@ -14,10 +14,10 @@ type Stage interface {
 }
 
 type Workspace[S Stage] struct {
-	_mu      sync.RWMutex
-	_stage   S
-	_message string
-	_values  map[string]any
+	_mu          sync.RWMutex
+	_stage       S
+	_description string
+	_values      map[string]any
 }
 
 type isWorkspace interface {
@@ -28,21 +28,21 @@ type isWorkspace interface {
 func (w *Workspace[S]) mu() *sync.RWMutex      { return &w._mu }
 func (w *Workspace[S]) values() map[string]any { return w._values }
 func (w *Workspace[S]) Stage() S               { return w._stage }
-func (w *Workspace[S]) Description() string    { return w._message }
+func (w *Workspace[S]) Description() string    { return w._description }
 
 func SetStage[S Stage](w *Workspace[S], stage S, message string) {
 	w.mu().Lock()
 	defer w.mu().Unlock()
 
 	w._stage = stage
-	w._message = message
+	w._description = message
 }
 
 func New[S Stage](stage S, message string) *Workspace[S] {
 	return &Workspace[S]{
-		_stage:   stage,
-		_message: message,
-		_values:  make(map[string]any),
+		_stage:       stage,
+		_description: message,
+		_values:      make(map[string]any),
 	}
 }
 
@@ -94,17 +94,17 @@ func ToMap[S Stage](w *Workspace[S]) map[string]any {
 	defer w.mu().RUnlock()
 
 	return map[string]any{
-		"stage":   w._stage,
-		"message": w._message,
-		"values":  maps.Clone(w._values),
+		"stage":       w._stage,
+		"description": w._description,
+		"values":      maps.Clone(w._values),
 	}
 }
 
 func FromMap[S Stage](data map[string]any) (*Workspace[S], *stderrs.Error) {
 	type workspace[S Stage] struct {
-		Stage   S              `json:"stage"`
-		Message string         `json:"message"`
-		Values  map[string]any `json:"values"`
+		Stage       S              `json:"stage"`
+		Description string         `json:"description"`
+		Values      map[string]any `json:"values"`
 	}
 
 	var ws = new(workspace[S])
@@ -120,8 +120,8 @@ func FromMap[S Stage](data map[string]any) (*Workspace[S], *stderrs.Error) {
 	}
 
 	return &Workspace[S]{
-		_stage:   ws.Stage,
-		_message: ws.Message,
-		_values:  ws.Values,
+		_stage:       ws.Stage,
+		_description: ws.Description,
+		_values:      ws.Values,
 	}, nil
 }
