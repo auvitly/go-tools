@@ -20,6 +20,11 @@ type Workspace[S Stage] struct {
 	_values      map[string]any
 }
 
+type KV struct {
+	Key   string
+	Value any
+}
+
 type isWorkspace interface {
 	mu() *sync.RWMutex
 	values() map[string]any
@@ -46,23 +51,31 @@ func New[S Stage](stage S, message string) *Workspace[S] {
 	}
 }
 
-func Store[V any](w isWorkspace, key string, value V) *stderrs.Error {
+func Store(w isWorkspace, pairs ...KV) *stderrs.Error {
 	w.mu().Lock()
 	defer w.mu().Unlock()
 
-	raw, err := json.Marshal(value)
-	if err != nil {
-		return stderrs.Internal.SetMessage("not supported '%T' type as value", value)
+	var parsed = make(map[string]any)
+
+	for _, pair := range pairs {
+		raw, err := json.Marshal(pair.Value)
+		if err != nil {
+			return stderrs.Internal.SetMessage("not supported '%T' type as value", pair.Value)
+		}
+
+		var stored any
+
+		err = json.Unmarshal(raw, &stored)
+		if err != nil {
+			return stderrs.Internal.SetMessage("not supported '%T' type as value", pair.Value)
+		}
+
+		parsed[pair.Key] = stored
 	}
 
-	var stored any
-
-	err = json.Unmarshal(raw, &stored)
-	if err != nil {
-		return stderrs.Internal.SetMessage("not supported '%T' type as value", value)
+	for key, value := range parsed {
+		w.values()[key] = value
 	}
-
-	w.values()[key] = stored
 
 	return nil
 }
