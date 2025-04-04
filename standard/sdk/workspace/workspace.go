@@ -101,7 +101,7 @@ func StoreValues(w isWorkspace, pairs ...Value) *stderrs.Error {
 	return nil
 }
 
-func Load[V any](w isWorkspace, key string) (value V, stderr *stderrs.Error) {
+func LoadValue[V any](w isWorkspace, key string) (value V, stderr *stderrs.Error) {
 	w.mu().RLock()
 	defer w.mu().RUnlock()
 

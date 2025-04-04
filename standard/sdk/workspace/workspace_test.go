@@ -34,7 +34,7 @@ func TestWorkspace(t *testing.T) {
 	ws2, stderr := workspace.FromMap[Stage](workspace.ToMap(ws))
 	require.Nil(t, stderr)
 
-	str, stderr := workspace.Load[Struct](ws2, "struct")
+	str, stderr := workspace.LoadValue[Struct](ws2, "struct")
 	require.Nil(t, stderr)
 
 	t.Log(str)
