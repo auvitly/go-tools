@@ -159,3 +159,27 @@ func FromMap[S Stage](data map[string]any) (*Workspace[S], *stderrs.Error) {
 		_values:      ws.Values,
 	}, nil
 }
+
+func (w *Workspace[S]) MarshalJSON() ([]byte, error) {
+	return json.Marshal(ToMap(w))
+}
+
+func (w *Workspace[S]) UnmarshalJSON(data []byte) error {
+	var raw = make(map[string]any)
+
+	err := json.Unmarshal(data, &raw)
+	if err != nil {
+		return err
+	}
+
+	ws, stderr := FromMap[S](raw)
+	if stderr != nil {
+		return stderr
+	}
+
+	w._stage = ws._stage
+	w._description = ws._description
+	w._values = ws._values
+
+	return nil
+}
