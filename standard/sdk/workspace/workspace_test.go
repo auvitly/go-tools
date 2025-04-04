@@ -22,11 +22,12 @@ func TestWorkspace(t *testing.T) {
 
 	var ws = workspace.New(StageInit, "my init stage")
 
-	workspace.Store(ws,
-		workspace.KV{Key: "string", Value: "string"},
-		workspace.KV{Key: "int", Value: 0},
-		workspace.KV{Key: "struct", Value: Struct{A: "a"}},
+	workspace.StoreValues(ws,
+		workspace.Value{Key: "string", Value: "string"},
+		workspace.Value{Key: "int", Value: 0},
 	)
+
+	workspace.StoreValue(ws, "struct", Struct{A: "a"})
 
 	workspace.SetStage(ws, StageError, "it's error!")
 

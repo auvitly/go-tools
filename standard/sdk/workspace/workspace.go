@@ -20,7 +20,7 @@ type Workspace[S Stage] struct {
 	_values      map[string]any
 }
 
-type KV struct {
+type Value struct {
 	Key   string
 	Value any
 }
@@ -51,7 +51,28 @@ func New[S Stage](stage S, message string) *Workspace[S] {
 	}
 }
 
-func Store(w isWorkspace, pairs ...KV) *stderrs.Error {
+func StoreValue(w isWorkspace, key string, value any) *stderrs.Error {
+	w.mu().Lock()
+	defer w.mu().Unlock()
+
+	raw, err := json.Marshal(value)
+	if err != nil {
+		return stderrs.Internal.SetMessage("not supported '%T' type as value", value)
+	}
+
+	var stored any
+
+	err = json.Unmarshal(raw, &stored)
+	if err != nil {
+		return stderrs.Internal.SetMessage("not supported '%T' type as value", value)
+	}
+
+	w.values()[key] = stored
+
+	return nil
+}
+
+func StoreValues(w isWorkspace, pairs ...Value) *stderrs.Error {
 	w.mu().Lock()
 	defer w.mu().Unlock()
 
