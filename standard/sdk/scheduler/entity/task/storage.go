@@ -46,7 +46,6 @@ type (
 		ListFilter
 		Statuses []Status
 	}
-
 	ListFilterInactive struct {
 		ListFilter
 		Interval time.Duration
@@ -65,6 +64,10 @@ type (
 		ListFilter
 		Limit  int
 		Offset int
+	}
+	ListFilterSortByCreatedAT struct {
+		ListFilter
+		Desc bool
 	}
 )
 

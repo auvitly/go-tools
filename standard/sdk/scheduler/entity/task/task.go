@@ -1,6 +1,7 @@
 package task
 
 import (
+	"maps"
 	"slices"
 	"time"
 
@@ -28,7 +29,10 @@ type Task struct {
 	WorkerLabels    map[string]string
 }
 
-type IsTask interface{ Impl() *Task }
+type IsTask interface {
+	Impl() *Task
+	Clone() IsTask
+}
 
 type (
 	Status string
@@ -70,3 +74,47 @@ const (
 )
 
 func (t *Task) Impl() *Task { return t }
+
+func (t *Task) Clone() IsTask {
+	var (
+		sessionID *uuid.UUID
+		assignTS  *time.Time
+	)
+
+	if t.WorkerSessionID != nil {
+		sessionID = func() *uuid.UUID {
+			var value = *t.WorkerSessionID
+
+			return &value
+		}()
+	}
+
+	if t.WorkerAssignTS != nil {
+		assignTS = func() *time.Time {
+			var value = *t.WorkerAssignTS
+
+			return &value
+		}()
+	}
+
+	return &Task{
+		ID:       t.ID,
+		ParentID: t.ParentID,
+
+		Type:   t.Type,
+		Mode:   t.Mode,
+		Status: t.Status,
+
+		Arguments: maps.Clone(t.Arguments),
+		Data:      maps.Clone(t.Data),
+		Results:   maps.Clone(t.Results),
+
+		CreatedTS: t.CreatedTS,
+		UpdatedTS: t.UpdatedTS,
+		PendingTS: t.PendingTS,
+
+		WorkerSessionID: sessionID,
+		WorkerAssignTS:  assignTS,
+		WorkerLabels:    maps.Clone(t.WorkerLabels),
+	}
+}
