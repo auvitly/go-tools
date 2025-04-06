@@ -48,8 +48,11 @@ func TestScheduler(t *testing.T) {
 	})
 	require.Nil(t, stderr)
 
-	s.CreateTask(ctx, &MyTask{
+	created, stderr := s.CreateTask(ctx, &MyTask{
 		Task:  prepeared,
 		Field: "field",
 	})
+	require.Nil(t, stderr)
+
+	require.Equal(t, created.Field, "field")
 }
