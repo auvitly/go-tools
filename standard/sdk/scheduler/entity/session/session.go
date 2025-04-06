@@ -1,4 +1,4 @@
-package entity
+package session
 
 import (
 	"time"
@@ -13,3 +13,7 @@ type Session struct {
 	UpdatedAT time.Time
 	DoneAT    *time.Time
 }
+
+type IsSession interface{ Impl() *Session }
+
+func (s *Session) Impl() *Session { return s }
