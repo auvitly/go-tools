@@ -18,8 +18,8 @@ type ReceiveTaskParams[W worker.IsWorker] struct {
 
 type ReportTaskRequest[T task.IsTask, W worker.IsWorker, S session.IsSession] struct {
 	TaskID  uuid.UUID
-	Session S
 	Worker  W
+	Session S
 	Event   ReportTaskEvent[T]
 }
 

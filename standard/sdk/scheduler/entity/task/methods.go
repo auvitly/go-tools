@@ -13,7 +13,7 @@ type NewParams struct {
 	Type      string
 	Mode      Mode
 	PendingTS *time.Time
-	Argument  map[string]any
+	Arguments map[string]any
 	Labels    map[string]string
 }
 
@@ -38,9 +38,9 @@ func New(params NewParams) (*Task, *stderrs.Error) {
 			Mode:   params.Mode,
 			Status: StatusCreated,
 
-			Argument: params.Argument,
-			Data:     nil,
-			Result:   nil,
+			Arguments: params.Arguments,
+			Data:      nil,
+			Results:   nil,
 
 			CreatedTS: ts,
 			UpdatedTS: ts,

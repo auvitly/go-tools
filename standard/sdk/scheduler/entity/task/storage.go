@@ -11,7 +11,7 @@ import (
 type Storage[T IsTask] interface {
 	Get(ctx context.Context, taskID uuid.UUID) (T, *stderrs.Error)
 	List(ctx context.Context, filters ...IsListFilter) ([]T, *stderrs.Error)
-	Push(ctx context.Context, task IsTask) (T, *stderrs.Error)
+	Save(ctx context.Context, task IsTask) (T, *stderrs.Error)
 }
 
 type PopParams struct {

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"reflect"
 	"time"
 
 	"github.com/auvitly/go-tools/collection/stderrs"
@@ -11,6 +12,47 @@ import (
 	"github.com/auvitly/go-tools/standard/utils/reflector"
 	"github.com/google/uuid"
 )
+
+func (s *Service[T, W, S]) CreateTask(ctx context.Context, record T) (T, *stderrs.Error) {
+	switch {
+	case task.IsTask(record) == nil:
+		return reflector.Nil[T](), stderrs.InvalidArgument.SetMessage("task is nil")
+	case record.Impl() == nil:
+		return reflector.Nil[T](), stderrs.InvalidArgument.SetMessage("embed task is nil")
+	case record.Impl().Status.Valid():
+		return reflector.Nil[T](), stderrs.InvalidArgument.SetMessage("status '%s' not found", record.Impl().Status)
+	case record.Impl().WorkerSessionID != nil || record.Impl().WorkerAssignTS != nil:
+		return reflector.Nil[T](), stderrs.InvalidArgument.SetMessage("cannot create task assigned to worker")
+	}
+
+	if record.Impl().ParentID != nil {
+		_, stderr := s.dependencies.TaskStorage.Get(ctx, *record.Impl().ParentID)
+		if stderr != nil {
+			return reflector.Nil[T](), stderr.SetMessage("not found parent task with id '%s'", *record.Impl().ParentID)
+		}
+	}
+
+	founded, stderr := s.dependencies.TaskStorage.Get(ctx, record.Impl().ID)
+
+	switch {
+	case stderr.Is(stderrs.NotFound):
+		saved, stderr := s.dependencies.TaskStorage.Save(ctx, record)
+		if stderr != nil {
+			return reflector.Nil[T](), stderr
+		}
+
+		return saved, nil
+	case stderr != nil:
+		return reflector.Nil[T](), stderr
+	case founded.Impl().Type != record.Impl().Type, founded.Impl().ParentID != record.Impl().ParentID,
+		founded.Impl().Mode != record.Impl().Mode, founded.Impl().CreatedTS != record.Impl().CreatedTS,
+		reflect.DeepEqual(founded.Impl().Arguments, record.Impl().Arguments):
+		return reflector.Nil[T](), stderrs.AlreadyExists.
+			SetMessage("task with id '%s' already exists", record.Impl().ID)
+	default:
+		return founded, nil
+	}
+}
 
 func (s *Service[T, W, S]) ReceiveTask(ctx context.Context, params ReceiveTaskParams[W]) (T, *stderrs.Error) {
 	worker, stderr := s.dependencies.WorkerStorage.Save(ctx, params.Worker)
@@ -49,7 +91,7 @@ func (s *Service[T, W, S]) ReceiveTask(ctx context.Context, params ReceiveTaskPa
 	item.Impl().WorkerSessionID = &workerSession.Impl().ID
 	item.Impl().WorkerAssignTS = &ts
 
-	received, stderr := s.dependencies.TaskStorage.Push(ctx, item)
+	received, stderr := s.dependencies.TaskStorage.Save(ctx, item)
 	if stderr != nil {
 		stderr2 := s.dependencies.SessionStorage.Drop(ctx, workerSession.Impl().ID)
 		if stderr2 != nil {
@@ -105,12 +147,12 @@ func (s *Service[T, W, S]) CancelTask(ctx context.Context, id uuid.UUID) (T, *st
 		return reflector.Nil[T](), stderrs.Internal.SetMessage("unexpected task status '%s'", impl.Impl().Status)
 	}
 
-	pushed, stderr := s.dependencies.TaskStorage.Push(ctx, founded)
+	saved, stderr := s.dependencies.TaskStorage.Save(ctx, founded)
 	if stderr != nil {
 		return reflector.Nil[T](), stderr
 	}
 
-	return pushed, nil
+	return saved, nil
 }
 
 func (s *Service[T, W, S]) CommitTask(ctx context.Context, id uuid.UUID) (T, *stderrs.Error) {
@@ -126,12 +168,12 @@ func (s *Service[T, W, S]) CommitTask(ctx context.Context, id uuid.UUID) (T, *st
 
 	founded.Impl().Status = task.StatusCompleted
 
-	pushed, stderr := s.dependencies.TaskStorage.Push(ctx, founded)
+	saved, stderr := s.dependencies.TaskStorage.Save(ctx, founded)
 	if stderr != nil {
 		return reflector.Nil[T](), stderr
 	}
 
-	return pushed, nil
+	return saved, nil
 }
 
 func (s *Service[T, W, S]) ReportTask(ctx context.Context, req ReportTaskRequest[T, W, S]) (*ReportTaskResponse[T], *stderrs.Error) {
@@ -162,7 +204,7 @@ func (s *Service[T, W, S]) ReportTask(ctx context.Context, req ReportTaskRequest
 		}
 	}
 
-	_, stderr = s.dependencies.TaskStorage.Push(ctx, response.Task)
+	_, stderr = s.dependencies.TaskStorage.Save(ctx, response.Task)
 	if stderr != nil {
 		return nil, stderr
 	}

@@ -1,6 +1,7 @@
 package task
 
 import (
+	"slices"
 	"time"
 
 	"github.com/google/uuid"
@@ -14,9 +15,9 @@ type Task struct {
 	Mode   Mode
 	Status Status
 
-	Argument map[string]any
-	Data     map[string]any
-	Result   map[string]any
+	Arguments map[string]any
+	Data      map[string]any
+	Results   map[string]any
 
 	CreatedTS time.Time
 	UpdatedTS time.Time
@@ -35,21 +36,37 @@ type (
 )
 
 const (
+	StatusPending      Status = "pending"
 	StatusCreated      Status = "created"
 	StatusInProgress   Status = "in_progress"
 	StatusError        Status = "error"
+	StatusException    Status = "exception"
 	StatusCompensating Status = "compensating"
 	StatusCanceled     Status = "canceled"
 	StatusDone         Status = "done"
 	StatusCompleted    Status = "completed"
 )
 
+var Statuses = []Status{
+	StatusPending,
+	StatusCreated,
+	StatusInProgress,
+	StatusError,
+	StatusException,
+	StatusCompensating,
+	StatusCanceled,
+	StatusDone,
+	StatusCompleted,
+}
+
+func (s Status) Valid() bool {
+	return slices.Contains(Statuses, s)
+}
+
 const (
-	ModeGlobalSync  Mode = "global_sync"
-	ModeLocalSync   Mode = "local_sync"
-	ModeGlobalAsync Mode = "global_async"
-	ModeLocalAsync  Mode = "local_async"
-	ModeManual      Mode = "manual"
+	ModeAsync  Mode = "async"
+	ModeSync   Mode = "sync"
+	ModeManual Mode = "manual"
 )
 
 func (t *Task) Impl() *Task { return t }
