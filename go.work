@@ -1,6 +1,7 @@
-go 1.22.2
+go 1.25.0
 
 use (
+	./standard/sdk/telemetry
 	nuclear
 	standard/collection/cache
 	standard/collection/constraints
@@ -12,5 +13,4 @@ use (
 	standard/test/lab
 	standard/utils/recovery
 	standard/utils/reflector
-
 )
