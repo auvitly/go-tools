@@ -1,6 +1,7 @@
 go 1.25.0
 
 use (
+	./standard/sdk/telemetry
 	nuclear
 	standard/collection/cache
 	standard/collection/constraints
