@@ -2,7 +2,10 @@ module github.com/auvitly/go-tools/standard/sdk/workspace
 
 go 1.21
 
-require github.com/stretchr/testify v1.9.0
+require (
+	github.com/auvitly/go-tools/standard/collection/constraints v0.0.0-20250406192846-70bd5b315b9d
+	github.com/stretchr/testify v1.9.0
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

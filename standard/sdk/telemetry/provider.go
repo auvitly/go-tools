@@ -200,4 +200,3 @@ func buildSampler(ratio float64) sdktrace.Sampler {
 		return sdktrace.TraceIDRatioBased(ratio)
 	}
 }
-
